@@ -1,0 +1,1846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AILAS — Decision Intelligence Engine</title>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════════ */
+:root {
+  --white:        #FFFFFF;
+  --bg-warm:      #FDF4F2;
+  --bg-card:      #FFF6F8;
+  --text:         #0E1317;
+  --text-60:      #6E7174;
+  --text-40:      #9FA1A2;
+  --text-cap:     #2F3337;
+  --red:          #E4200A;
+  --red-dark:     #C01A08;
+  --red-p5:       #FDF4F2;
+  --red-p11:      #FCE6E4;
+  --red-border:   #FFDFDC;
+  --red-border2:  #FFB7B8;
+  --border:       #E4E4E4;
+  --border-light: #F0F0F0;
+  --border-muted: rgba(14,19,23,0.10);
+  --border-strong:#C8C8C8;
+  --shadow-card:  0 4px 24px rgba(255,56,60,0.14);
+  --shadow-soft:  0 4px 8px  rgba(255,56,60,0.04);
+  --shadow-sm:    0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  --shadow-md:    0 4px 16px rgba(228,32,10,.07), 0 1px 4px rgba(0,0,0,.04);
+  --shadow-red:   0 8px 28px rgba(228,32,10,.18);
+  --ff-serif:     'Crimson Text', Georgia, serif;
+  --ff-sans:      'DM Sans', sans-serif;
+  --ff-mono:      'DM Mono', monospace;
+  --ease:         cubic-bezier(.4,0,.2,1);
+  --t200:         200ms var(--ease);
+  --t400:         400ms var(--ease);
+  --r-sm:6px; --r-md:12px; --r-lg:20px; --r-xl:100px;
+}
+
+/* ══════════════════════════════════════════
+   RESET & BASE
+══════════════════════════════════════════ */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{
+  background:var(--white);
+  color:var(--text);
+  font-family:var(--ff-sans);
+  font-weight:400;
+  line-height:1.65;
+  overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+}
+img{display:block;max-width:100%}
+button{cursor:pointer;border:none;background:none;font:inherit}
+
+/* ══════════════════════════════════════════
+   NAV
+══════════════════════════════════════════ */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  height:62px;padding:0 80px;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border-light);
+  transition:box-shadow var(--t200);
+}
+nav.scrolled{box-shadow:0 1px 0 var(--border),0 4px 20px rgba(0,0,0,.05)}
+
+.nav-logo{
+  display:flex;align-items:center;gap:10px;text-decoration:none;
+  position:relative;z-index:2;
+}
+.nav-center{
+  position:absolute;left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;
+}
+.nav-pill{
+  font-family:var(--ff-sans);font-size:14px;font-weight:400;
+  color:var(--text-60);
+  padding:5px 14px;border-radius:100px;
+  text-decoration:none;
+  transition:background var(--t200),color var(--t200);
+  letter-spacing:-.1px;
+}
+.nav-pill:hover{background:var(--border-light);color:var(--text);}
+.nav-pill.active{background:var(--red-p5);color:var(--red);}
+
+/* ══════════════════════════════════════════
+   SECTION HELPERS
+══════════════════════════════════════════ */
+.eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--ff-mono);font-size:10px;font-weight:400;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--text-40);
+  margin-bottom:12px;
+}
+.eyebrow::before{
+  content:'';display:block;width:16px;height:1px;background:var(--red);opacity:.6;
+}
+.section-h{
+  font-family:var(--ff-serif);
+  font-size:clamp(34px,3.8vw,56px);
+  font-weight:400;line-height:1.1;letter-spacing:-.02em;
+  color:var(--text);
+}
+.section-h em{font-style:italic;color:var(--red)}
+.section-sub{
+  font-size:16px;color:var(--text-60);
+  line-height:1.75;letter-spacing:-.1px;margin-top:14px;
+}
+
+/* reveal animation */
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .85s var(--ease),transform .85s var(--ease)}
+.reveal.in{opacity:1;transform:none}
+.reveal-delay-1{transition-delay:.1s}
+.reveal-delay-2{transition-delay:.2s}
+.reveal-delay-3{transition-delay:.3s}
+
+/* ══════════════════════════════════════════
+   1. HERO
+══════════════════════════════════════════ */
+#hero{
+  min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;
+  padding:140px 80px 120px;
+  background:linear-gradient(168deg,var(--bg-warm) 0%,#FFFFFF 52%);
+  position:relative;overflow:hidden;
+}
+#hero::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(228,32,10,.06) 1px,transparent 1px);
+  background-size:36px 36px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 40%,black 20%,transparent 75%);
+}
+#hero::after{
+  content:'';position:absolute;
+  width:600px;height:600px;border-radius:50%;
+  background:radial-gradient(circle,rgba(228,32,10,.06) 0%,transparent 70%);
+  top:50%;left:50%;transform:translate(-50%,-60%);
+  pointer-events:none;animation:orb 8s ease-in-out infinite;
+}
+@keyframes orb{0%,100%{transform:translate(-50%,-60%) scale(1)}50%{transform:translate(-50%,-55%) scale(1.06)}}
+
+.hero-inner{position:relative;z-index:2;max-width:800px;width:100%;}
+
+.hero-badge{
+  display:inline-flex;align-items:center;
+  border:1px solid var(--border);
+  background:var(--white);
+  border-radius:100px;padding:6px 18px;
+  font-family:var(--ff-mono);font-size:10px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--text-40);
+  margin-bottom:36px;
+  opacity:0;animation:fadeUp .7s var(--ease) forwards .1s;
+}
+
+.hero-h{
+  font-family:var(--ff-serif);
+  font-size:clamp(34px,4vw,58px);
+  font-weight:400;line-height:1.12;letter-spacing:-.022em;
+  color:var(--text);margin-bottom:24px;
+  opacity:0;animation:fadeUp .85s var(--ease) forwards .3s;
+}
+.hero-h em{font-style:italic;color:var(--red)}
+
+.hero-sub{
+  font-size:17px;color:var(--text-60);
+  max-width:560px;margin:0 auto 20px;
+  line-height:1.72;letter-spacing:-.15px;
+  opacity:0;animation:fadeUp .85s var(--ease) forwards .5s;
+}
+.hero-body{
+  font-size:14px;color:var(--text-cap);
+  max-width:540px;margin:0 auto;line-height:1.82;
+  opacity:0;animation:fadeUp .85s var(--ease) forwards .65s;
+}
+
+.hero-expand{
+  margin-top:20px;
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--ff-mono);font-size:10px;font-weight:400;
+  letter-spacing:.14em;text-transform:uppercase;
+  color:var(--text-40);
+  border:1px solid var(--border);
+  border-radius:100px;
+  padding:7px 18px;
+  background:var(--white);
+  opacity:0;animation:fadeUp .85s var(--ease) forwards .8s;
+  transition:color var(--t200),border-color var(--t200),background var(--t200);
+}
+.hero-expand:hover{
+  color:var(--red);
+  border-color:var(--red-border2);
+  background:var(--red-p5);
+}
+.hero-expand-chevron{
+  width:12px;height:12px;display:block;flex-shrink:0;
+  transition:transform var(--t400);
+}
+.hero-expand.open .hero-expand-chevron{ transform:rotate(180deg); }
+
+.hero-hidden{
+  overflow:hidden;max-height:0;opacity:0;
+  transition:max-height .42s var(--ease),opacity .3s;
+  font-size:14px;color:var(--text-cap);
+  max-width:540px;margin:0 auto;line-height:1.82;
+  text-align:left;
+}
+.hero-hidden.open{max-height:500px;opacity:1;margin-top:20px}
+
+/* FIX: hero scroll cue — proper from/to fadeIn */
+.hero-scroll{
+  position:absolute;bottom:36px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:8px;
+  opacity:0;animation:fadeIn 1s ease forwards 1.4s;
+  pointer-events:none;
+}
+.hero-scroll-mouse{
+  width:20px;height:32px;
+  border:1.5px solid var(--border-strong);
+  border-radius:10px;
+  display:flex;align-items:flex-start;justify-content:center;
+  padding-top:5px;
+}
+.hero-scroll-wheel{
+  width:3px;height:6px;
+  background:var(--red);
+  border-radius:2px;
+  opacity:.7;
+  animation:scrollWheel 2s ease-in-out infinite;
+}
+@keyframes scrollWheel{
+  0%   {transform:translateY(0);   opacity:.7}
+  60%  {transform:translateY(10px);opacity:0}
+  61%  {transform:translateY(0);   opacity:0}
+  100% {transform:translateY(0);   opacity:.7}
+}
+.hero-scroll-label{
+  font-family:var(--ff-mono);font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--text-40);
+}
+
+/* FIX: proper from state in fadeIn so no flicker */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* ══════════════════════════════════════════
+   2. INTELLIGENCE RAIL
+   FIX: corrected animation distance — 16 cards × 206px = 3296px total,
+   animate exactly half (8 cards = 1648px) so the duplicate set loops seamlessly.
+══════════════════════════════════════════ */
+/* Each card: flex-basis 196px + gap 10px = 206px effective width */
+@keyframes railScroll{
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(calc(-206px * 8)); }
+}
+
+#rail{
+  position:relative;
+  border-top:1px solid var(--border-light);
+  border-bottom:1px solid var(--border-light);
+  background:var(--white);
+  overflow-x:clip;
+  overflow-y:visible;
+  padding:100px 0;
+}
+.rail-clip{ overflow-x:clip; overflow-y:visible; position:relative; }
+.rail-fade-left,.rail-fade-right{
+  position:absolute;top:0;bottom:0;width:140px;z-index:20;pointer-events:none;
+}
+.rail-fade-left { left:0;  background:linear-gradient(to right,var(--white),transparent); }
+.rail-fade-right{ right:0; background:linear-gradient(to left, var(--white),transparent); }
+
+.rail-track{
+  display:flex;gap:10px;
+  animation: railScroll 38s linear infinite;
+  will-change:transform;
+  /* Ensure track is wide enough to hold all 16 cards without wrapping */
+  width:max-content;
+}
+.rail-track.paused{ animation-play-state:paused; }
+
+.rail-card{
+  flex:0 0 196px;
+  height:80px;
+  position:relative;
+  cursor:default;
+  z-index:1;
+}
+.rail-card.active{ z-index:100; }
+
+.rail-card-inner{
+  position:absolute;
+  top:50%;left:0;
+  transform:translateY(-50%);
+  width:100%;min-width:196px;
+  border:1px solid var(--border-light);
+  border-radius:10px;
+  padding:14px 16px 16px;
+  background:var(--white);
+  transition:
+    border-color var(--t400),
+    box-shadow var(--t400),
+    background var(--t400),
+    min-width var(--t400);
+  z-index:2;
+}
+.rail-card.active .rail-card-inner{
+  min-width:280px;
+  border-color:var(--red-border);
+  box-shadow:0 6px 28px rgba(228,32,10,.09);
+  background:var(--red-p5);
+}
+.rail-card-inner::after{
+  content:'';position:absolute;
+  bottom:0;left:10px;right:10px;height:1.5px;
+  background:var(--red);border-radius:1px;
+  opacity:0;transition:opacity var(--t400);
+}
+.rail-card.active .rail-card-inner::after{ opacity:1; }
+
+.rail-dot{
+  width:18px;height:18px;border-radius:50%;
+  border:1px solid var(--border);
+  background:var(--white);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:9px;
+  transition:border-color var(--t400),background var(--t400);
+  flex-shrink:0;
+}
+.rail-card.active .rail-dot{ border-color:rgba(228,32,10,.32); }
+.rail-dot-inner{
+  width:5px;height:5px;border-radius:50%;
+  background:var(--border);
+  transition:background var(--t400),transform var(--t400);
+}
+.rail-card.active .rail-dot-inner{ background:var(--red); transform:scale(1.1); }
+.rail-icon { width:28px; height:28px; border-radius:8px; background:var(--red-p5); border:1px solid var(--red-border); display:flex; align-items:center; justify-content:center; margin-bottom:10px; flex-shrink:0; transition:background var(--t400),border-color var(--t400); }
+.rail-card.active .rail-icon { background:var(--red-border); border-color:var(--red-border2); }
+.rail-icon svg { width:14px; height:14px; stroke:var(--red); fill:none; stroke-width:1.8; stroke-linecap:round; stroke-linejoin:round; }
+
+.rail-title{
+  font-family:var(--ff-serif);font-size:14px;font-weight:600;
+  color:var(--text);letter-spacing:-.1px;line-height:1.25;
+}
+.rail-text{
+  font-size:12px;color:var(--text-60);line-height:1.65;
+  max-height:0;overflow:hidden;opacity:0;
+  transition:max-height .4s var(--ease),opacity .3s .1s,margin-top .3s var(--ease);
+}
+.rail-card.active .rail-text{ max-height:120px;opacity:1;margin-top:7px; }
+
+/* ══════════════════════════════════════════
+   3. DECISION ARCHITECTURE
+══════════════════════════════════════════ */
+#architecture{
+  position:relative;
+  z-index:10;
+  background:var(--white);
+  border-top:1px solid var(--border-light);
+  padding-top:80px;
+}
+
+/* FIX: arch-header sits above the two-column grid, full-width */
+.arch-header{
+  text-align:center;
+  padding:80px 80px 48px;
+  max-width:none;
+}
+.arch-header .section-sub{ max-width:440px;margin:12px auto 0; }
+
+.arch-wrap{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  position:relative;
+  border-top:1px solid var(--border-light);
+}
+
+.arch-tree-pane{
+  position:sticky;
+  top:62px;
+  height:calc(100vh - 62px);
+  border-right:1px solid var(--border-light);
+  background:var(--white);
+  overflow:visible;
+  z-index:10;
+  background: linear-gradient(180deg, var(--white) 0%, #FAFAFA 100%);
+}
+
+#archTreeCanvas{
+  width:100%;height:100%;display:block;cursor:default;
+  position:absolute;inset:0;
+  overflow:hidden;
+}
+
+.arch-panels{
+  display:flex;
+  flex-direction:column;
+}
+.arch-panel{
+  height:calc(100vh - 62px);
+  display:flex;
+  align-items:center;
+  justify-content:flex-start;
+  padding:48px 56px;
+  border-bottom:1px solid var(--border-light);
+  position:relative;
+}
+.arch-exp {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity .5s var(--ease), transform .5s var(--ease);
+  pointer-events: none;
+  max-width: 420px;
+}
+.arch-exp.in-view {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.arch-exp-label {
+  font-family: var(--ff-mono);
+  font-size: 9px;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+  color: var(--red);
+  opacity: .7;
+  margin-bottom: 10px;
+  display: block;
+}
+.arch-exp-title {
+  font-family: var(--ff-serif);
+  font-size: clamp(22px, 2.4vw, 32px);
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.15;
+  letter-spacing: -.02em;
+  margin-bottom: 20px;
+}
+.arch-exp-what-label {
+  font-family: var(--ff-mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--text-40);
+  margin-bottom: 8px;
+  display: block;
+}
+.arch-exp-what {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.72;
+  margin-bottom: 14px;
+}
+.arch-exp-why {
+  font-size: 13px;
+  color: var(--text-60);
+  line-height: 1.72;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-light);
+  margin-bottom: 20px;
+}
+.arch-exp-group-label {
+  font-family: var(--ff-mono);
+  font-size: 9px;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--text-40);
+  margin-top: 16px;
+  margin-bottom: 8px;
+  display: block;
+}
+.arch-exp-items {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.arch-exp-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-60);
+  line-height: 1.4;
+}
+.arch-exp-item-dot {
+  width: 4px; height: 4px;
+  border-radius: 50%;
+  background: var(--red);
+  opacity: .5;
+  flex-shrink: 0;
+}
+.arch-panel:last-child{ border-bottom:none; }
+
+.arch-exp{
+  width:100%;
+  max-width:420px;
+  opacity:0;
+  transform:translateX(20px);
+  transition:opacity .65s var(--ease), transform .65s var(--ease);
+}
+/* FIX: allow re-animation on scroll back — managed via JS class toggling */
+.arch-exp.in-view{ opacity:1; transform:none; }
+
+.arch-exp-label{
+  font-family:var(--ff-mono);
+  font-size:10px;letter-spacing:.2em;
+  text-transform:uppercase;
+  color:var(--red);
+  opacity:.8;
+  margin-bottom:20px;
+  display:flex;align-items:center;gap:8px;
+}
+.arch-exp-label::before{
+  content:'';display:block;
+  width:14px;height:1px;background:var(--red);
+}
+
+.arch-exp-title{
+  font-family:var(--ff-serif);
+  font-size:32px;font-weight:400;
+  color:var(--text);
+  line-height:1.12;letter-spacing:-.02em;
+  margin-bottom:20px;
+}
+
+.arch-exp-what-label{
+  font-family:var(--ff-mono);
+  font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--text-40);
+  margin-bottom:8px;
+}
+.arch-exp-what{
+  font-size:15px;color:var(--text-cap);
+  line-height:1.78;font-weight:400;
+  margin-bottom:20px;
+}
+
+.arch-exp-why{
+  font-size:14px;color:var(--text-60);
+  line-height:1.75;font-weight:400;
+  margin-bottom:20px;
+  padding-left:14px;
+  border-left:2px solid var(--red-border);
+}
+
+.arch-exp-group-label{
+  font-family:var(--ff-mono);
+  font-size:9px;letter-spacing:.18em;
+  text-transform:uppercase;
+  color:var(--text-40);
+  margin-bottom:10px;
+}
+.arch-exp-items{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-bottom:18px;
+}
+.arch-exp-item{
+  display:flex;align-items:center;gap:6px;
+  padding:5px 12px;
+  border:1px solid var(--border);
+  border-radius:6px;
+  font-size:12px;color:var(--text-cap);
+  background:var(--white);
+  font-weight:400;
+}
+.arch-exp-item-dot{
+  width:4px;height:4px;border-radius:50%;
+  background:var(--red);flex-shrink:0;
+}
+
+@media(max-width:960px){
+  .arch-wrap{ grid-template-columns:1fr; }
+  .arch-tree-pane{
+    position:static;height:600px;
+    border-right:none;border-bottom:1px solid var(--border-light);
+  }
+  .arch-panel{ padding:48px 24px;height:auto;min-height:80vh; }
+  .arch-exp{ max-width:100%; }
+}
+
+/* ══════════════════════════════════════════
+   ARCH SECTION SCROLL PROGRESS
+   Inside arch-tree-pane (position:sticky), sits on its right border.
+══════════════════════════════════════════ */
+.arch-progress{
+  position:absolute;
+  right:-10px;
+  top:50%;
+  transform:translateY(-50%);
+  width:20px;
+  height:320px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:30;
+  pointer-events:none;
+}
+
+/* Vertical track */
+.arch-progress-track{
+  position:relative;
+  width:1.5px;
+  height:100%;
+  background:var(--border-light);
+  border-radius:2px;
+  overflow:visible;
+}
+
+/* Filled portion */
+.arch-progress-fill{
+  position:absolute;
+  top:0; left:0; right:0;
+  background:var(--red);
+  border-radius:2px;
+  transition:height .45s cubic-bezier(.4,0,.2,1);
+  width:100%;
+  height:0%;
+}
+
+/* Travelling dot */
+.arch-progress-dot{
+  position:absolute;
+  left:50%; transform:translateX(-50%);
+  width:7px; height:7px;
+  border-radius:50%;
+  background:var(--red);
+  border:1.5px solid var(--white);
+  box-shadow:0 0 0 1px var(--red);
+  transition:top .45s cubic-bezier(.4,0,.2,1);
+  top:0%;
+  margin-top:-3.5px;
+}
+
+/* Start / end caps */
+.arch-progress-cap{
+  width:4px; height:4px;
+  border-radius:50%;
+  background:var(--border-strong);
+  flex-shrink:0;
+  opacity:.45;
+}
+.arch-progress-cap--top{ margin-bottom:3px; }
+.arch-progress-cap--bottom{ margin-top:3px; }
+
+@media(max-width:960px){
+  .arch-progress{ display:none; }
+}
+
+/* ══════════════════════════════════════════
+   4. LEADERSHIP VALUE — Hover grid
+══════════════════════════════════════════ */
+#outcomes{
+  padding:80px 80px 96px;
+  background:var(--white);
+  border-top:1px solid var(--border-light);
+}
+
+.oc-header{
+  text-align:center;
+  max-width:600px;margin:0 auto 56px;
+}
+#outcomes .oc-header .eyebrow{ color:var(--text-40); }
+#outcomes .oc-header .eyebrow::before{ background:var(--red);opacity:.6; }
+#outcomes .oc-header .section-h{ color:var(--text); }
+#outcomes .oc-header .section-sub{ color:var(--text-60); }
+
+.oc-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  max-width:1160px;margin:0 auto;
+  border-top:1px solid var(--border-light);
+  border-left:1px solid var(--border-light);
+}
+.oc-card{
+  position:relative;height:220px;
+  border-right:1px solid var(--border-light);
+  border-bottom:1px solid var(--border-light);
+  overflow:hidden;cursor:default;
+}
+
+.oc-card-default{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:flex-end;
+  padding:28px;
+  transition:opacity .38s var(--ease),transform .38s var(--ease);
+}
+.oc-card:hover .oc-card-default{
+  opacity:0;transform:translateY(-8px);pointer-events:none;
+}
+
+.oc-card-icon{
+  width:38px;height:38px;border-radius:50%;
+  border:1px solid var(--border-light);
+  background:var(--bg-warm);
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:16px;
+}
+.oc-card-icon svg{
+  width:16px;height:16px;
+  stroke:var(--red);fill:none;stroke-width:1.5;opacity:.7;
+}
+
+.oc-card-title{
+  font-family:var(--ff-serif);font-size:19px;font-weight:400;
+  color:var(--text);line-height:1.2;letter-spacing:-.01em;
+}
+
+.oc-card-hover{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:flex-end;
+  padding:28px;
+  background:var(--bg-warm);
+  border-top:1.5px solid var(--red-border2);
+  opacity:0;transform:translateY(12px);
+  transition:opacity .38s var(--ease),transform .38s var(--ease);
+  pointer-events:none;
+}
+.oc-card-hover::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--red) 0%,rgba(228,32,10,0) 100%);
+  opacity:.7;
+}
+.oc-card:hover .oc-card-hover{
+  opacity:1;transform:none;pointer-events:auto;
+}
+.oc-card-hover .oc-card-title{
+  font-size:17px;color:var(--text);
+  margin-bottom:10px;font-weight:600;
+}
+.oc-card-desc{
+  font-family:var(--ff-sans);font-size:13px;font-weight:400;
+  color:var(--text-60);line-height:1.7;
+}
+
+@media(max-width:960px){
+  #outcomes{ padding:60px 24px 72px; }
+  .oc-header{ margin-bottom:40px; }
+  .oc-grid{ grid-template-columns:1fr 1fr; }
+  .oc-card{ height:200px; }
+}
+@media(max-width:600px){
+  .oc-grid{ grid-template-columns:1fr; }
+  .oc-card{ height:180px; }
+}
+
+/* ══════════════════════════════════════════
+   5. CONTACT CTA
+══════════════════════════════════════════ */
+#contact{
+  padding:120px 80px;
+  border-top:1px solid var(--border-light);
+  background:var(--white);
+  position:relative;overflow:hidden;
+}
+#contact::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(228,32,10,.035) 1px,transparent 1px);
+  background-size:40px 40px;
+  mask-image:radial-gradient(ellipse 65% 75% at 50% 100%,black 5%,transparent 65%);
+}
+.contact-inner{position:relative;z-index:2;max-width:440px;margin:0 auto;}
+.contact-h{
+  font-family:var(--ff-serif);
+  font-size:clamp(36px,4.5vw,56px);
+  font-weight:400;letter-spacing:-.02em;
+  color:var(--text);line-height:1.06;margin-bottom:14px;margin-top:10px;
+}
+.contact-h em{font-style:italic;color:var(--red)}
+.contact-sub{
+  font-size:15px;color:var(--text-60);
+  max-width:400px;margin:0 auto 48px;line-height:1.72;
+}
+.contact-form{
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;max-width:400px;margin:0 auto;
+}
+.contact-input{
+  width:100%;
+  background:var(--white);border:1.5px solid var(--border);
+  border-radius:var(--r-md);padding:12px 16px;
+  font-family:var(--ff-sans);font-size:14px;color:var(--text);
+  outline:none;letter-spacing:-.1px;
+  transition:border-color var(--t200),box-shadow var(--t200);
+}
+.contact-input::placeholder{color:var(--text-40)}
+.contact-input:focus{
+  border-color:rgba(228,32,10,.35);
+  box-shadow:0 0 0 3px rgba(228,32,10,.06);
+}
+/* FIX: highlight invalid fields visually */
+.contact-input.invalid{
+  border-color:rgba(228,32,10,.5);
+  box-shadow:0 0 0 3px rgba(228,32,10,.08);
+  animation:shake .3s var(--ease);
+}
+@keyframes shake{
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-4px)}
+  75%{transform:translateX(4px)}
+}
+.contact-btn{
+  width:100%;background:var(--red);color:white;
+  border-radius:var(--r-md);padding:13px 24px;
+  font-family:var(--ff-sans);font-size:14px;font-weight:500;
+  letter-spacing:.01em;margin-top:4px;
+  transition:background var(--t200),transform var(--t200),box-shadow var(--t200);
+}
+.contact-btn:hover:not(:disabled){
+  background:var(--red-dark);
+  transform:translateY(-1px);
+  box-shadow:var(--shadow-red);
+}
+.contact-btn:active{transform:none}
+.contact-btn:disabled{opacity:.7;cursor:default}
+
+/* ══════════════════════════════════════════
+   FOOTER
+══════════════════════════════════════════ */
+footer {
+  width: 100%;
+  background: linear-gradient(180deg, #FDF4F2 0%, #AD0C1E 48%, #411455 100%);
+  padding: 72px 80px 36px;
+  color: white;
+}
+.footer-inner { max-width:1280px; margin:0 auto; display:flex; flex-direction:column; }
+.footer-main { display:flex; align-items:flex-start; justify-content:space-between; padding-bottom:48px; }
+.footer-brand { opacity:0; transition:opacity .6s var(--ease); display:flex; flex-direction:column; max-width:400px; }
+.footer-brand.in { opacity:1; }
+.footer-logo { height:22px; width:auto; display:block; filter:brightness(0) invert(1); margin-bottom:14px; }
+.footer-desc { font-family:var(--ff-sans); font-size:14px; font-weight:300; color:rgba(255,255,255,.55); line-height:1.6; margin-bottom:20px; }
+.footer-address { display:flex; align-items:flex-start; gap:7px; }
+.footer-address svg { width:16px; height:16px; fill:white; flex-shrink:0; margin-top:2px; opacity:.8; }
+.footer-address span { font-family:var(--ff-sans); font-size:13.5px; font-weight:500; color:rgba(255,255,255,.9); line-height:1.5; }
+.footer-cols { display:flex; gap:60px; flex-shrink:0; }
+.footer-col { opacity:0; transition:opacity .6s var(--ease); display:flex; flex-direction:column; }
+.footer-col.d1 { transition-delay:.1s; }
+.footer-col.d2 { transition-delay:.2s; }
+.footer-col.in { opacity:1; }
+.footer-col-head { font-family:var(--ff-serif); font-size:22px; font-weight:600; color:white; margin-bottom:22px; }
+.footer-links { list-style:none; display:flex; flex-direction:column; gap:13px; }
+.footer-links li a { font-family:var(--ff-sans); font-size:14px; font-weight:300; color:rgba(255,255,255,.55); line-height:1; text-decoration:none; transition:color .2s var(--ease); }
+.footer-links li a:hover { color:rgba(255,255,255,.9); }
+.footer-socials { display:flex; align-items:center; gap:10px; margin-top:4px; }
+.footer-social { width:48px; height:48px; border-radius:12px; background:rgba(255,255,255,.1); border:1px solid rgba(255,255,255,.1); display:flex; align-items:center; justify-content:center; flex-shrink:0; text-decoration:none; transition:background .2s var(--ease),border-color .2s var(--ease); }
+.footer-social:hover { background:rgba(255,255,255,.18); border-color:rgba(255,255,255,.2); }
+.footer-social svg { width:20px; height:20px; fill:rgba(255,255,255,.7); display:block; transition:fill .2s var(--ease); }
+.footer-social:hover svg { fill:white; }
+.footer-social img { width:20px; height:20px; display:block; object-fit:contain; filter:brightness(0) invert(1); opacity:.7; transition:opacity .2s var(--ease); }
+.footer-social:hover img { opacity:1; }
+.footer-bottom { opacity:0; transition:opacity .6s var(--ease); transition-delay:.28s; padding-top:28px; border-top:1px solid rgba(255,255,255,.1); }
+.footer-bottom.in { opacity:1; }
+.footer-copyright { display:flex; align-items:center; gap:5px; font-family:var(--ff-sans); font-size:13px; font-weight:300; color:rgba(255,255,255,.35); }
+.footer-copyright svg { width:14px; height:14px; stroke:rgba(255,255,255,.35); fill:none; stroke-width:1.4; flex-shrink:0; }
+@media(max-width:960px){
+  footer { padding:60px 24px 32px; }
+  .footer-main { flex-direction:column; gap:40px; padding-bottom:40px; }
+  .footer-cols { flex-wrap:wrap; gap:36px; }
+  .footer-bottom { flex-direction:column; gap:10px; text-align:center; }
+}
+
+
+/* ══════════════════════════════════════════
+   BACK TO TOP
+══════════════════════════════════════════ */
+#back-top{
+  position:fixed;bottom:28px;right:28px;z-index:400;
+  width:38px;height:38px;border-radius:var(--r-sm);
+  background:var(--white);border:1px solid var(--border);
+  box-shadow:var(--shadow-sm);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(12px);pointer-events:none;
+  transition:opacity var(--t200),transform var(--t200),box-shadow var(--t200);
+  cursor:pointer;
+}
+#back-top.visible{opacity:1;transform:none;pointer-events:auto}
+#back-top:hover{box-shadow:var(--shadow-md);border-color:var(--red-border2)}
+#back-top svg{width:13px;height:13px;stroke:var(--text-60);stroke-width:2;fill:none}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media(max-width:960px){
+  nav{padding:0 24px}
+  .nav-center{display:none}
+  #hero{padding:100px 24px 80px}
+  #rail,#contact{padding-left:0;padding-right:0}
+  #architecture,#outcomes{padding-left:0;padding-right:0}
+  .arch-header{padding:60px 24px 32px}
+  #back-top{bottom:20px;right:20px}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════ NAV ══════ -->
+<nav id="main-nav">
+  <a href="#hero" class="nav-logo">
+    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjg0IiBoZWlnaHQ9IjQ3IiB2aWV3Qm94PSIwIDAgMjg0IDQ3IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAyNC40NTE4TDI3LjI3MDEgMC4xMDI1MzlMNTQuMjQ5IDI0LjQ1MThWMzcuNjUzOEwyNy4xMjQ1IDE1LjM1OTJMMCAzNy42NTM4VjI0LjQ1MThaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMjAuMTY4IDMzLjk4ODNIMzUuMTk2MUwyOC4xOTQ5IDQ2LjUyOTNMMjAuMTY4IDMzLjk4ODNaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYuMTY0MSAzMC4yMzgxTDkyLjAxNjIgNDAuNTcySDg2LjkyNzdMMTAwLjY2MSA2LjEyNDAySDEwNi45NTdMMTIxLjI4IDQwLjU3MkgxMTUuODMxTDExMS41NTMgMzAuMjM4MUg5Ni4xNjQxWk0xMTAuMjQgMjYuMzI1OEMxMDYuNTY1IDE3LjI3MTMgMTA0LjU0NSAxMi40NjA2IDEwMy43MDkgOS44MzY4SDEwMy42NTNDMTAyLjcxMSAxMi43NTg2IDEwMC40NTMgMTguNTgyMSA5Ny40OTIyIDI2LjMyNThIMTEwLjI0WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE0My41NjQgNi4xMjQwMlY0MC41NzJIMTM4LjQ1MVY2LjEyNDAySDE0My41NjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTY1LjEwOSA2LjEyNDAySDE3MC4yMjNWMzYuNjU5OEgxOTAuMzM1TDE4OS42MjIgNDAuNTcySDE2NS4xMDlWNi4xMjQwMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMTQuNDk0IDMwLjIzODFMMjEwLjM0NiA0MC41NzJIMjA1LjI1OEwyMTguOTkxIDYuMTI0MDJIMjI1LjI4N0wyMzkuNjEgNDAuNTcySDIzNC4xNjFMMjI5Ljg4MyAzMC4yMzgxSDIxNC40OTRaTTIyOC41NyAyNi4zMjU4QzIyNC44OTUgMTcuMjcxMyAyMjIuODc1IDEyLjQ2MDYgMjIyLjA0IDkuODM2OEgyMjEuOTg0QzIyMS4wNDEgMTIuNzU4NiAyMTguNzgzIDE4LjU4MjEgMjE1LjgyMiAyNi4zMjU4SDIyOC41N1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yNTkuNTg1IDMwLjk4NDJDMjYwLjYzMSAzNS4xMTYgMjYzLjc5MyAzNy4zNDc3IDI2OS4zODEgMzcuMzQ3N0MyNzUuMzk3IDM3LjM0NzcgMjc3Ljc3OCAzNC44MjcgMjc3Ljc3OCAzMS41NzM1QzI3Ny43NzggMjguMTE4NCAyNzUuODc2IDI2LjE4MjUgMjY4LjE0NyAyNC41MTFDMjU5LjA2MSAyMi41MzkyIDI1NS45MDcgMTkuNzU4NSAyNTUuOTA3IDE0LjkxNjVDMjU1LjkwNyA5LjgwMTAyIDI2MC4xMzEgNS42Mjg5MSAyNjguNzM4IDUuNjI4OTFDMjc3LjkyMSA1LjYyODkxIDI4MS42OTkgMTAuMzcwMSAyODIuMjE5IDE0Ljg5NEgyNzcuMDE2QzI3Ni4zMjYgMTEuODI4OCAyNzQuMTc5IDkuMzEyNTYgMjY4LjU1NSA5LjMxMjU2QzI2My44NiA5LjMxMjU2IDI2MS4yMjQgMTEuMjAxNCAyNjEuMjI0IDE0LjQ4NEMyNjEuMjI0IDE3LjcxNzMgMjYzLjQwMSAxOC45OTIyIDI3MC4xNTggMjAuNDU1NEMyODEuMTU1IDIyLjg0NjIgMjgzLjA5NyAyNi42NzEgMjgzLjA5NyAzMS4wOTE4QzI4My4wOTcgMzYuNjQ4NyAyNzguNDkgNDEuMDAyMyAyNjkuMDU5IDQxLjAwMjNDMjU5LjM1OSA0MS4wMDIzIDI1NS4xODQgMzYuMjY3NyAyNTQuMzg3IDMwLjk4MkgyNTkuNTg1VjMwLjk4NDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=" alt="AILAS" style="height:36px;width:auto;display:block;">
+  </a>
+  <div class="nav-center">
+    <a href="#rail"         class="nav-pill" data-section="rail">Intelligence</a>
+    <a href="#architecture" class="nav-pill" data-section="architecture">Architecture</a>
+    <a href="#outcomes"     class="nav-pill" data-section="outcomes">Outcomes</a>
+    <a href="#contact"      class="nav-pill" data-section="contact">Contact</a>
+  </div>
+</nav>
+
+<!-- BACK TO TOP -->
+<button id="back-top" aria-label="Back to top" onclick="window.scrollTo({top:0,behavior:'smooth'})">
+  <svg viewBox="0 0 24 24"><polyline points="18 15 12 9 6 15"/></svg>
+</button>
+
+<!-- ══════ 1. HERO ══════ -->
+<section id="hero">
+  <div class="hero-inner">
+    <div class="hero-badge">Decision Intelligence Engine</div>
+
+    <h1 class="hero-h">
+      Leadership infrastructure for<br>
+      <em>enterprise AI</em> transformation
+    </h1>
+
+    <p class="hero-sub">
+      A research-backed intelligence system that helps organisations identify, evaluate, and govern AI transformation with greater clarity, control, and strategic discipline.
+    </p>
+
+    <p class="hero-body">
+      The AILAS Decision Intelligence Engine is a multi-step architecture designed as a premium enterprise software system for organisations approaching AI adoption as a strategic transformation challenge and want a more structured path to AI adoption. It applies the AILAS framework to bring together organisational context, transformation opportunities, and executive oversight within a single decision environment designed for high-stakes enterprise decisions with greater precision, discipline, and control.
+    </p>
+
+    <div class="expand-wrap" style="display:flex;flex-direction:column;align-items:center">
+      <button class="hero-expand" id="expandBtn">
+        <span id="expandLabel">Read more</span>
+        <svg class="hero-expand-chevron" viewBox="0 0 12 12" fill="none">
+          <path d="M2 4l4 4 4-4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </button>
+      <div class="hero-hidden" id="heroHidden">
+        At the centre of the system is a research-driven evaluation architecture that structures AI transformation through a multi-step decision framework. It interprets hundreds of organisational signals across dozens of transformation dimensions, combining rigorous scoring logic with intelligent analysis grounded in the proprietary AILAS knowledge base. The result is not merely reporting, but structured decision intelligence: a refined view of where opportunity is strongest, where readiness is insufficient, where governance exposure is emerging, and where strategic attention should be directed first.<br><br>
+        By converting dispersed organisational inputs into visual and comparative intelligence, the engine allows executives to understand the enterprise AI landscape with far greater clarity. It reveals not only formal priorities, but also latent demand, operational friction, and early signs of informal or shadow adoption across teams and functions. Whether deployed with the support of AILAS specialists or through guided input capture by the AI interviewer Dobby, the system enables organisations to move from ambiguity to informed action, and from isolated experimentation to deliberate, governed transformation.
+      </div>
+    </div>
+  </div>
+
+  <div class="hero-scroll">
+    <div class="hero-scroll-mouse">
+      <div class="hero-scroll-wheel"></div>
+    </div>
+    <span class="hero-scroll-label">Scroll</span>
+  </div>
+</section>
+
+<!-- ══════ 2. INTELLIGENCE RAIL ══════ -->
+<section id="rail">
+  <div class="rail-clip">
+    <div class="rail-fade-left"></div>
+    <div class="rail-fade-right"></div>
+    <div class="rail-track" id="railTrack"></div>
+  </div>
+</section>
+
+<!-- ══════ 3. DECISION ARCHITECTURE ══════ -->
+<section id="architecture">
+
+
+
+  <div class="arch-header reveal">
+    <div class="eyebrow">Decision Architecture</div>
+    <h2 class="section-h">The Decision Intelligence <em>Architecture</em></h2>
+    <p class="section-sub">A layered system that transforms organisational inputs into structured decision intelligence.</p>
+  </div>
+
+  <div class="arch-wrap">
+
+    <div class="arch-tree-pane">
+      <canvas id="archTreeCanvas"></canvas>
+      <!-- Scroll progress indicator -->
+      <div class="arch-progress" id="archProgress">
+        <div class="arch-progress-cap arch-progress-cap--top"></div>
+        <div class="arch-progress-track">
+          <div class="arch-progress-fill" id="archProgressFill"></div>
+          <div class="arch-progress-dot" id="archProgressDot"></div>
+        </div>
+        <div class="arch-progress-cap arch-progress-cap--bottom"></div>
+      </div>
+    </div>
+
+    <div class="arch-panels">
+
+      <!-- 0: root — Decision Intelligence Engine -->
+      <div class="arch-panel" data-arch-panel="0">
+        <div class="arch-exp" data-arch-exp="0">
+          <div class="arch-exp-label">Decision Intelligence Engine</div>
+          <div class="arch-exp-title">Decision Intelligence Engine</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">A multi-step architecture that brings together organisational context, transformation opportunities, and executive oversight within a single decision environment — designed for high-stakes AI adoption decisions with greater precision, discipline, and control.</div>
+          <div class="arch-exp-why">The engine evaluates over 300 organisational signals across 48 transformation dimensions, applying deterministic and dynamic scoring models to assess opportunity potential, readiness, governance exposure, and implementation feasibility.</div>
+        </div>
+      </div>
+
+      <!-- 1: base — Base Layer -->
+      <div class="arch-panel" data-arch-panel="1">
+        <div class="arch-exp" data-arch-exp="1">
+          <div class="arch-exp-label">1 — Base Layer</div>
+          <div class="arch-exp-title">Base Layer</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">The Base Layer establishes the organisational context required for accurate transformation analysis.</div>
+          <div class="arch-exp-why">AI transformation decisions depend heavily on organisational structure, roles, and priorities.</div>
+          <div class="arch-exp-group-label">Modules</div>
+          <div class="arch-exp-items">
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Org Profile</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Organisation Structure</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>AILAS Compass</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Department &amp; Role Management</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2: l1 — Org Profile (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="2">
+        <div class="arch-exp" data-arch-exp="2">
+          <div class="arch-exp-label">1A — Org Profile</div>
+          <div class="arch-exp-title">Org Profile</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Captures the foundational profile of the organisation — its sector, size, operating model, and strategic context — that anchors all subsequent transformation analysis within the engine.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 3: l2 — Org Structure (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="3">
+        <div class="arch-exp" data-arch-exp="3">
+          <div class="arch-exp-label">1B — Organisation Structure</div>
+          <div class="arch-exp-title">Organisation Structure</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Maps the departments, reporting lines, and functional divisions that define how the enterprise operates — providing the structural backbone for use case mapping and readiness assessment.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 4: l3 — AILAS Compass (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="4">
+        <div class="arch-exp" data-arch-exp="4">
+          <div class="arch-exp-label">1C — AILAS Compass</div>
+          <div class="arch-exp-title">AILAS Compass</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">A strategic orientation module that establishes the organisation's current AI posture, transformation priorities, and leadership intent — calibrating the engine's analysis to what matters most to the enterprise.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 5: l4 — Dept & Role Mgmt (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="5">
+        <div class="arch-exp" data-arch-exp="5">
+          <div class="arch-exp-label">1D — Department &amp; Role Management</div>
+          <div class="arch-exp-title">Department &amp; Role Management</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Structures the human layer of the organisation by mapping teams, functions, and roles — enabling targeted use case discovery, readiness assessment, and adoption modelling across the enterprise.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 6: journey — Journey (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="6">
+        <div class="arch-exp" data-arch-exp="6">
+          <div class="arch-exp-label">2 — Journey</div>
+          <div class="arch-exp-title">Journey</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">The Journey layer orchestrates the full AI transformation process, grouping Discovery, Diagnostics, and the Transformation Control Room under a single structured progression path.</div>
+          <div class="arch-exp-why">Content for this layer is being finalised. This description serves as a placeholder pending final copy.</div>
+          <div class="arch-exp-group-label">Contains</div>
+          <div class="arch-exp-items">
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Discovery</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Diagnostics</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Transformation Control Room</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7: disc — Discovery -->
+      <div class="arch-panel" data-arch-panel="7">
+        <div class="arch-exp" data-arch-exp="7">
+          <div class="arch-exp-label">3 — Discovery</div>
+          <div class="arch-exp-title">Discovery</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Identifies and structures potential AI opportunities across the organisation.</div>
+          <div class="arch-exp-group-label">Outputs</div>
+          <div class="arch-exp-items">
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Opportunity Snapshot</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Use Case Portfolio</div>
+          </div>
+          <div class="arch-exp-group-label">Modules</div>
+          <div class="arch-exp-items">
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Use Case Explorer</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Use Case Mapping</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Use Case Portfolio</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 8: l5 — Use Case Explorer (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="8">
+        <div class="arch-exp" data-arch-exp="8">
+          <div class="arch-exp-label">3A — Use Case Explorer</div>
+          <div class="arch-exp-title">Use Case Explorer</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Systematically identifies AI opportunities across departments and functions — drawing on organisational inputs, operational signals, and the AILAS knowledge base to surface relevant transformation candidates.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 9: l6 — Use Case Mapping (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="9">
+        <div class="arch-exp" data-arch-exp="9">
+          <div class="arch-exp-label">3B — Use Case Mapping</div>
+          <div class="arch-exp-title">Use Case Mapping</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Positions identified opportunities within the organisational structure — linking each use case to the departments, roles, processes, and systems it would affect, enabling precise scoping and prioritisation.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 10: l7 — Use Case Portfolio (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="10">
+        <div class="arch-exp" data-arch-exp="10">
+          <div class="arch-exp-label">3C — Use Case Portfolio</div>
+          <div class="arch-exp-title">Use Case Portfolio</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Consolidates all identified and mapped opportunities into a structured, comparative view — enabling leadership to assess the breadth of transformation potential and select candidates for deeper diagnostic evaluation.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 11: diag — Diagnostics -->
+      <div class="arch-panel" data-arch-panel="11">
+        <div class="arch-exp" data-arch-exp="11">
+          <div class="arch-exp-label">4 — Diagnostics</div>
+          <div class="arch-exp-title">Diagnostics</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Evaluates selected use cases across key transformation dimensions.</div>
+          <div class="arch-exp-group-label">Output</div>
+          <div class="arch-exp-items">
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Detailed Diagnostic Report</div>
+          </div>
+          <div class="arch-exp-group-label">Modules</div>
+          <div class="arch-exp-items">
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Readiness</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Ethics</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Governance</div>
+            <div class="arch-exp-item"><span class="arch-exp-item-dot"></span>Compliance</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 12: l8 — Readiness (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="12">
+        <div class="arch-exp" data-arch-exp="12">
+          <div class="arch-exp-label">4A — Readiness</div>
+          <div class="arch-exp-title">Readiness</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Evaluates the organisation's readiness to implement and sustain an AI use case — assessing technical infrastructure, data quality, talent, and operational capacity against the requirements of each initiative.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 13: l9 — Ethics (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="13">
+        <div class="arch-exp" data-arch-exp="13">
+          <div class="arch-exp-label">4B — Ethics</div>
+          <div class="arch-exp-title">Ethics</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Evaluates the ethical dimensions of each AI use case — assessing potential bias, fairness risks, human impact, and alignment with the organisation's values and responsible AI commitments.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 14: l10 — Governance (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="14">
+        <div class="arch-exp" data-arch-exp="14">
+          <div class="arch-exp-label">4C — Governance</div>
+          <div class="arch-exp-title">Governance</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Assesses the oversight structures, accountability frameworks, and decision rights required to manage an AI use case responsibly — ensuring appropriate controls are in place before and during deployment.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 15: l11 — Compliance (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="15">
+        <div class="arch-exp" data-arch-exp="15">
+          <div class="arch-exp-label">4D — Compliance</div>
+          <div class="arch-exp-title">Compliance</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Evaluates each use case against applicable regulatory requirements, data protection obligations, and sector-specific legal constraints — identifying exposure before deployment creates liability.</div>
+          <div class="arch-exp-why">Content for this module is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 16: l12 — Transformation Report (no doc content — placeholder) -->
+      <div class="arch-panel" data-arch-panel="16">
+        <div class="arch-exp" data-arch-exp="16">
+          <div class="arch-exp-label">4E — Transformation Report</div>
+          <div class="arch-exp-title">Transformation Report</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">The consolidated output of the Diagnostics stage — a structured intelligence document that synthesises readiness, ethics, governance, and compliance assessments into a single executive-ready decision artefact.</div>
+          <div class="arch-exp-why">Content for this output is being finalised. This description serves as a placeholder pending final copy.</div>
+        </div>
+      </div>
+
+      <!-- 17: ctrl — Transformation Control Room -->
+      <div class="arch-panel" data-arch-panel="17">
+        <div class="arch-exp" data-arch-exp="17">
+          <div class="arch-exp-label">5 — Transformation Control Room</div>
+          <div class="arch-exp-title">Transformation Control Room</div>
+          <div class="arch-exp-what-label">What it is</div>
+          <div class="arch-exp-what">Executive environment for monitoring the organisation's AI transformation landscape.</div>
+          <div class="arch-exp-why">Provides leadership with structured oversight of opportunity signals, readiness gaps, and governance exposure across the enterprise.</div>
+        </div>
+      </div>
+
+    </div>    </div>
+  </div>
+</section>
+
+<!-- ══════ 4. LEADERSHIP VALUE ══════ -->
+<section id="outcomes">
+
+  <div class="oc-header reveal">
+    <div class="eyebrow">Leadership Value</div>
+    <h2 class="section-h">What leadership <em>gains</em></h2>
+    <p class="section-sub">The Decision Intelligence Engine gives leadership a clearer understanding of where AI should be applied, where risks are emerging, and how transformation priorities should evolve across the enterprise.</p>
+  </div>
+
+  <div class="oc-grid reveal reveal-delay-1">
+
+    <div class="oc-card">
+      <div class="oc-card-default">
+        <div class="oc-card-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12"/></svg></div>
+        <div class="oc-card-title">Strategic clarity</div>
+      </div>
+      <div class="oc-card-hover">
+        <div class="oc-card-title">Strategic clarity</div>
+        <div class="oc-card-desc">Clearer visibility into where AI can generate meaningful value across the organisation.</div>
+      </div>
+    </div>
+
+    <div class="oc-card">
+      <div class="oc-card-default">
+        <div class="oc-card-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <div class="oc-card-title">Transformation control</div>
+      </div>
+      <div class="oc-card-hover">
+        <div class="oc-card-title">Transformation control</div>
+        <div class="oc-card-desc">Leadership gains structured oversight of emerging AI initiatives across departments and workflows.</div>
+      </div>
+    </div>
+
+    <div class="oc-card">
+      <div class="oc-card-default">
+        <div class="oc-card-icon"><svg viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></div>
+        <div class="oc-card-title">Earlier risk visibility</div>
+      </div>
+      <div class="oc-card-hover">
+        <div class="oc-card-title">Earlier risk visibility</div>
+        <div class="oc-card-desc">Governance, compliance, and readiness gaps become visible before significant resources are committed.</div>
+      </div>
+    </div>
+
+    <div class="oc-card">
+      <div class="oc-card-default">
+        <div class="oc-card-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="oc-card-title">Disciplined adoption</div>
+      </div>
+      <div class="oc-card-hover">
+        <div class="oc-card-title">Disciplined adoption</div>
+        <div class="oc-card-desc">AI initiatives move forward through structured evaluation rather than scattered experimentation.</div>
+      </div>
+    </div>
+
+    <div class="oc-card">
+      <div class="oc-card-default">
+        <div class="oc-card-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></div>
+        <div class="oc-card-title">Higher adoption potential</div>
+      </div>
+      <div class="oc-card-hover">
+        <div class="oc-card-title">Higher adoption potential</div>
+        <div class="oc-card-desc">By surfacing employee demand and operational friction, the system prioritises initiatives that teams are more likely to adopt.</div>
+      </div>
+    </div>
+
+    <div class="oc-card">
+      <div class="oc-card-default">
+        <div class="oc-card-icon"><svg viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
+        <div class="oc-card-title">Better capital allocation</div>
+      </div>
+      <div class="oc-card-hover">
+        <div class="oc-card-title">Better capital allocation</div>
+        <div class="oc-card-desc">Leadership can focus investment and organisational energy on the initiatives most likely to produce meaningful outcomes.</div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ══════ 5. CONTACT CTA ══════ -->
+<section id="contact">
+  <div class="contact-inner reveal">
+    <div class="eyebrow" style="justify-content:center">Leave Contact Information</div>
+    <h2 class="contact-h">Start the <em>conversation</em></h2>
+    <p class="contact-sub">Leave your details and an AILAS representative will get in touch to discuss your organisation's AI transformation priorities.</p>
+    <div class="contact-form">
+      <input class="contact-input" id="inputName"  type="text"  placeholder="Full Name"      autocomplete="name"/>
+      <input class="contact-input" id="inputEmail" type="email" placeholder="Email Address"  autocomplete="email"/>
+      <button class="contact-btn" id="submitBtn">Speak with the AILAS Team</button>
+    </div>
+  </div>
+</section>
+
+<!-- ══════ FOOTER ══════ -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img class="footer-logo" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjg0IiBoZWlnaHQ9IjQ3IiB2aWV3Qm94PSIwIDAgMjg0IDQ3IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAyNC40NTE4TDI3LjI3MDEgMC4xMDI1MzlMNTQuMjQ5IDI0LjQ1MThWMzcuNjUzOEwyNy4xMjQ1IDE1LjM1OTJMMCAzNy42NTM4VjI0LjQ1MThaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMjAuMTY4IDMzLjk4ODNIMzUuMTk2MUwyOC4xOTQ5IDQ2LjUyOTNMMjAuMTY4IDMzLjk4ODNaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNOTYuMTY0MSAzMC4yMzgxTDkyLjAxNjIgNDAuNTcySDg2LjkyNzdMMTAwLjY2MSA2LjEyNDAySDEwNi45NTdMMTIxLjI4IDQwLjU3MkgxMTUuODMxTDExMS41NTMgMzAuMjM4MUg5Ni4xNjQxWk0xMTAuMjQgMjYuMzI1OEMxMDYuNTY1IDE3LjI3MTMgMTA0LjU0NSAxMi40NjA2IDEwMy43MDkgOS44MzY4SDEwMy42NTNDMTAyLjcxMSAxMi43NTg2IDEwMC40NTMgMTguNTgyMSA5Ny40OTIyIDI2LjMyNThIMTEwLjI0WiIgZmlsbD0id2hpdGUiLz4KPHBhdGggZD0iTTE0My41NjQgNi4xMjQwMlY0MC41NzJIMTM4LjQ1MVY2LjEyNDAySDE0My41NjRaIiBmaWxsPSJ3aGl0ZSIvPgo8cGF0aCBkPSJNMTY1LjEwOSA2LjEyNDAySDE3MC4yMjNWMzYuNjU5OEgxOTAuMzM1TDE4OS42MjIgNDAuNTcySDE2NS4xMDlWNi4xMjQwMloiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yMTQuNDk0IDMwLjIzODFMMjEwLjM0NiA0MC41NzJIMjA1LjI1OEwyMTguOTkxIDYuMTI0MDJIMjI1LjI4N0wyMzkuNjEgNDAuNTcySDIzNC4xNjFMMjI5Ljg4MyAzMC4yMzgxSDIxNC40OTRaTTIyOC41NyAyNi4zMjU4QzIyNC44OTUgMTcuMjcxMyAyMjIuODc1IDEyLjQ2MDYgMjIyLjA0IDkuODM2OEgyMjEuOTg0QzIyMS4wNDEgMTIuNzU4NiAyMTguNzgzIDE4LjU4MjEgMjE1LjgyMiAyNi4zMjU4SDIyOC41N1oiIGZpbGw9IndoaXRlIi8+CjxwYXRoIGQ9Ik0yNTkuNTg1IDMwLjk4NDJDMjYwLjYzMSAzNS4xMTYgMjYzLjc5MyAzNy4zNDc3IDI2OS4zODEgMzcuMzQ3N0MyNzUuMzk3IDM3LjM0NzcgMjc3Ljc3OCAzNC44MjcgMjc3Ljc3OCAzMS41NzM1QzI3Ny43NzggMjguMTE4NCAyNzUuODc2IDI2LjE4MjUgMjY4LjE0NyAyNC41MTFDMjU5LjA2MSAyMi41MzkyIDI1NS45MDcgMTkuNzU4NSAyNTUuOTA3IDE0LjkxNjVDMjU1LjkwNyA5LjgwMTAyIDI2MC4xMzEgNS42Mjg5MSAyNjguNzM4IDUuNjI4OTFDMjc3LjkyMSA1LjYyODkxIDI4MS42OTkgMTAuMzcwMSAyODIuMjE5IDE0Ljg5NEgyNzcuMDE2QzI3Ni4zMjYgMTEuODI4OCAyNzQuMTc5IDkuMzEyNTYgMjY4LjU1NSA5LjMxMjU2QzI2My44NiA5LjMxMjU2IDI2MS4yMjQgMTEuMjAxNCAyNjEuMjI0IDE0LjQ4NEMyNjEuMjI0IDE3LjcxNzMgMjYzLjQwMSAxOC45OTIyIDI3MC4xNTggMjAuNDU1NEMyODEuMTU1IDIyLjg0NjIgMjgzLjA5NyAyNi42NzEgMjgzLjA5NyAzMS4wOTE4QzI4My4wOTcgMzYuNjQ4NyAyNzguNDkgNDEuMDAyMyAyNjkuMDU5IDQxLjAwMjNDMjU5LjM1OSA0MS4wMDIzIDI1NS4xODQgMzYuMjY3NyAyNTQuMzg3IDMwLjk4MkgyNTkuNTg1VjMwLjk4NDJaIiBmaWxsPSJ3aGl0ZSIvPgo8L3N2Zz4=" alt="AILAS">
+        <p class="footer-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+        <div class="footer-address">
+          <svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+          <span>2118 Thornridge Cir. Syracuse, Connecticut 35624</span>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col d1">
+          <div class="footer-col-head">Explore</div>
+          <ul class="footer-links">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">AI Journey</a></li>
+            <li><a href="#">Who Are You</a></li>
+            <li><a href="#">How It Works</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">FAQ's</a></li>
+          </ul>
+        </div>
+        <div class="footer-col d2">
+          <div class="footer-col-head">Contact Us</div>
+          <div class="footer-socials">
+            <a href="#" class="footer-social" aria-label="Instagram">
+              <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+            </a>
+            <a href="#" class="footer-social" aria-label="X">
+              <svg viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+            <a href="#" class="footer-social" aria-label="Behance">
+              <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAFA0lEQVR4nO2a32sdRRTHPydN25vQ1rbGUuIPosQYRUqRKjGWClVK0VAUi4SKL1r6ID746IMoiH+AlFL6oCKlqBQRLQFL6IP4o2AoRSRKQElrKUVLjTGWENOYrw+zt93e7u7M5t69F3E/sNxN5sw5s2dn55w5u1BSUlJSUlJSUlLyv8QkDQCVnP0WYueL0bEAzANzwJSZXWrMEIvFJE0Cdxag+w/gFDAKHDWzcwXYqB9JkyqeeUmHJXW3+nprKXIGJPE7MGxmJ0I7SDoMPFGn3TfNbH9SQ3udivNyM3BM0k4z+zKwz6qoXz2krnFtdSpeCh3AB5LWtMD2DbTCAQC3Aq+0yPZ1hKwBXwEzCf9vwz1C7cAK3FTdEB3LAmz/YmY9PiFJa8kfpmuZMbPZNAO+KHB/HkuSNkp6WdKlgOjQV+eF1U3DHwEz+9XMDuBW7ise8fsabT8vhUUBMxuTNAo8mSHWlVevpAowADwEdOMevTZcBjoNXADGgbHUaR+j6DB4wdMePAMlPQC8BOwGbgro8qekY8ABMxurewAFMe0TkNQl6QgwBrxI2MUTyT0PnJT0saSNSUJFO+AOT/tEVmN0108DzxEWWZJYBjwDnJK0JclIQ6NATO/WaA+QxgVJqTdA0oCkqYBIkocpSZvidho+AyRtkPQqMAIszxA9ZGaLKTp6gE+BdQ0e3jpcKn518Q1JhD4DplLa4olQBZcEbQJWegbyAzBgZpdrG6JZMQo85tEBcAY4i6tFrAH6CVsjPjSzPVWDzdgOx5mI7nAikp4K0HFa0jbVPEKSKpL2KOyaBpvtgAVJ78uzCZJ00qPnhKRVHh1dksY8ej6B5obBedx0TUUuNX44Q+Q34NmkRydOVI7bDfyVITYkaX0zHdABvAGMS9qWIrPDo+OgmaWtR9cRleDeyxBZDmxvRSJ0O3Bc0uMJbYMZ/f4BjuS0NeJp3xKSCmdtaKoOzJukdAAfSdpkZvF0uT+jzxzQr3w7SN9eoy8kDD4I/JjS1hY7KkAnLvsbAvYBqz0DeNfM9sLV8HeR+stfefi2yEywV9JZj+45RUmJpHa5SNFMxgtbA8zsZ2CvR2wl1yq+nSw9318qlUIXwaj8/ZNHbHORY/DQ1oyy+EXg7oz26kI1H6jvCi71XYwdcRYzzmv/vtgMB3R62ldEv/O4xCVt4fwcGI7kqheStJlK3GClbbwKdYDcyn6bR2wW3AAlnQfuTZG7y8ySqtN1UXQitBm4xSMTzwOyCiS9ythELZXCZoBc8fLtANHTsfOvgadT5JbhosprOcbQjSuepjFRSB4gqUfSFwFxeEZSZ6xff4B8UCldLq/wjeGFkBnwuqQprs2WpN9qUaQTV6ruJbsaVOVwvHRtZhOSvgEeSZFfDYxI2mVm42lKJbUDB4FHM2xfAY63oiBSZUbSDQukpJ0Bfeck7ZerG1ZifbskDcsVTHwcqnZqlQP2ZdzBozn0zMu9hptWeCp9XtL6Vjog8WOFmAPWSvq+INuzqpbDWuCABUlvKaMcHhtXt6RTDbY/K2lXraFmOeA7Sdt9F14ztk65Z70Ru8TzkrYmGSnSAZOS3pG0QwF3PcMRg/IXS9OYk3RQsXcBcUzSEO4N61KpfiNY/U7wMu6d37lGp65y3zQOAzuBezJE/8Z9ojeCC7WpL2mtkQNsJnJfjvRx42ZrGpgws7lmj6mkpKSkpKSkpKTkP8S/qJBDziucAS4AAAAASUVORK5CYII=" alt="Behance">
+            </a>
+            <a href="#" class="footer-social" aria-label="Dribbble">
+              <img src="data:image/png;base64,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" alt="Dribbble">
+            </a>
+            <a href="#" class="footer-social" aria-label="LinkedIn">
+              <svg viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M15 9.354a4 4 0 100 5.292" stroke-linecap="round"/></svg>
+        Copyright 2024, All Rights Reserved. AILAS
+      </div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ══════════════════════════════════════════
+   SCROLL: NAV ACTIVE + BACK TOP
+   FIX: match sections array to navPills by data-section attribute
+   so index alignment is guaranteed regardless of DOM order.
+══════════════════════════════════════════ */
+const mainNav = document.getElementById('main-nav');
+const backTop  = document.getElementById('back-top');
+
+// Build a map of sectionId → navPill for reliable matching
+const sectionIds = ['rail','architecture','outcomes','contact'];
+const pillMap = {};
+document.querySelectorAll('.nav-pill[data-section]').forEach(p => {
+  pillMap[p.dataset.section] = p;
+});
+
+window.addEventListener('scroll', () => {
+  const st = window.scrollY;
+  mainNav.classList.toggle('scrolled', st > 20);
+  backTop.classList.toggle('visible', st > 400);
+
+  sectionIds.forEach(id => {
+    const sec = document.getElementById(id);
+    const pill = pillMap[id];
+    if (!sec || !pill) return;
+    const rect = sec.getBoundingClientRect();
+    pill.classList.toggle('active', rect.top <= 80 && rect.bottom > 80);
+  });
+}, { passive: true });
+
+/* ══════════════════════════════════════════
+   HERO EXPAND
+══════════════════════════════════════════ */
+document.getElementById('expandBtn').addEventListener('click', function() {
+  const h   = document.getElementById('heroHidden');
+  const lbl = document.getElementById('expandLabel');
+  h.classList.toggle('open');
+  this.classList.toggle('open');
+  lbl.textContent = h.classList.contains('open') ? 'Read less' : 'Read more';
+});
+
+/* ══════════════════════════════════════════
+   INTELLIGENCE RAIL
+   FIX: card width = 196px flex-basis + 10px gap = 206px effective.
+   Duplicate exactly 8 cards so translateX(-206*8) loops seamlessly.
+   The animation keyframe matches this value.
+══════════════════════════════════════════ */
+const RAIL_DATA = [
+  { title:'Research-Backed',      icon:'<svg viewBox="0 0 24 24"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>',     text:'Built on applied research into enterprise AI adoption, organisational readiness, and transformation governance.' },
+  { title:'Expert Diagnostics',   icon:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',   text:'Expert-designed diagnostic systems built to evaluate enterprise AI transformation with rigorous assessment logic.' },
+  { title:'300+ Signals',         icon:'<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',         text:'Captures hundreds of organisational signals across strategy, operations, governance, culture, and technology.' },
+  { title:'48 Dimensions',        icon:'<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',        text:'Evaluates transformation across the dimensions that determine whether AI initiatives can succeed at enterprise scale.' },
+  { title:'Scored Intelligence',  icon:'<svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',  text:'Combines deterministic scoring models with knowledge-grounded analysis to produce sharper decision insight.' },
+  { title:'Private by Design',    icon:'<svg viewBox="0 0 24 24"><path d="M12 2L4 6v6c0 5.25 3.5 9.74 8 11 4.5-1.26 8-5.75 8-11V6L12 2z"/><polyline points="9 12 11 14 15 10"/></svg>',    text:'Supports sensitive environments through PII redaction and architecture options such as edge AI or on-premise deployment.' },
+  { title:'Intelligent Guidance', icon:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>', text:'Dobby gathers structured inputs while Grand Master Oogway explains technical concepts and AI terminology.' },
+  { title:'Executive Visibility', icon:'<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>', text:'Transforms organisational inputs into comparative visual intelligence for leadership oversight.' },
+];
+
+const track = document.getElementById('railTrack');
+
+// Render exactly 2 sets so the loop point is clean
+[...RAIL_DATA, ...RAIL_DATA].forEach(d => {
+  const c = document.createElement('div');
+  c.className = 'rail-card';
+  c.innerHTML = `
+    <div class="rail-card-inner">
+      <div class="rail-icon">${d.icon}</div>
+      <div class="rail-title">${d.title}</div>
+      <div class="rail-text">${d.text}</div>
+    </div>`;
+  c.addEventListener('mouseenter', () => { c.classList.add('active');    track.classList.add('paused'); });
+  c.addEventListener('mouseleave', () => { c.classList.remove('active'); track.classList.remove('paused'); });
+  track.appendChild(c);
+});
+
+/* ══════════════════════════════════════════
+   DECISION ARCHITECTURE — Staircase Tree
+   FIX 1: stage initialises to 1 (Base Layer active) matching ACTIVE map.
+   FIX 2: sync() correctly maps panel index → stage (panel 0 → stage 1, etc.)
+   FIX 3: canvas resize guards against zero dimensions on first paint.
+   FIX 4: arch-exp IntersectionObserver uses a threshold approach that allows
+           re-triggering when user scrolls back, via a MutationObserver-free
+           approach — we keep observing and toggle the class both ways.
+══════════════════════════════════════════ */
+(function () {
+  const cv = document.getElementById('archTreeCanvas');
+  if (!cv) return;
+
+  const dpr = window.devicePixelRatio || 1;
+  let stage = 0, inView = false, t = 0, pulses = [];
+
+  function resize() {
+    // Guard: offsetWidth/Height may be 0 if not yet painted
+    const w = cv.offsetWidth  || cv.parentElement.offsetWidth  || 600;
+    const h = cv.offsetHeight || cv.parentElement.offsetHeight || 700;
+    cv.width  = w * dpr;
+    cv.height = h * dpr;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  const ctx = cv.getContext('2d');
+  const W = () => cv.width  / dpr;
+  const H = () => cv.height / dpr;
+
+  const NODES = [
+    { id:'root',    label:'Decision Intelligence Engine',        lx:0.02, cy:0.038, w:0.44, h:0.056, stage:0,  type:'root'    },
+    { id:'base',    label:'Base Layer',                          lx:0.06, cy:0.101, w:0.22, h:0.048, stage:1,  type:'layer'    },
+    { id:'l1',    label:'Org Profile',                         lx:0.09, cy:0.156, w:0.16, h:0.04, stage:2,  type:'leaf'    },
+    { id:'l2',    label:'Org Structure',                       lx:0.27, cy:0.207, w:0.18, h:0.04, stage:3,  type:'leaf'    },
+    { id:'l3',    label:'AILAS Compass',                       lx:0.45, cy:0.258, w:0.18, h:0.04, stage:4,  type:'leaf'    },
+    { id:'l4',    label:'Dept & Role Mgmt',                    lx:0.63, cy:0.309, w:0.22, h:0.04, stage:5,  type:'leaf'    },
+    { id:'journey',    label:'Journey',                             lx:0.06, cy:0.364, w:0.22, h:0.048, stage:6,  type:'layer'    },
+    { id:'disc',    label:'Discovery',                           lx:0.12, cy:0.423, w:0.22, h:0.048, stage:7,  type:'layer'    },
+    { id:'l5',    label:'Use Case Explorer',                   lx:0.15, cy:0.478, w:0.22, h:0.04, stage:8,  type:'leaf'    },
+    { id:'l6',    label:'Use Case Mapping',                    lx:0.33, cy:0.529, w:0.2, h:0.04, stage:9,  type:'leaf'    },
+    { id:'l7',    label:'Use Case Portfolio',                  lx:0.53, cy:0.58, w:0.22, h:0.04, stage:10,  type:'leaf'    },
+    { id:'diag',    label:'Diagnostics',                         lx:0.12, cy:0.635, w:0.22, h:0.048, stage:11,  type:'layer'    },
+    { id:'l8',    label:'Readiness',                           lx:0.15, cy:0.69, w:0.14, h:0.04, stage:12,  type:'leaf'    },
+    { id:'l9',    label:'Ethics',                              lx:0.33, cy:0.741, w:0.11, h:0.04, stage:13,  type:'leaf'    },
+    { id:'l10',    label:'Governance',                          lx:0.44, cy:0.792, w:0.16, h:0.04, stage:14,  type:'leaf'    },
+    { id:'l11',    label:'Compliance',                          lx:0.6, cy:0.843, w:0.15, h:0.04, stage:15,  type:'leaf'    },
+    { id:'l12',    label:'Transformation Report',               lx:0.6, cy:0.894, w:0.26, h:0.04, stage:16,  type:'leaf'    },
+    { id:'ctrl',    label:'Transformation Control Room',         lx:0.12, cy:0.953, w:0.47, h:0.056, stage:17,  type:'control'    },
+  ];
+
+  const byId = {};
+  NODES.forEach(n => byId[n.id] = n);
+
+  const EDGES = [
+    ['root','base'],
+    ['root','journey'],
+    // Base Layer leaves — chained: base→l1→l2→l3→l4
+    ['base','l1'],['l1','l2'],['l2','l3'],['l3','l4'],
+    ['journey','disc'],
+    ['journey','diag'],
+    ['journey','ctrl'],
+    // Discovery leaves — chained: disc→l5→l6→l7
+    ['disc','l5'],['l5','l6'],['l6','l7'],
+    // Diagnostics leaves — chained: diag→l8→l8→l9→l10→l11→l12
+    ['diag','l8'],['l8','l9'],['l9','l10'],['l10','l11'],['l11','l12'],
+  ];
+
+  // 18 panels — each highlights its corresponding node
+  const ACTIVE = {
+    0:'root',
+    1:'base', 2:'l1', 3:'l2', 4:'l3', 5:'l4',
+    6:'journey',
+    7:'disc', 8:'l5', 9:'l6', 10:'l7',
+    11:'diag', 12:'l8', 13:'l9', 14:'l10', 15:'l11', 16:'l12',
+    17:'ctrl'
+  };
+
+  const A = {};
+  const ga = id => A[id] || 0;
+  const sa = (id, v) => { A[id] = Math.max(0, Math.min(1, v)); };
+
+  // Spawn pulse on active outgoing edges
+  setInterval(() => {
+    if (!inView) return;
+    const lid = ACTIVE[stage];
+    const ch  = EDGES.filter(([p]) => p === lid);
+    if (!ch.length) return;
+    const [pid, cid] = ch[Math.floor(Math.random() * ch.length)];
+    pulses.push({ from: pid, to: cid, p: 0 });
+  }, 1800);
+
+  const NX = n => n.lx * W() + n.w * W() / 2;
+  const NY = n => n.cy * H();
+  const NW = n => n.w * W();
+  const NH = n => n.h * H();
+  const NL = n => n.lx * W();
+  const NT = n => n.cy * H() - n.h * H() / 2;
+  const NB = n => n.cy * H() + n.h * H() / 2;
+
+  function rr(x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.arcTo(x+w,y,x+w,y+r,r);
+    ctx.lineTo(x+w,y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+    ctx.lineTo(x+r,y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+    ctx.lineTo(x,y+r); ctx.arcTo(x,y,x+r,y,r);
+    ctx.closePath();
+  }
+
+  function drawNode(n) {
+    const a = ga(n.id); if (a < 0.02) return;
+    const lid    = ACTIVE[stage];
+    const active = n.id === lid;
+    const past   = n.stage < stage && !active;
+    const x = NL(n), y = NT(n), w = NW(n), h = NH(n);
+    const R = 7;
+    const breath = active ? Math.sin(t * .038) * .05 + .96 : 1;
+
+    if (active && a > .5) {
+      const gr = Math.max(w, h) * .70 * breath;
+      const g  = ctx.createRadialGradient(NX(n), NY(n), 0, NX(n), NY(n), gr);
+      g.addColorStop(0, `rgba(228,32,10,${.060*a*breath})`);
+      g.addColorStop(1, 'transparent');
+      ctx.beginPath(); ctx.arc(NX(n), NY(n), gr, 0, Math.PI*2);
+      ctx.fillStyle = g; ctx.fill();
+    }
+
+    ctx.shadowColor   = active ? `rgba(228,32,10,${.09*a})` : `rgba(0,0,0,${.04*a})`;
+    ctx.shadowBlur    = active ? 14 : 3;
+    ctx.shadowOffsetY = active ? 2  : 1;
+
+    rr(x, y, w, h, R);
+    ctx.fillStyle = active ? `rgba(255,249,248,${a})` : past ? `rgba(246,246,246,${a})` : `rgba(255,255,255,${.98*a})`;
+    ctx.fill();
+
+    rr(x, y, w, h, R);
+    ctx.strokeStyle = active ? `rgba(228,32,10,${.56*a})` : past ? `rgba(210,210,210,${.48*a})` : `rgba(202,205,209,${.76*a})`;
+    ctx.lineWidth   = active ? 1.8 : 1; ctx.stroke();
+    ctx.shadowBlur  = 0; ctx.shadowOffsetY = 0;
+
+    if (active && n.type !== 'leaf' && a > .5) {
+      ctx.fillStyle = `rgba(228,32,10,${.66*a})`;
+      ctx.fillRect(x, y+R, 2.5, h-R*2);
+    }
+
+    if (a > .18) {
+      const large = n.type === 'root' || n.type === 'control';
+      const fs    = n.type === 'leaf' ? 10 : large ? 12 : 11;
+      ctx.font      = `${large?'500':'400'} ${fs}px 'DM Sans',sans-serif`;
+      ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = active ? `rgba(14,19,23,${.92*a})` : past ? `rgba(145,150,154,${.65*a})` : `rgba(48,53,58,${.80*a})`;
+      const px = x+12, maxW = w-18;
+      let lbl = n.label;
+      while (ctx.measureText(lbl).width > maxW && lbl.length > 3) lbl = lbl.slice(0,-1);
+      if (lbl !== n.label) lbl += '\u2026';
+      ctx.fillText(lbl, px, NY(n));
+    }
+  }
+
+  function drawEdge(pid, cid) {
+    const pn = byId[pid], cn = byId[cid];
+    if (!pn || !cn) return;
+    const a = Math.min(ga(pid), ga(cid)); if (a < 0.02) return;
+    const lid    = ACTIVE[stage];
+    const active = pid === lid || cid === lid;
+    const past   = pn.stage < stage && cn.stage < stage && !active;
+    ctx.beginPath();
+    let jx, jy;
+
+    if (pid === 'root' || pid === 'journey') {
+      /* main left spine: drop from parent's left edge down to child's cy, branch right */
+      const sx = NL(pn) + W() * .025;
+      const py = NB(pn), cy2 = NY(cn), cx = NL(cn);
+      ctx.moveTo(sx, py); ctx.lineTo(sx, cy2); ctx.lineTo(cx, cy2);
+      jx = cx; jy = cy2;
+    } else if (pid === 'l11' && cid === 'l12') {
+      /* Compliance → Transformation Report: straight vertical then short horizontal */
+      const px = NX(pn), py = NB(pn), cx = NX(cn), cy2 = NT(cn);
+      ctx.moveTo(px, py); ctx.lineTo(px, cy2); ctx.lineTo(cx, cy2);
+      jx = cx; jy = cy2;
+    } else {
+      /* staircase elbow: spine from parent's left edge down to child cy, then right */
+      const sx = NL(pn) + W() * .02;
+      const py = NB(pn), cy2 = NY(cn), cx = NL(cn);
+      ctx.moveTo(sx, py); ctx.lineTo(sx, cy2); ctx.lineTo(cx, cy2);
+      jx = cx; jy = cy2;
+    }
+
+    ctx.strokeStyle = active ? `rgba(228,32,10,${.22*a})` : past ? `rgba(195,195,195,${.36*a})` : `rgba(196,200,204,${.58*a})`;
+    ctx.lineWidth   = active ? 1.4 : .8;
+    ctx.stroke();
+    if (active && a > .5) {
+      ctx.beginPath(); ctx.arc(jx, jy, 2.2, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(228,32,10,${.28*a})`; ctx.fill();
+    }
+  }
+
+  function drawPulse(pid, cid, p, a) {
+    const pn = byId[pid], cn = byId[cid];
+    if (!pn || !cn || a < .04) return;
+    let bx, by, tot;
+
+    if (pid === 'root' || pid === 'journey') {
+      const sx = NL(pn) + W() * .025;
+      const py = NB(pn), cy2 = NY(cn), cx = NL(cn);
+      const s1 = Math.abs(cy2 - py), s2 = Math.abs(cx - sx);
+      tot = s1 + s2; if (tot < 1) return;
+      const d = p * tot;
+      if (d <= s1) { bx = sx; by = py + d; }
+      else         { bx = sx + (cx - sx) * ((d - s1) / s2); by = cy2; }
+    } else if (pid === 'l11' && cid === 'l12') {
+      const px = NX(pn), py = NB(pn), cx = NX(cn), cy2 = NT(cn);
+      const s1 = Math.abs(cy2 - py), s2 = Math.abs(cx - px);
+      tot = s1 + s2; if (tot < 1) return;
+      const d = p * tot;
+      if (d <= s1) { bx = px; by = py + d; }
+      else         { bx = px + (cx - px) * ((d - s1) / s2); by = cy2; }
+    } else {
+      const sx = NL(pn) + W() * .02;
+      const py = NB(pn), cy2 = NY(cn), cx = NL(cn);
+      const s1 = Math.abs(cy2 - py), s2 = Math.abs(cx - sx);
+      tot = s1 + s2; if (tot < 1) return;
+      const d = p * tot;
+      if (d <= s1) { bx = sx; by = py + d; }
+      else         { bx = sx + (cx - sx) * ((d - s1) / s2); by = cy2; }
+    }
+
+    const fade = p < .15 ? p / .15 : p > .85 ? (1 - p) / .15 : 1;
+    const g = ctx.createRadialGradient(bx, by, 0, bx, by, 5);
+    g.addColorStop(0, `rgba(228,32,10,${.38*fade*a})`);
+    g.addColorStop(1, 'transparent');
+    ctx.beginPath(); ctx.arc(bx, by, 5, 0, Math.PI*2);
+    ctx.fillStyle = g; ctx.fill();
+    ctx.beginPath(); ctx.arc(bx, by, 2, 0, Math.PI*2);
+    ctx.fillStyle = `rgba(228,32,10,${.78*fade*a})`; ctx.fill();
+  }
+
+  function draw() {
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.clearRect(0,0,W(),H());
+    ctx.fillStyle = '#FFFFFF'; ctx.fillRect(0,0,W(),H());
+
+    ctx.fillStyle = 'rgba(228,32,10,.015)';
+    for (let gx=40; gx<W(); gx+=54)
+      for (let gy=40; gy<H(); gy+=54) {
+        ctx.beginPath(); ctx.arc(gx,gy,1,0,Math.PI*2); ctx.fill();
+      }
+
+    NODES.forEach(n => {
+      const tgt = n.stage <= stage ? 1 : 0, cur = ga(n.id);
+      if (cur < tgt) sa(n.id, cur+.028); else if (cur > tgt) sa(n.id, cur-.022);
+    });
+    pulses = pulses.filter(p => p.p < 1);
+    pulses.forEach(p => p.p += .016);
+
+    const lid = ACTIVE[stage];
+    EDGES.forEach(([p,c]) => drawEdge(p,c));
+    pulses.forEach(pp => drawPulse(pp.from, pp.to, pp.p, Math.min(ga(pp.from), ga(pp.to))));
+    NODES.filter(n => n.id !== lid).forEach(n => drawNode(n));
+    const an = byId[lid]; if (an) drawNode(an);
+    t++;
+    requestAnimationFrame(draw);
+  }
+  requestAnimationFrame(draw);
+
+  const panels = document.querySelectorAll('.arch-panel');
+
+  // sync maps panel index 0–4 to stage 1–5 (panel 0 = Base Layer = stage 1)
+  function sync() {
+    let best = -1, bestR = 0;
+    panels.forEach((p, i) => {
+      const r   = p.getBoundingClientRect();
+      const vis = Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+      const ratio = vis / r.height;
+      if (ratio > bestR) { bestR = ratio; best = i; }
+    });
+    if (best >= 0 && best !== stage) {
+      stage = best;
+      /* show only the active panel's content, hide all others */
+      const expCards = document.querySelectorAll('.arch-exp');
+      expCards.forEach((c, i) => {
+        c.classList.toggle('in-view', i === best);
+      });
+    }
+
+    /* ── Update scroll progress indicator ── */
+    if (best >= 0) {
+      const total   = panels.length;
+      const pct     = best / (total - 1);
+      const fillEl  = document.getElementById('archProgressFill');
+      const dotEl   = document.getElementById('archProgressDot');
+      if (fillEl)  fillEl.style.height  = (pct * 100) + '%';
+      if (dotEl)   dotEl.style.top      = (pct * 100) + '%';
+    }
+  }
+  window.addEventListener('scroll', sync, { passive: true });
+
+  /* seed first panel visible on load */
+  document.querySelectorAll('.arch-exp').forEach((c, i) => {
+    c.classList.toggle('in-view', i === 0);
+  });
+
+  /* seed initial progress indicator */
+  (function(){
+    const fillEl = document.getElementById('archProgressFill');
+    const dotEl  = document.getElementById('archProgressDot');
+    if (fillEl) fillEl.style.height = '0%';
+    if (dotEl)  dotEl.style.top     = '0%';
+  })();
+
+  new IntersectionObserver(entries => {
+    if (entries[0].isIntersecting) { inView = true; sync(); if (stage < 0) stage = 0; }
+    else { inView = false; }
+  }, { threshold: .05 }).observe(cv);
+})();
+
+/* ══════════════════════════════════════════
+   GENERAL SCROLL REVEAL
+══════════════════════════════════════════ */
+const revealObs = new IntersectionObserver(entries => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); revealObs.unobserve(e.target); } });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => revealObs.observe(el));
+
+/* ══════════════════════════════════════════
+   CONTACT FORM
+   FIX: proper email format validation with regex.
+   FIX: shake animation on invalid fields, clear on re-focus.
+   FIX: button disabled state prevents double-submit.
+══════════════════════════════════════════ */
+const inputName  = document.getElementById('inputName');
+const inputEmail = document.getElementById('inputEmail');
+const submitBtn  = document.getElementById('submitBtn');
+
+// Clear invalid state when user starts typing
+[inputName, inputEmail].forEach(inp => {
+  inp.addEventListener('input', () => inp.classList.remove('invalid'));
+});
+
+submitBtn.addEventListener('click', function () {
+  const name  = inputName.value.trim();
+  const email = inputEmail.value.trim();
+  // Basic email regex: requires local@domain.tld
+  const emailValid = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email);
+
+  let hasError = false;
+
+  if (!name) {
+    inputName.classList.remove('invalid');
+    void inputName.offsetWidth; // force reflow to replay animation
+    inputName.classList.add('invalid');
+    hasError = true;
+  }
+  if (!emailValid) {
+    inputEmail.classList.remove('invalid');
+    void inputEmail.offsetWidth;
+    inputEmail.classList.add('invalid');
+    hasError = true;
+  }
+
+  if (hasError) {
+    submitBtn.textContent = 'Please check your details';
+    submitBtn.style.background = '#6E7174';
+    setTimeout(() => {
+      submitBtn.textContent = 'Speak with the AILAS Team';
+      submitBtn.style.background = '';
+    }, 2200);
+    return;
+  }
+
+  submitBtn.textContent = '✓  Message sent — we\'ll be in touch';
+  submitBtn.style.background = '#2f7a3a';
+  submitBtn.disabled = true;
+});
+
+/* ══════ FOOTER FADE-IN ══════ */
+(function(){
+  const footerEls = document.querySelectorAll('.footer-brand, .footer-col, .footer-bottom');
+  footerEls.forEach((el, i) => setTimeout(() => el.classList.add('in'), 120 + i * 100));
+})();
+</script>
+</body>
+</html>
