@@ -1,0 +1,1073 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AILAS — The Cognitive Operating System for Enterprise Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+/* ── TOKENS ─────────────────────────────── */
+:root{
+  --bg:        #FFFFFF;
+  --bg-2:      #FDF4F2;
+  --bg-3:      #F8F8F8;
+  --bg-card:   rgba(0,0,0,.02);
+  --border:    #E4E4E4;
+  --border-2:  #D0D0D0;
+  --text:      #0E1317;
+  --text-60:   #6E7174;
+  --text-40:   #9FA1A2;
+  --red:       #E4200A;
+  --red-dim:   rgba(228,32,10,.08);
+  --red-glow:  rgba(228,32,10,.18);
+  --cream:     #5C5451;
+  --ff-display:'Crimson Text',Georgia,serif;
+  --ff-sans:   'DM Sans',sans-serif;
+  --ff-mono:   'DM Mono',monospace;
+  --ease:      cubic-bezier(.4,0,.2,1);
+  --spring:    cubic-bezier(.22,1,.36,1);
+  --t200:      200ms var(--ease);
+  --t400:      400ms var(--ease);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth;overflow-x:hidden}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--ff-sans);
+  font-weight:300;
+  line-height:1.65;
+  -webkit-font-smoothing:antialiased;
+}
+img{display:block;max-width:100%}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;background:none;font:inherit}
+
+/* ── REVEAL ─────────────────────────────── */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .9s var(--spring),transform .9s var(--spring)}
+.reveal.in{opacity:1;transform:none}
+.r1{transition-delay:.1s}.r2{transition-delay:.2s}.r3{transition-delay:.3s}.r4{transition-delay:.4s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:.5}50%{opacity:1}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px var(--red-dim)}50%{box-shadow:0 0 40px var(--red-glow)}}
+
+/* ── NAV ─────────────────────────────────── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:500;
+  display:flex;align-items:center;justify-content:space-between;
+  height:64px;padding:0 56px;
+  background:rgba(255,255,255,.97);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  transition:box-shadow var(--t200);
+}
+nav.scrolled{box-shadow:0 1px 0 var(--border),0 4px 20px rgba(0,0,0,.05)}
+.nav-logo{display:flex;align-items:center;gap:10px;z-index:2;transition:opacity var(--t200)}
+.nav-logo:hover{opacity:.75}
+.nav-logo img{height:28px;width:auto;filter:none}
+.nav-links{display:flex;gap:4px}
+.nav-link{
+  font-family:var(--ff-mono);font-size:10px;font-weight:400;
+  letter-spacing:.18em;text-transform:uppercase;color:var(--text-40);
+  padding:6px 14px;border-radius:100px;
+  transition:color var(--t200),background var(--t200);
+}
+.nav-link:hover{color:var(--text-60);background:var(--bg-2)}
+.nav-link.active{color:var(--red);background:rgba(228,32,10,.06)}
+.nav-cta{
+  font-family:var(--ff-sans);font-size:12px;font-weight:500;
+  letter-spacing:.02em;color:var(--text);
+  padding:8px 20px;border-radius:100px;
+  background:var(--red);
+  transition:background var(--t200),transform var(--t200);
+}
+.nav-cta:hover{background:#c01a08;transform:translateY(-1px)}
+
+/* ── HERO ─────────────────────────────────── */
+#hero{
+  position:relative;min-height:100vh;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  text-align:center;
+  padding:140px 56px 120px;
+  overflow:hidden;
+  background:linear-gradient(168deg,var(--bg-2) 0%,#FFFFFF 52%);
+}
+.hero-grid{
+  position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(228,32,10,.06) 1px,transparent 1px);
+  background-size:36px 36px;
+  mask-image:radial-gradient(ellipse 70% 70% at 50% 40%,black 20%,transparent 75%);
+}
+.hero-inner{position:relative;z-index:2;max-width:920px}
+.hero-eyebrow{
+  display:inline-flex;align-items:center;gap:10px;
+  font-family:var(--ff-mono);font-size:10px;font-weight:400;letter-spacing:.25em;
+  text-transform:uppercase;color:var(--text-40);
+  margin-bottom:32px;
+  padding:6px 16px;border:1px solid var(--border);border-radius:100px;
+  background:var(--bg);
+  opacity:0;animation:fadeUp .8s var(--spring) .1s forwards;
+}
+
+.hero-h{
+  font-family:var(--ff-display);
+  font-size:clamp(34px,4vw,58px);
+  font-weight:400;line-height:1.12;
+  letter-spacing:-.022em;color:var(--text);
+  margin-bottom:24px;
+  opacity:0;animation:fadeUp .9s var(--spring) .25s forwards;
+}
+.hero-h em{font-style:italic;color:var(--red)}
+.hero-sub{
+  font-size:clamp(15px,1.4vw,19px);font-weight:300;
+  color:var(--text-60);max-width:580px;margin:0 auto 48px;
+  line-height:1.72;letter-spacing:-.01em;
+  opacity:0;animation:fadeUp .9s var(--spring) .4s forwards;
+}
+.hero-actions{
+  display:flex;align-items:center;justify-content:center;gap:14px;flex-wrap:wrap;
+  opacity:0;animation:fadeUp .9s var(--spring) .55s forwards;
+}
+.btn-primary{
+  padding:14px 32px;border-radius:100px;
+  font-family:var(--ff-sans);font-size:14px;font-weight:500;
+  color:#fff;background:var(--red);letter-spacing:.01em;
+  transition:background var(--t200),transform var(--t200),box-shadow var(--t200);
+}
+.btn-primary:hover{background:#c01a08;transform:translateY(-2px);box-shadow:0 8px 32px rgba(228,32,10,.3)}
+.btn-ghost{
+  padding:13px 28px;border-radius:100px;
+  font-family:var(--ff-sans);font-size:14px;font-weight:400;
+  color:var(--text-60);border:1px solid var(--border-2);
+  transition:border-color var(--t200),color var(--t200);
+}
+.btn-ghost:hover{border-color:rgba(255,255,255,.3);color:var(--text)}
+/* Scroll indicator */
+.hero-scroll{
+  position:absolute;bottom:40px;left:50%;transform:translateX(-50%);
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  opacity:0;animation:fadeIn 1s var(--ease) 1.4s forwards;z-index:2;
+}
+.hero-scroll-label{font-family:var(--ff-mono);font-size:8px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-40)}
+.scroll-mouse{width:22px;height:34px;border:1.5px solid var(--text-40);border-radius:11px;display:flex;align-items:flex-start;justify-content:center;padding-top:5px;opacity:.7}
+.scroll-mouse::before{content:'';width:1.5px;height:7px;background:var(--red);border-radius:2px;animation:scrollWheel 2s var(--ease) infinite}
+@keyframes scrollWheel{0%{transform:translateY(0);opacity:1}60%{transform:translateY(9px);opacity:.2}61%{transform:translateY(0);opacity:0}80%{opacity:1}100%{transform:translateY(0);opacity:1}}
+
+/* Hero stats strip */
+
+
+.hero-stat:last-child{border-right:none}
+
+
+
+/* ── PRINCIPLES (was trust) ───────────────── */
+#principles{
+  border-top:1px solid var(--border);
+  padding:96px 56px 100px;
+  background:var(--bg);
+}
+.section-header{text-align:center;margin-bottom:56px}
+.eyebrow{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--ff-mono);font-size:9px;font-weight:400;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--text-40);margin-bottom:16px;
+}
+.eyebrow::before{content:'';display:block;width:20px;height:1px;background:var(--red);opacity:.7}
+.section-h{
+  font-family:var(--ff-display);
+  font-size:clamp(32px,3.6vw,52px);
+  font-weight:400;line-height:1.1;letter-spacing:-.02em;color:#0E1317;
+}
+.section-h em{font-style:italic;color:var(--red)}
+.section-sub{font-size:16px;font-weight:300;color:var(--text-60);max-width:520px;margin:14px auto 0;line-height:1.72}
+/* Principles grid */
+.principles-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  max-width:1200px;margin:0 auto;
+  border:1px solid var(--border);border-radius:2px;
+}
+.principle-card{
+  padding:44px 36px;border-right:1px solid var(--border);border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+  background:var(--bg);
+  transition:background var(--t200);
+}
+.principle-card:nth-child(3n){border-right:none}
+.principle-card:nth-last-child(-n+3){border-bottom:none}
+.principle-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--red),transparent);
+  transform:scaleX(0);transform-origin:left;transition:transform .4s var(--ease);
+}
+.principle-card:hover{background:var(--bg-2)}
+.principle-card:hover::before{transform:scaleX(1)}
+.principle-num{font-family:var(--ff-mono);font-size:9px;letter-spacing:.2em;color:var(--red);opacity:.6;margin-bottom:16px}
+.principle-title{font-family:var(--ff-display);font-size:20px;font-weight:400;color:var(--text);margin-bottom:10px;line-height:1.2;letter-spacing:-.01em}
+.principle-desc{font-size:13px;font-weight:300;line-height:1.72;color:var(--text-60)}
+
+/* ── ARCHITECTURE ─────────────────────────── */
+#architecture{
+  border-top:1px solid var(--border);
+  background:#FFFFFF;
+}
+.arch-header{
+  text-align:center;
+  padding:72px 56px 0;
+}
+.arch-header .section-sub{max-width:480px;margin:12px auto 0}
+/* Scroll track */
+.arch-scroll-track{
+  position:relative;
+  height:600vh;
+  margin-top:48px;
+}
+.arch-sticky-wrap{
+  position:sticky;top:64px;
+  height:calc(100vh - 64px);
+  display:grid;grid-template-columns:7fr 3fr;
+  border-top:1px solid var(--border);
+  overflow:hidden;
+  background:var(--bg);
+}
+/* Canvas */
+.arch-canvas-pane{
+  position:relative;height:100%;overflow:hidden;
+  border-right:1px solid rgba(0,0,0,.08);
+}
+#archCanvas{width:100%;height:100%;display:block;cursor:grab}
+#arch-reset{
+  position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  height:28px;
+  padding:0 14px;
+  border-radius:100px;
+  border:1px solid var(--border);background:rgba(255,255,255,.95);
+  display:flex;align-items:center;justify-content:center;gap:6px;
+  cursor:pointer;z-index:20;
+  transition:background var(--t200),border-color var(--t200),box-shadow var(--t200);
+  box-shadow:0 2px 12px rgba(0,0,0,.08);
+  white-space:nowrap;
+}
+#arch-reset:hover{background:var(--bg-2);border-color:var(--text-40);box-shadow:0 4px 16px rgba(0,0,0,.12)}
+#arch-reset span{font-family:var(--ff-mono);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-60)}
+/* Tooltip */
+#arch-tip{
+  position:absolute;z-index:30;pointer-events:none;
+  background:rgba(255,255,255,.97);border:1px solid var(--border);
+  border-radius:10px;padding:12px 16px;width:220px;
+  opacity:0;transform:translateY(4px);
+  transition:opacity .15s,transform .15s;
+  box-shadow:0 4px 24px rgba(0,0,0,.12);
+}
+#arch-tip.on{opacity:1;transform:none}
+.tip-type{font-family:var(--ff-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:6px}
+.tip-name{font-family:var(--ff-display);font-size:16px;font-weight:400;color:#0E1317;margin-bottom:4px}
+.tip-desc{font-size:12px;font-weight:300;color:var(--text-60);line-height:1.55;margin-bottom:8px}
+.tip-hint{font-size:10px;color:var(--text-40);padding-top:6px;border-top:1px solid var(--border)}
+/* Right text pane */
+.arch-text-pane{
+  position:relative;height:100%;overflow:hidden;display:flex;flex-direction:column;
+  background:var(--bg);
+}
+.arch-progress-bar{position:absolute;right:0;top:0;bottom:0;width:2px;background:var(--border);z-index:10}
+.arch-progress-fill{position:absolute;top:0;left:0;right:0;background:var(--red);height:0%;transition:height .08s linear}
+/* Tabs */
+.arch-tabs{
+  display:flex;border-bottom:1px solid var(--border);flex-shrink:0;overflow-x:auto;scrollbar-width:none;
+}
+.arch-tabs::-webkit-scrollbar{display:none}
+.arch-tab-btn{
+  flex:1;min-width:0;padding:10px 6px;
+  font-family:var(--ff-mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-40);
+  border:none;background:none;cursor:pointer;
+  border-bottom:1px solid transparent;transition:color var(--t200),border-color var(--t200),background var(--t200);
+  white-space:nowrap;position:relative;top:1px;
+}
+.arch-tab-btn:hover{color:var(--text-60);background:rgba(255,255,255,.04)}
+.arch-tab-btn.active{color:var(--red);border-bottom-color:var(--red)}
+/* Slides */
+.arch-slides-wrap{flex:1;position:relative;overflow:hidden}
+.arch-slide{
+  position:absolute;inset:0;padding:36px 44px 36px 28px;
+  display:flex;flex-direction:column;justify-content:center;
+  opacity:0;transform:translateY(16px);
+  transition:opacity .5s var(--spring),transform .5s var(--spring);
+  pointer-events:none;overflow-y:auto;
+}
+.arch-slide::-webkit-scrollbar{width:2px}
+.arch-slide::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:2px}
+.arch-slide.active{opacity:1;transform:none;pointer-events:auto}
+.arch-slide.out{opacity:0;transform:translateY(-16px)}
+.arch-state-num{
+  font-family:var(--ff-mono);font-size:9px;letter-spacing:.22em;
+  text-transform:uppercase;color:var(--text-40);
+  margin-bottom:12px;display:flex;align-items:center;gap:10px;
+}
+.arch-state-num::before{content:'';display:block;width:14px;height:1px;background:var(--red);flex-shrink:0}
+.arch-state-num.red{color:var(--red)}
+.arch-slide-title{
+  font-family:var(--ff-display);font-size:clamp(20px,2.2vw,30px);
+  font-weight:300;line-height:1.1;letter-spacing:-.02em;color:var(--text);margin-bottom:14px;
+}
+.arch-slide-title em{font-style:italic;color:var(--red)}
+.arch-slide-body{font-size:13px;font-weight:300;line-height:1.8;color:var(--text-60);margin-bottom:10px}
+.arch-slide-list{list-style:none;display:flex;flex-direction:column;gap:5px;margin-bottom:12px}
+.arch-slide-list li{font-size:12px;font-weight:300;color:var(--text-60);padding-left:14px;position:relative;line-height:1.6}
+.arch-slide-list li::before{content:'—';position:absolute;left:0;color:var(--red);opacity:.5}
+.arch-slide-insight{
+  font-size:12px;font-weight:400;color:var(--cream);line-height:1.72;
+  padding-top:12px;border-top:1px solid var(--border);font-style:italic;margin-top:4px;
+}
+.arch-slide-insight strong{font-style:normal;color:var(--text);font-weight:500}
+/* Node panel */
+#node-panel{
+  position:fixed;right:0;top:0;bottom:0;z-index:600;width:min(420px,100vw);
+  background:rgba(255,255,255,.99);border-left:1px solid var(--border);
+  padding:56px 36px 60px;transform:translateX(102%);
+  transition:transform .45s var(--ease);overflow-y:auto;
+  box-shadow:-4px 0 32px rgba(0,0,0,.1);
+}
+#node-panel.open{transform:translateX(0)}
+#node-panel::-webkit-scrollbar{width:2px}
+#node-panel::-webkit-scrollbar-thumb{background:var(--border-2);border-radius:2px}
+#np-close{
+  position:absolute;top:20px;right:20px;width:32px;height:32px;border-radius:50%;
+  border:1px solid var(--border-2);color:var(--text-40);
+  display:flex;align-items:center;justify-content:center;font-size:14px;transition:all var(--t200);background:none;
+}
+#np-close:hover{background:var(--red-dim);border-color:rgba(228,32,10,.3);color:var(--red)}
+.np-badge{display:inline-flex;align-items:center;gap:7px;padding:5px 14px;border-radius:100px;font-family:var(--ff-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;margin-bottom:22px}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.2}}
+.np-dot{width:5px;height:5px;border-radius:50%;animation:blink 1.5s infinite;flex-shrink:0}
+.np-name{font-family:var(--ff-display);font-size:28px;font-weight:400;line-height:1.1;color:#0E1317;margin-bottom:12px}
+.np-desc{font-size:13px;font-weight:300;line-height:1.82;color:var(--text-60);margin-bottom:24px;padding-bottom:22px;border-bottom:1px solid var(--border)}
+.np-label{font-family:var(--ff-mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--text-40);margin-bottom:10px}
+.np-attrs,.np-conns{display:flex;flex-direction:column;gap:6px;margin-bottom:22px}
+.np-attr{display:flex;justify-content:space-between;padding:9px 12px;border-radius:6px;background:var(--bg-2);border:1px solid var(--border)}
+.np-ak{font-size:12px;font-weight:300;color:var(--text-40)}
+.np-av{font-size:12px;font-weight:400;color:var(--text)}
+.np-conn{display:flex;align-items:flex-start;gap:9px;padding:8px 12px;border-radius:6px;background:var(--border);font-size:12px;font-weight:300;color:var(--text-60);line-height:1.55}
+.np-cd{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:3px}
+
+/* ── OUTCOMES ─────────────────────────────── */
+#outcomes{
+  border-top:1px solid var(--border);
+  padding:96px 56px 108px;
+  background:var(--bg-2);
+}
+.oc-header{text-align:center;max-width:600px;margin:0 auto 64px}
+.oc-grid{
+  display:grid;grid-template-columns:repeat(3,1fr);
+  max-width:1200px;margin:0 auto;
+  border:1px solid var(--border);border-radius:2px;
+}
+.oc-card{
+  position:relative;height:248px;
+  border-right:1px solid rgba(0,0,0,.08);border-bottom:1px solid var(--border);
+  overflow:hidden;cursor:default;
+  background:var(--bg);
+}
+.oc-card:nth-child(3n){border-right:none}
+.oc-card:nth-last-child(-n+3){border-bottom:none}
+.oc-default{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:28px;transition:opacity .38s var(--ease),transform .38s var(--ease);
+}
+.oc-card:hover .oc-default{opacity:0;transform:translateY(-8px)}
+.oc-icon{width:36px;height:36px;border-radius:50%;border:1px solid var(--border);background:var(--bg-2);display:flex;align-items:center;justify-content:center;margin-bottom:14px}
+.oc-icon svg{width:15px;height:15px;stroke:var(--red);fill:none;stroke-width:1.5;opacity:.8}
+.oc-title{font-family:var(--ff-display);font-size:19px;font-weight:400;color:var(--text);line-height:1.2;letter-spacing:-.01em}
+.oc-hover{
+  position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;
+  padding:28px;background:var(--bg-2);
+  border-top:1.5px solid rgba(228,32,10,.4);
+  opacity:0;transform:translateY(12px);
+  transition:opacity .38s var(--ease),transform .38s var(--ease);
+  pointer-events:none;
+}
+.oc-card:hover .oc-hover{opacity:1;transform:none;pointer-events:auto}
+.oc-hover .oc-title{font-size:17px;margin-bottom:10px}
+.oc-desc{font-family:var(--ff-sans);font-size:13px;font-weight:300;color:var(--text-60);line-height:1.7}
+.oc-closing{
+  text-align:center;margin-top:56px;
+  font-family:var(--ff-display);font-size:clamp(20px,2.2vw,28px);
+  font-style:italic;color:var(--text-60);max-width:600px;margin-left:auto;margin-right:auto;
+}
+.oc-closing strong{font-style:normal;font-weight:500;color:var(--text)}
+
+/* ── CONTACT ─────────────────────────────── */
+#contact{
+  border-top:1px solid var(--border);
+  padding:100px 56px 108px;
+  background:var(--bg);
+  position:relative;overflow:hidden;
+}
+#contact::after{
+  content:'';position:absolute;
+  width:600px;height:400px;border-radius:50%;
+  background:radial-gradient(circle,rgba(228,32,10,.05) 0%,transparent 70%);
+  bottom:-100px;left:50%;transform:translateX(-50%);
+  pointer-events:none;
+}
+#contact::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background-image:radial-gradient(circle,rgba(228,32,10,.04) 1px,transparent 1px);
+  background-size:44px 44px;
+  mask-image:radial-gradient(ellipse 60% 70% at 50% 100%,black 5%,transparent 65%);
+}
+.contact-inner{position:relative;z-index:2;max-width:440px;margin:0 auto;text-align:center}
+.contact-h{
+  font-family:var(--ff-display);
+  font-size:clamp(36px,4.5vw,56px);
+  font-weight:300;letter-spacing:-.02em;color:var(--text);
+  line-height:1.0;margin-bottom:14px;margin-top:10px;
+}
+.contact-h em{font-style:italic;color:var(--red)}
+.contact-sub{font-size:15px;font-weight:300;color:var(--text-60);max-width:400px;margin:0 auto 48px;line-height:1.72;text-align:center}
+.contact-form{display:flex;flex-direction:column;align-items:center;gap:10px;max-width:400px;margin:0 auto}
+.contact-input{
+  width:100%;background:var(--bg);border:1px solid var(--border);
+  border-radius:8px;padding:12px 16px;
+  font-family:var(--ff-sans);font-size:14px;color:var(--text);outline:none;
+  transition:border-color var(--t200),background var(--t200);
+}
+.contact-input::placeholder{color:var(--text-40)}
+.contact-input:focus{border-color:rgba(228,32,10,.4);background:var(--bg-2);box-shadow:0 0 0 3px rgba(228,32,10,.08)}
+.contact-btn{
+  width:100%;padding:14px;border-radius:8px;
+  font-family:var(--ff-sans);font-size:14px;font-weight:500;
+  letter-spacing:.01em;color:#fff;background:var(--red);
+  transition:background var(--t200),transform var(--t200),box-shadow var(--t200);
+}
+.contact-btn:hover{background:#c01a08;transform:translateY(-2px);box-shadow:0 8px 32px rgba(228,32,10,.3)}
+.contact-btn:active{transform:none;box-shadow:none}
+
+/* ── FOOTER ────────────────────────────────── */
+footer{
+  background:linear-gradient(180deg,#FDF4F2 0%,#AD0C1E 48%,#411455 100%);
+  padding:72px 56px 36px;
+}
+.footer-inner{max-width:1280px;margin:0 auto;display:flex;flex-direction:column}
+.footer-main{display:flex;align-items:flex-start;justify-content:space-between;padding-bottom:48px}
+.footer-brand{display:flex;flex-direction:column;max-width:380px}
+.footer-logo{height:24px;width:auto;display:block;filter:brightness(0) invert(1);margin-bottom:16px;opacity:.9}
+.footer-desc{font-family:var(--ff-sans);font-size:13px;font-weight:300;color:rgba(255,255,255,.55);line-height:1.65;margin-bottom:20px}
+.footer-address{display:flex;align-items:flex-start;gap:8px}
+.footer-address svg{width:14px;height:14px;fill:rgba(255,255,255,.5);flex-shrink:0;margin-top:2px}
+.footer-address span{font-family:var(--ff-sans);font-size:13px;font-weight:300;color:rgba(255,255,255,.7);line-height:1.5}
+.footer-cols{display:flex;gap:64px;flex-shrink:0}
+.footer-col{display:flex;flex-direction:column}
+.footer-col-head{font-family:var(--ff-display);font-size:22px;font-weight:600;color:white;margin-bottom:22px}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:11px}
+.footer-links li a{font-family:var(--ff-sans);font-size:13px;font-weight:300;color:rgba(255,255,255,.55);text-decoration:none;transition:color var(--t200)}
+.footer-links li a:hover{color:rgba(255,255,255,.8)}
+.footer-socials{display:flex;gap:10px;margin-top:4px}
+.footer-social{width:44px;height:44px;border-radius:10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;text-decoration:none;transition:background var(--t200),border-color var(--t200)}
+.footer-social:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.14)}
+.footer-social svg{width:18px;height:18px;fill:rgba(255,255,255,.6)}
+.footer-social:hover svg{fill:rgba(255,255,255,.9)}
+.footer-social img{width:18px;height:18px;filter:brightness(0) invert(1);opacity:.6;transition:opacity var(--t200)}
+.footer-social:hover img{opacity:.9}
+.footer-bottom{padding-top:28px;border-top:1px solid rgba(255,255,255,.07)}
+.footer-copyright{display:flex;align-items:center;gap:6px;font-family:var(--ff-sans);font-size:12px;font-weight:300;color:rgba(255,255,255,.25)}
+.footer-copyright svg{width:13px;height:13px;stroke:rgba(255,255,255,.25);fill:none;stroke-width:1.4;flex-shrink:0}
+
+/* ── RESPONSIVE ──────────────────────────── */
+@media(max-width:1024px){
+  nav{padding:0 24px}
+  .nav-links{display:none}
+  #hero{padding:120px 24px 80px}
+  
+  #principles{padding:72px 24px}
+  .principles-grid{grid-template-columns:1fr 1fr}
+  .principle-card:nth-child(3n){border-right:1px solid var(--border)}
+  .principle-card:nth-child(2n){border-right:none}
+  .arch-sticky-wrap{grid-template-columns:1fr;height:auto;position:relative;top:0}
+  .arch-scroll-track{height:auto}
+  .arch-canvas-pane{height:60vw;min-height:320px;border-right:none;border-bottom:1px solid var(--border)}
+  .arch-text-pane{min-height:360px;height:auto}
+  .arch-tabs{grid-template-columns:repeat(6,1fr)}
+  .arch-header{padding:60px 24px 0}
+  #outcomes{padding:72px 24px}
+  .oc-grid{grid-template-columns:1fr 1fr}
+  #contact{padding:80px 24px}
+  footer{padding:60px 24px 32px}
+  .footer-main{flex-direction:column;gap:40px;padding-bottom:40px}
+  .footer-cols{gap:40px}
+}
+@media(max-width:640px){
+  .hero-h{font-size:clamp(40px,10vw,60px)}
+  .principles-grid{grid-template-columns:1fr}
+  .principle-card:nth-child(3n){border-right:none}
+  .oc-grid{grid-template-columns:1fr}
+  .footer-cols{flex-direction:column;gap:32px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="main-nav">
+  <a href="#hero" class="nav-logo">
+    <img src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjg0IiBoZWlnaHQ9IjQ3IiB2aWV3Qm94PSIwIDAgMjg0IDQ3IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAyNC40NTE4TDI3LjI3MDEgMC4xMDI1MzlMNTQuMjQ5IDI0LjQ1MThWMzcuNjUzOEwyNy4xMjQ1IDE1LjM1OTJMMCAzNy42NTM4VjI0LjQ1MVhaIiBmaWxsPSIjMEUxMzE3Ii8+CjxwYXRoIGQ9Ik0yMC4xNjggMzMuOTg4M0gzNS4xOTYxTDI4LjE5NDkgNDYuNTI5M0wyMC4xNjggMzMuOTg4M1oiIGZpbGw9IiNFNDIwMEEiLz4KPHBhdGggZD0iTTk2LjE2NDEgMzAuMjM4MUw5Mi4wMTYyIDQwLjU3Mkg4Ni45Mjc3TDEwMC42NjEgNi4xMjQwMkgxMDYuOTU3TDEyMS4yOCA0MC41NzJIMTE1LjgzMUwxMTEuNTUzIDMwLjIzODFIOTYuMTY0MVpNMTEwLjI0IDI2LjMyNThDMTA2LjU2NSAxNy4yNzEzIDEwNC41NDUgMTIuNDYwNiAxMDMuNzA5IDkuODM2OEgxMDMuNjUzQzEwMi43MTEgMTIuNzU4NiAxMDAuNDUzIDE4LjU4MjEgOTcuNDkyMiAyNi4zMjU4SDExMC4yNFoiIGZpbGw9IiMwRTEzMTciLz4KPHBhdGggZD0iTTE0My41NjQgNi4xMjQwMlY0MC41NzJIMTM4LjQ1MVY2LjEyNDAySDE0My41NjRaIiBmaWxsPSIjMEUxMzE3Ii8+CjxwYXRoIGQ9Ik0xNjUuMTA5IDYuMTI0MDJITVZM4NjU5OEgxOTAuMzM1TDE4OS42MjIgNDAuNTcySDE2NS4xMDlWNi4xMjQwMloiIGZpbGw9IiMwRTEzMTciLz4KPHBhdGggZD0iTTIxNC40OTQgMzAuMjM4MUwyMTAuMzQ2IDQwLjU3MkgyMDUuMjU4TDIxOC45OTEgNi4xMjQwMkgyMjUuMjg3TDIzOS42MSA0MC41NzJIMjM0LjE2MUwyMjkuODgzIDMwLjIzODFIMjE0LjQ5NFpNMjI4LjU3IDI2LjMyNThDMjI0Ljg5NSAxNy4yNzEzIDIyMi44NzUgMTIuNDYwNiAyMjIuMDQgOS44MzY4SDIyMS45ODRDMJJJMDE4LjU4MjEgMjE1LjgyMiAyNi4zMjU4SDIyOC41N1oiIGZpbGw9IiMwRTEzMTciLz4KPHBhdGggZD0iTTI1OS41ODUgMzAuOTg0MkMyNjAuNjMxIDM1LjExNiAyNjMuNzkzIDM3LjM0NzcgMjY5LjM4MSAzNy4zNDc3QzI3NS4zOTcgMzcuMzQ3NyAyNzcuNzc4IDM0LjgyNyAyNzcuNzc4IDMxLjU3MzVDMjc3Ljc3OCAyOC4xMTg0IDI3NS44NzYgMjYuMTgyNSAyNjguMTQ3IDI0LjUxMUMyNTkuMDYxIDIyLjUzOTIgMjU1LjkwNyAxOS43NTg1IDI1NS45MDcgMTQuOTE2NUMyNTUuOTA3IDkuODAxMDIgMjYwLjEzMSA1LjYyODkxIDI2OC43MzggNS42Mjg5MUMyNzcuOTIxIDUuNjI4OTEgMjgxLjY5OSAxMC4zNzAxIDI4Mi4yMTkgMTQuODk0SDI3Ny4wMTZDMjc2LjMyNiAxMS44Mjg4IDI3NC4xNzkgOS4zMTI1NiAyNjguNTU1IDkuMzEyNTZDMjYzLjg2IDkuMzEyNTYgMjYxLjIyNCAxMS4yMDE0IDI2MS4yMjQgMTQuNDg0QzI2MS4yMjQgMTcuNzE3MyAyNjMuNDAxIDE4Ljk5MjIgMjcwLjE1OCAyMC40NTU0QzI4MS4xNTUgMjIuODQ2MiAyODMuMDk3IDI2LjY3MSAyODMuMDk3IDMxLjA5MThDMjgzLjA5NyAzNi42NDg3IDI3OC40OSA0MS4wMDIzIDI2OS4wNTkgNDEuMDAyM0MyNTkuMzU5IDQxLjAwMjMgMjU1LjE4NCAzNi4yNjc3IDI1NC4zODcgMzAuOTgySDI1OS41ODVWMzAuOTg0MloiIGZpbGw9IiMwRTEzMTciLz4KPC9zdmc+" alt="AILAS">
+  </a>
+  <div class="nav-links">
+    <a href="#principles" class="nav-link" data-section="principles">System</a>
+    <a href="#architecture" class="nav-link" data-section="architecture">Architecture</a>
+    <a href="#outcomes" class="nav-link" data-section="outcomes">Outcomes</a>
+    <a href="#contact" class="nav-link" data-section="contact">Contact</a>
+  </div>
+  <a href="#contact" class="nav-cta">Get in touch</a>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="hero-grid"></div>
+  <div class="hero-inner">
+    <div class="hero-eyebrow">Federated Cognitive System</div>
+    <h1 class="hero-h">
+      The cognitive<br>operating system for<br><em>enterprise intelligence</em>
+    </h1>
+    <p class="hero-sub">
+      A bottom-up, governed architecture that turns individual AI productivity into coordinated organisational capability — with enterprise-scale oversight and control.
+    </p>
+    <div class="hero-actions">
+      <a href="#architecture" class="btn-primary">Explore the System</a>
+      <a href="#contact" class="btn-ghost">Speak with the team</a>
+    </div>
+  </div>
+  <div class="hero-scroll">
+    <span class="hero-scroll-label">Scroll</span>
+    <div class="scroll-mouse"></div>
+  </div>
+</section>
+
+<!-- PRINCIPLES -->
+<section id="principles">
+  <div class="section-header reveal">
+    <div class="eyebrow">Engineered for Trust</div>
+    <h2 class="section-h">Built for control,<br><em>designed for scale</em></h2>
+  </div>
+  <div class="principles-grid">
+    <div class="principle-card reveal">
+      <div class="principle-num">01</div>
+      <div class="principle-title">Governance-first</div>
+      <p class="principle-desc">Every interaction between agents, systems, and data flows is governed, audited, and policy-aligned through Facia — the coordination and control plane.</p>
+    </div>
+    <div class="principle-card reveal r1">
+      <div class="principle-num">02</div>
+      <div class="principle-title">Privacy by design</div>
+      <p class="principle-desc">Individual Shadow AI agents run on local edge infrastructure. Personal data never leaves the device without explicit, governed access control.</p>
+    </div>
+    <div class="principle-card reveal r2">
+      <div class="principle-num">03</div>
+      <div class="principle-title">Edge-ready</div>
+      <p class="principle-desc">Designed for on-premise and edge GPU deployment. Intelligence operates where work happens — close to data, close to users, away from exposure.</p>
+    </div>
+    <div class="principle-card reveal">
+      <div class="principle-num">04</div>
+      <div class="principle-title">Human-led</div>
+      <p class="principle-desc">The Chief Agentic Officer interface maintains continuous human oversight — real-time visibility, exception management, and policy enforcement at the enterprise level.</p>
+    </div>
+    <div class="principle-card reveal r1">
+      <div class="principle-num">05</div>
+      <div class="principle-title">Observable</div>
+      <p class="principle-desc">Full audit logs, explainable interactions, and transparent system behaviour. AILAS produces a system of record — not a black box.</p>
+    </div>
+    <div class="principle-card reveal r2">
+      <div class="principle-num">06</div>
+      <div class="principle-title">Enterprise scale</div>
+      <p class="principle-desc">From individual adoption to department-wide coordination to enterprise-level intelligence — a system designed to scale without losing control.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <div class="arch-header reveal">
+    <div class="eyebrow">Architecture</div>
+    <h2 class="section-h">A system built from <em>the ground up</em></h2>
+    <p class="section-sub">AI adoption begins with the individual and scales through structured capability and governed coordination.</p>
+  </div>
+
+  <div class="arch-scroll-track" id="archScrollTrack">
+    <div class="arch-sticky-wrap">
+      <div class="arch-canvas-pane">
+        <canvas id="archCanvas"></canvas>
+        <button id="arch-reset"><span>Reset view</span></button>
+        <div id="arch-tip">
+          <div class="tip-type"></div>
+          <div class="tip-name"></div>
+          <div class="tip-desc"></div>
+          <div class="tip-hint">Click to zoom &amp; see details →</div>
+        </div>
+      </div>
+      <div class="arch-text-pane">
+        <div class="arch-progress-bar"><div class="arch-progress-fill" id="archProgressFill"></div></div>
+        <div class="arch-tabs" id="archTabs">
+          <button class="arch-tab-btn active" data-idx="0">System</button>
+          <button class="arch-tab-btn" data-idx="1">Individual</button>
+          <button class="arch-tab-btn" data-idx="2">Departments</button>
+          <button class="arch-tab-btn" data-idx="3">Facia</button>
+          <button class="arch-tab-btn" data-idx="4">CAO</button>
+          <button class="arch-tab-btn" data-idx="5">Synthesis</button>
+        </div>
+        <div class="arch-slides-wrap">
+          <div class="arch-slide active" data-hl="all" data-cam="22,0.4,1.2" data-idx="0">
+            <div class="arch-state-num">01 — The System</div>
+            <h3 class="arch-slide-title">A federated system of <em>enterprise intelligence</em></h3>
+            <p class="arch-slide-body">At its core, the organisation is a network of distributed intelligence. Each employee operates a personal Shadow — a private system that understands how work is actually done.</p>
+            <p class="arch-slide-body">These individual systems do not exist in isolation. They form a connected structure — where intelligence can scale without losing control.</p>
+            <p class="arch-slide-insight">The enterprise is no longer a collection of roles — <strong>it becomes a system of intelligence.</strong></p>
+          </div>
+          <div class="arch-slide" data-hl="employees" data-cam="13,0.3,1.4" data-idx="1">
+            <div class="arch-state-num">02 — Individual Intelligence</div>
+            <h3 class="arch-slide-title">Intelligence begins with <em>the individual</em></h3>
+            <p class="arch-slide-body">Each node represents an employee and their Shadow.</p>
+            <ul class="arch-slide-list">
+              <li>Private by design</li>
+              <li>Grounded in real workflows</li>
+              <li>Capable of assisting and executing work</li>
+            </ul>
+            <p class="arch-slide-insight"><strong>AI starts where work actually happens.</strong></p>
+          </div>
+          <div class="arch-slide" data-hl="departments" data-cam="17,-0.3,1.1" data-idx="2">
+            <div class="arch-state-num">03 — Structured Capability</div>
+            <h3 class="arch-slide-title">Capability is structured at the <em>organisational level</em></h3>
+            <p class="arch-slide-body">Departments define how intelligence becomes consistent. Through shared tools, workflows, and knowledge, individual systems align into structured capability.</p>
+            <p class="arch-slide-insight"><strong>From distributed intelligence to coordinated capability.</strong></p>
+          </div>
+          <div class="arch-slide" data-hl="facia" data-cam="16,0.1,1.0" data-idx="3">
+            <div class="arch-state-num red">04 — Facia</div>
+            <h3 class="arch-slide-title"><em>Facia</em> — the coordination and control plane</h3>
+            <p class="arch-slide-body">Every interaction is mediated through Facia. It governs:</p>
+            <ul class="arch-slide-list">
+              <li>How systems interact</li>
+              <li>How data moves</li>
+              <li>How actions are executed</li>
+            </ul>
+            <p class="arch-slide-insight">Without Facia, intelligence fragments. <strong>With it, the system operates.</strong></p>
+          </div>
+          <div class="arch-slide" data-hl="cao" data-cam="20,0.6,0.8" data-idx="4">
+            <div class="arch-state-num">05 — CAO Operations</div>
+            <h3 class="arch-slide-title">Operational control at the <em>enterprise level</em></h3>
+            <p class="arch-slide-body">The Chief Agentic Officer operates as the control interface — overseeing how intelligence moves, interacts, and executes through Facia.</p>
+            <ul class="arch-slide-list">
+              <li>Monitors coordination across agents, tools, and systems</li>
+              <li>Enforces policies at the governance layer</li>
+              <li>Manages exceptions and escalations</li>
+            </ul>
+            <p class="arch-slide-insight">Governance defined centrally — <strong>enforced in real time.</strong></p>
+          </div>
+          <div class="arch-slide" data-hl="synthesis" data-cam="22,0.2,1.15" data-idx="5">
+            <div class="arch-state-num">06 — Synthesis</div>
+            <h3 class="arch-slide-title">A system that can <em>actually operate</em></h3>
+            <ul class="arch-slide-list">
+              <li>Intelligence remains distributed</li>
+              <li>Capability is structured</li>
+              <li>Coordination is controlled</li>
+              <li>Governance is continuous</li>
+            </ul>
+            <p class="arch-slide-insight"><strong>From fragmented tools to a unified operating system.</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- OUTCOMES -->
+<section id="outcomes">
+  <div class="oc-header reveal">
+    <div class="eyebrow">What the Enterprise Gains</div>
+    <h2 class="section-h">Outcomes that <em>matter</em></h2>
+  </div>
+  <div class="oc-grid">
+    <div class="oc-card reveal">
+      <div class="oc-default">
+        <div class="oc-icon"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
+        <div class="oc-title">Individual Productivity</div>
+      </div>
+      <div class="oc-hover">
+        <div class="oc-title">Individual Productivity</div>
+        <p class="oc-desc">Every employee gains a private AI agent grounded in their actual work — accelerating daily tasks without exposing personal data.</p>
+      </div>
+    </div>
+    <div class="oc-card reveal r1">
+      <div class="oc-default">
+        <div class="oc-icon"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+        <div class="oc-title">Coordinated Capability</div>
+      </div>
+      <div class="oc-hover">
+        <div class="oc-title">Coordinated Capability</div>
+        <p class="oc-desc">Department nodes translate individual intelligence into consistent, governed capability — eliminating silos without centralising control.</p>
+      </div>
+    </div>
+    <div class="oc-card reveal r2">
+      <div class="oc-default">
+        <div class="oc-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <div class="oc-title">Continuous Governance</div>
+      </div>
+      <div class="oc-hover">
+        <div class="oc-title">Continuous Governance</div>
+        <p class="oc-desc">Facia enforces policy across every interaction in real time — creating a system of record for all agentic activity across the enterprise.</p>
+      </div>
+    </div>
+    <div class="oc-card reveal">
+      <div class="oc-default">
+        <div class="oc-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="oc-title">Real-time Control</div>
+      </div>
+      <div class="oc-hover">
+        <div class="oc-title">Real-time Control</div>
+        <p class="oc-desc">The CAO interface provides continuous operational visibility — not reactive dashboards, but live oversight of intelligence across the organisation.</p>
+      </div>
+    </div>
+    <div class="oc-card reveal r1">
+      <div class="oc-default">
+        <div class="oc-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+        <div class="oc-title">Scalable Transformation</div>
+      </div>
+      <div class="oc-hover">
+        <div class="oc-title">Scalable Transformation</div>
+        <p class="oc-desc">Adoption starts at the individual level and scales naturally through the organisation — without mandates, without disruption, without risk.</p>
+      </div>
+    </div>
+    <div class="oc-card reveal r2">
+      <div class="oc-default">
+        <div class="oc-icon"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg></div>
+        <div class="oc-title">Greater Control</div>
+      </div>
+      <div class="oc-hover">
+        <div class="oc-title">Greater Control</div>
+        <p class="oc-desc">As intelligence scales, control scales with it. AILAS doesn't trade governance for capability — it makes both possible simultaneously.</p>
+      </div>
+    </div>
+  </div>
+  <p class="oc-closing reveal"><em>Not a point solution. Not a chatbot layer.</em><br><strong>A cognitive operating system for the enterprise.</strong></p>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="contact-inner">
+    <div class="eyebrow reveal" style="justify-content:center;display:flex;">Leave Contact Information</div>
+    <h2 class="contact-h reveal">Start the <em>conversation</em></h2>
+    <p class="contact-sub reveal">Leave your details and an AILAS representative will get in touch to explore how the system could work for your organisation.</p>
+    <form class="contact-form reveal" onsubmit="return false">
+      <input class="contact-input" type="text" placeholder="Your name">
+      <input class="contact-input" type="email" placeholder="Work email">
+      <input class="contact-input" type="text" placeholder="Organisation">
+      <button class="contact-btn" id="submitBtn" type="button">Speak with the AILAS Team</button>
+    </form>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-main">
+      <div class="footer-brand">
+        <img class="footer-logo" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjg0IiBoZWlnaHQ9IjQ3IiB2aWV3Qm94PSIwIDAgMjg0IDQ3IiBmaWxsPSJub25lIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciPgo8cGF0aCBkPSJNMCAyNC40NTE4TDI3LjI3MDEgMC4xMDI1MzlMNTQuMjQ5IDI0LjQ1MThWMzcuNjUzOEwyNy4xMjQ1IDE1LjM1OTJMMCAzNy42NTM4VjI0LjQ1MVhaIiBmaWxsPSIjMEUxMzE3Ii8+CjxwYXRoIGQ9Ik0yMC4xNjggMzMuOTg4M0gzNS4xOTYxTDI4LjE5NDkgNDYuNTI5M0wyMC4xNjggMzMuOTg4M1oiIGZpbGw9IiNFNDIwMEEiLz4KPHBhdGggZD0iTTk2LjE2NDEgMzAuMjM4MUw5Mi4wMTYyIDQwLjU3Mkg4Ni45Mjc3TDEwMC42NjEgNi4xMjQwMkgxMDYuOTU3TDEyMS4yOCA0MC41NzJIMTE1LjgzMUwxMTEuNTUzIDMwLjIzODFIOTYuMTY0MVpNMTEwLjI0IDI2LjMyNThDMTA2LjU2NSAxNy4yNzEzIDEwNC41NDUgMTIuNDYwNiAxMDMuNzA5IDkuODM2OEgxMDMuNjUzQzEwMi43MTEgMTIuNzU4NiAxMDAuNDUzIDE4LjU4MjEgOTcuNDkyMiAyNi4zMjU4SDExMC4yNFoiIGZpbGw9IiMwRTEzMTciLz4KPHBhdGggZD0iTTE0My41NjQgNi4xMjQwMlY0MC41NzJIMTM4LjQ1MVY2LjEyNDAySDE0My41NjRaIiBmaWxsPSIjMEUxMzE3Ii8+CjxwYXRoIGQ9Ik0xNjUuMTA5IDYuMTI0MDJITVZM4NjU5OEgxOTAuMzM1TDE4OS42MjIgNDAuNTcySDE2NS4xMDlWNi4xMjQwMloiIGZpbGw9IiMwRTEzMTciLz4KPHBhdGggZD0iTTIxNC40OTQgMzAuMjM4MUwyMTAuMzQ2IDQwLjU3MkgyMDUuMjU4TDIxOC45OTEgNi4xMjQwMkgyMjUuMjg3TDIzOS42MSA0MC41NzJIMjM0LjE2MUwyMjkuODgzIDMwLjIzODFIMjE0LjQ5NFpNMjI4LjU3IDI2LjMyNThDMjI0Ljg5NSAxNy4yNzEzIDIyMi44NzUgMTIuNDYwNiAyMjIuMDQgOS44MzY4SDIyMS45ODRDMJJJMDE4LjU4MjEgMjE1LjgyMiAyNi4zMjU4SDIyOC41N1oiIGZpbGw9IiMwRTEzMTciLz4KPHBhdGggZD0iTTI1OS41ODUgMzAuOTg0MkMyNjAuNjMxIDM1LjExNiAyNjMuNzkzIDM3LjM0NzcgMjY5LjM4MSAzNy4zNDc3QzI3NS4zOTcgMzcuMzQ3NyAyNzcuNzc4IDM0LjgyNyAyNzcuNzc4IDMxLjU3MzVDMjc3Ljc3OCAyOC4xMTg0IDI3NS44NzYgMjYuMTgyNSAyNjguMTQ3IDI0LjUxMUMyNTkuMDYxIDIyLjUzOTIgMjU1LjkwNyAxOS43NTg1IDI1NS45MDcgMTQuOTE2NUMyNTUuOTA3IDkuODAxMDIgMjYwLjEzMSA1LjYyODkxIDI2OC43MzggNS42Mjg5MUMyNzcuOTIxIDUuNjI4OTEgMjgxLjY5OSAxMC4zNzAxIDI4Mi4yMTkgMTQuODk0SDI3Ny4wMTZDMjc2LjMyNiAxMS44Mjg4IDI3NC4xNzkgOS4zMTI1NiAyNjguNTU1IDkuMzEyNTZDMjYzLjg2IDkuMzEyNTYgMjYxLjIyNCAxMS4yMDE0IDI2MS4yMjQgMTQuNDg0QzI2MS4yMjQgMTcuNzE3MyAyNjMuNDAxIDE4Ljk5MjIgMjcwLjE1OCAyMC40NTU0QzI4MS4xNTUgMjIuODQ2MiAyODMuMDk3IDI2LjY3MSAyODMuMDk3IDMxLjA5MThDMjgzLjA5NyAzNi42NDg3IDI3OC40OSA0MS4wMDIzIDI2OS4wNTkgNDEuMDAyM0MyNTkuMzU5IDQxLjAwMjMgMjU1LjE4NCAzNi4yNjc3IDI1NC4zODcgMzAuOTgySDI1OS41ODVWMzAuOTg0MloiIGZpbGw9IiMwRTEzMTciLz4KPC9zdmc+" alt="AILAS">
+        <p class="footer-desc">The cognitive operating system for enterprise intelligence — governing, coordinating, and scaling AI capability across your organisation.</p>
+        <div class="footer-address">
+          <svg viewBox="0 0 24 24"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <span>AILAS Intelligence Ltd<br>London, United Kingdom</span>
+        </div>
+      </div>
+      <div class="footer-cols">
+        <div class="footer-col">
+          <div class="footer-col-head">Explore</div>
+          <ul class="footer-links">
+            <li><a href="#principles">The System</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#outcomes">Outcomes</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <div class="footer-col-head">Contact Us</div>
+          <ul class="footer-links">
+            <li><a href="#contact">Get in touch</a></li>
+            <li><a href="#">Partnerships</a></li>
+            <li><a href="#">Press &amp; Media</a></li>
+          </ul>
+          <div class="footer-socials" style="margin-top:20px">
+            <a href="#" class="footer-social"><svg viewBox="0 0 24 24"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg></a>
+            <a href="#" class="footer-social"><svg viewBox="0 0 24 24"><path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"/></svg></a>
+            <a href="#" class="footer-social"><svg viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.96-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02"/></svg></a>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="footer-copyright">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M14.83 14.83a4 4 0 1 1 0-5.66"/></svg>
+        2025 AILAS Intelligence Ltd. All rights reserved.
+      </div>
+    </div>
+  </div>
+</footer>
+
+<!-- NODE DETAIL PANEL -->
+<div id="node-panel">
+  <button id="np-close">✕</button>
+  <div id="np-body"></div>
+</div>
+
+<script>
+// ─── NAV ────────────────────────────────────────────────────
+const mainNav = document.getElementById('main-nav');
+window.addEventListener('scroll', () => {
+  mainNav.classList.toggle('scrolled', window.scrollY > 10);
+  const sections = ['principles','architecture','outcomes','contact'];
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if(el && window.scrollY >= el.offsetTop - 100) current = id;
+  });
+  document.querySelectorAll('.nav-link').forEach(a => {
+    a.classList.toggle('active', a.dataset.section === current);
+  });
+}, {passive:true});
+
+// ─── REVEAL ─────────────────────────────────────────────────
+const revealIO = new IntersectionObserver(entries => {
+  entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('in'); });
+}, {threshold:0.12});
+document.querySelectorAll('.reveal').forEach(el => revealIO.observe(el));
+
+// ─── 3D ENGINE ───────────────────────────────────────────────
+const META={
+  employee:{hex:'#726E6B',col:0x726E6B,badge:'Individual Agent',desc:'A personal Shadow AI agent — private, edge-deployed intelligence grounded in individual workflows.',attrs:[{k:'Privacy',v:'Local by default'},{k:'Memory',v:'Personal only'},{k:'Access',v:'Role-scoped'},{k:'Deployment',v:'Edge GPU'}],conns:['Communicates via Facia only','Can request department tools','No direct cross-employee data access'],names:['Research Analyst','Product Lead','Data Scientist','Legal Counsel','Finance Director','Ops Head','UX Designer','Eng Lead','Marketing Mgr','Security Officer','HR Director','Strategy Lead']},
+  department:{hex:'#D3412C',col:0xD3412C,badge:'Department Node',desc:'Department nodes coordinate shared intelligence capability — team memory, specialist AI tools, and governed workflows.',attrs:[{k:'Scope',v:'Team-wide'},{k:'Tools',v:'Shared capability'},{k:'Governance',v:'Policy-bound'},{k:'Memory',v:'Collective'}],conns:['Governed interactions via Facia','Exposes tools to team members','Aligns intelligence to standards'],names:['Engineering','Legal & Compliance','Finance','Product','Operations','Marketing']},
+  facia:{hex:'#A8A09A',col:0xA8A09A,badge:'Facia — Governance Plane',desc:'Facia is the connective tissue — mediating every interaction between agents, departments, and systems.',attrs:[{k:'Role',v:'Connective tissue'},{k:'Function',v:'Governance & routing'},{k:'Audit',v:'Full interaction log'},{k:'Policy',v:'Real-time enforcement'}],conns:['Mediates all agent interactions','Enforces policy in real time','Logs every interaction'],names:['Policy Enforcer','Data Mediator','Audit Logger','Access Controller','Trust Validator','Flow Orchestrator']},
+  cao:{hex:'#E4200A',col:0xE4200A,badge:'CAO — Control Interface',desc:'The Chief Agentic Officer interface — the enterprise control plane overlaying Facia.',attrs:[{k:'Role',v:'Enterprise oversight'},{k:'Interface',v:'Agentic Ops Room'},{k:'Control',v:'Continuous'},{k:'Scope',v:'Organisation-wide'}],conns:['Reads all Facia event streams','Sets and enforces governance policies','Handles escalations and exceptions'],names:['Chief Agentic Officer']}
+};
+const EMP_COLS=[0x5C5451,0x6E6A67,0x4A4745,0x7A7572,0x534F4D,0x625E5B,0x403D3B,0x726E6B];
+const DEPT_COLS=[0xD3412C,0xD6503D,0xBF3A28,0xDA5F4E,0xB83325,0xCC4A38];
+const FACIA_COLS=[0xA8A09A,0xB8B0A8,0x988E88,0xC0B8B0];
+
+const canvasEl=document.getElementById('archCanvas');
+const archPane=document.querySelector('.arch-canvas-pane');
+function W(){return archPane.clientWidth;}
+function H(){return archPane.clientHeight;}
+
+const renderer=new THREE.WebGLRenderer({canvas:canvasEl,antialias:true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
+renderer.setClearColor(0xFFFFFF,1);
+renderer.setSize(W()||800, H()||600);
+
+const scene=new THREE.Scene();
+
+const cam=new THREE.PerspectiveCamera(50,W()/H(),.1,200);
+cam.position.set(0,2,22);
+
+const amb=new THREE.AmbientLight(0xffffff,.9); scene.add(amb);
+const kl=new THREE.DirectionalLight(0xffffff,.8); kl.position.set(8,14,10); scene.add(kl);
+const fl=new THREE.DirectionalLight(0xfff4f0,.35); fl.position.set(-8,-4,-6); scene.add(fl);
+
+function lerp(a,b,t){return a+(b-a)*t;}
+const ray=new THREE.Raycaster();
+const mndc=new THREE.Vector2(-999,-999);
+let rmx=0,rmy=0;
+let drag=false,lmx=0,lmy=0,ltd=0;
+let oTh=.4,oPh=1.2,oR=22,tTh=.4,tPh=1.2,tR=22,autoA=0,free=false;
+let hovIdx=-1,selIdx=-1,zoomT=null;
+
+function setCam(r,th,ph){cam.position.set(r*Math.sin(ph)*Math.cos(th),r*Math.cos(ph),r*Math.sin(ph)*Math.sin(th));cam.lookAt(0,0,0);}
+
+let wasDragging=false;
+let mouseDownX=0,mouseDownY=0;
+canvasEl.addEventListener('mousedown',e=>{
+  drag=true;free=true;lmx=e.clientX;lmy=e.clientY;
+  mouseDownX=e.clientX;mouseDownY=e.clientY;
+  wasDragging=false;
+  canvasEl.style.cursor='grabbing';
+  e.preventDefault();
+});
+window.addEventListener('mouseup',()=>{if(drag){drag=false;canvasEl.style.cursor=hovIdx>-1?'pointer':'grab';}});
+window.addEventListener('mousemove',e=>{
+  if(drag){
+    const dx=e.clientX-mouseDownX,dy=e.clientY-mouseDownY;
+    if(Math.abs(dx)>3||Math.abs(dy)>3) wasDragging=true;
+    tTh-=(e.clientX-lmx)*.006;tPh=Math.max(.2,Math.min(Math.PI-.2,tPh+(e.clientY-lmy)*.006));lmx=e.clientX;lmy=e.clientY;return;
+  }
+  const r=archPane.getBoundingClientRect();
+  if(e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom){rmx=e.clientX-r.left;rmy=e.clientY-r.top;mndc.x=(rmx/W())*2-1;mndc.y=-(rmy/H())*2+1;}else{mndc.set(-999,-999);}
+});
+canvasEl.addEventListener('mouseleave',()=>{if(!drag){mndc.set(-999,-999);hovIdx=-1;hideTip();canvasEl.style.cursor='grab';}});
+canvasEl.addEventListener('wheel',e=>{
+  // Only intercept scroll if cursor is hovering a node (intentional 3D zoom)
+  // Otherwise let the page scroll naturally
+  if(hovIdx>-1){
+    e.preventDefault();
+    tR=Math.max(7,Math.min(36,tR+e.deltaY*.04));
+    free=true;
+  }
+},{passive:false});
+canvasEl.addEventListener('touchstart',e=>{if(e.touches.length===1){drag=true;free=true;lmx=e.touches[0].clientX;lmy=e.touches[0].clientY;wasDragging=false;mouseDownX=e.touches[0].clientX;mouseDownY=e.touches[0].clientY;}if(e.touches.length===2)ltd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);},{passive:true});
+canvasEl.addEventListener('touchmove',e=>{if(e.touches.length===1&&drag){tTh-=(e.touches[0].clientX-lmx)*.006;tPh=Math.max(.2,Math.min(Math.PI-.2,tPh+(e.touches[0].clientY-lmy)*.006));lmx=e.touches[0].clientX;lmy=e.touches[0].clientY;}if(e.touches.length===2){const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);tR=Math.max(7,Math.min(36,tR-(d-ltd)*.05));ltd=d;free=true;}},{passive:true});
+canvasEl.addEventListener('touchend',()=>{drag=false;},{passive:true});
+canvasEl.addEventListener('click',e=>{
+  if(!wasDragging && hovIdx>-1){
+    e.stopPropagation();
+    zoomToNode(hovIdx);
+    openPanel(hovIdx);
+  }
+  wasDragging=false;
+});
+
+function zoomToNode(idx){
+  const mesh=NM[idx];
+  const wp=new THREE.Vector3();
+  mesh.getWorldPosition(wp);
+
+  // Direction from origin to node in current world space
+  const d=wp.clone().normalize();
+  const nodePh=Math.acos(Math.max(-1,Math.min(1,d.y)));
+  const nodeTh=Math.atan2(d.z,d.x);
+
+  // Zoom distance: closer for bigger nodes
+  const dist=Math.max(2.8, NODES[idx].size*14);
+
+  // Set target angles — subtract autoA so oTh stays locked on node despite auto-spin
+  tPh=nodePh;
+  tTh=nodeTh - autoA; // compensate for accumulated auto rotation
+  tR=dist;
+
+  // Freeze auto-spin during zoom
+  free=true;
+  clearTimeout(zoomT);
+  zoomT=setTimeout(()=>{free=false;},5000);
+}
+document.getElementById('arch-reset').addEventListener('click',()=>{
+  free=false;autoA=0;
+  const s=document.querySelector('.arch-slide.active');
+  if(s&&s.dataset.cam){const[r,th,ph]=s.dataset.cam.split(',').map(Number);tR=r;tTh=th;tPh=ph;}
+  document.getElementById('node-panel').classList.remove('open');selIdx=-1;
+});
+
+function sph(r,n=0){const t=Math.random()*Math.PI*2,p=Math.acos(2*Math.random()-1),rad=r+(Math.random()-.5)*n;return new THREE.Vector3(rad*Math.sin(p)*Math.cos(t),rad*Math.sin(p)*Math.sin(t),rad*Math.cos(p));}
+const NODES=[],LINKS=[],nc={employee:0,department:0,facia:0,cao:0};
+function addN(type,pos,size,ov={}){const m=META[type];let col=m.col;if(type==='employee')col=EMP_COLS[Math.floor(Math.random()*EMP_COLS.length)];else if(type==='department')col=DEPT_COLS[nc.department%DEPT_COLS.length];else if(type==='facia')col=FACIA_COLS[Math.floor(Math.random()*FACIA_COLS.length)];NODES.push({type,pos,size,phase:Math.random()*Math.PI*2,label:m.names[nc[type]++%m.names.length],col,hex:'#'+col.toString(16).padStart(6,'0'),...ov});}
+for(let i=0;i<20;i++)addN('employee',sph(7,2),.14+Math.random()*.07);
+['Engineering','Legal & Compliance','Finance','Product','Operations','Marketing'].forEach((nm,d)=>{const a=(d/6)*Math.PI*2,c=new THREE.Vector3(Math.cos(a)*4.8,(Math.random()-.5)*2.2,Math.sin(a)*4.8);addN('department',c.clone(),.35+Math.random()*.08,{label:nm});for(let j=0;j<3;j++)addN('employee',c.clone().add(new THREE.Vector3((Math.random()-.5)*2,(Math.random()-.5)*1.8,(Math.random()-.5)*2)),.12+Math.random()*.05);});
+for(let i=0;i<8;i++)addN('facia',sph(2.2,.7),.16+Math.random()*.08);
+addN('cao',new THREE.Vector3(0,0,0),.52,{label:'Chief Agentic Officer'});
+NODES.forEach((n,i)=>{if(n.type==='employee'){let b=-1,bd=999;NODES.forEach((m,j)=>{if(m.type==='department'){const d=n.pos.distanceTo(m.pos);if(d<bd){bd=d;b=j;}}});if(b>-1&&Math.random()>.2)LINKS.push({a:i,b,t:'ed'});}if(n.type==='department'){NODES.forEach((m,j)=>{if(m.type==='facia'&&Math.random()>.45)LINKS.push({a:i,b:j,t:'df'});});NODES.forEach((m,j)=>{if(j!==i&&m.type==='department'&&Math.random()>.7)LINKS.push({a:i,b:j,t:'dd'});});}if(n.type==='facia')LINKS.push({a:i,b:NODES.length-1,t:'fc'});});
+
+const wg=new THREE.Group();scene.add(wg);
+const NM=NODES.map((n,i)=>{
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(n.size,48,48),new THREE.MeshLambertMaterial({color:n.col}));
+  mesh.position.copy(n.pos);mesh.userData={nodeIdx:i};wg.add(mesh);
+  if(n.type!=='employee'){
+    const rc=new THREE.Color(n.col).multiplyScalar(.6);
+    const ring=new THREE.Mesh(new THREE.RingGeometry(n.size*1.75,n.size*2.2,48),new THREE.MeshLambertMaterial({color:rc,transparent:true,opacity:0,side:THREE.DoubleSide}));
+    ring.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,0);
+    mesh.add(ring);mesh.userData.ring=ring;
+  }
+  return mesh;
+});
+
+function tube(pA,pB,r,col,op){const dir=new THREE.Vector3().subVectors(pB,pA),len=dir.length(),geo=new THREE.CylinderGeometry(r,r,len,6,1),mat=new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:op,emissive:new THREE.Color(0,0,0)}),m=new THREE.Mesh(geo,mat);m.position.copy(new THREE.Vector3().addVectors(pA,pB).multiplyScalar(.5));m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());return m;}
+const EM=LINKS.map(lk=>{const t=tube(NODES[lk.a].pos.clone(),NODES[lk.b].pos.clone(),.007,0x4A4645,.4);t.userData=lk;wg.add(t);return t;});
+
+const fr1=new THREE.Mesh(new THREE.TorusGeometry(2.8,.018,12,96),new THREE.MeshLambertMaterial({color:0xD3412C,transparent:true,opacity:0}));
+const fr2=new THREE.Mesh(new THREE.TorusGeometry(2.4,.012,12,96),new THREE.MeshLambertMaterial({color:0xBF3A28,transparent:true,opacity:0}));
+fr2.rotation.y=.9;scene.add(fr1);scene.add(fr2);
+const caoA=new THREE.Mesh(new THREE.SphereGeometry(1.1,24,24),new THREE.MeshLambertMaterial({color:0xE4200A,transparent:true,opacity:0,wireframe:true}));
+scene.add(caoA);
+
+// Particle field
+const pg=new THREE.BufferGeometry(),pp=new Float32Array(600*3);
+for(let i=0;i<600*3;i++)pp[i]=(Math.random()-.5)*40;
+pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
+scene.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xCCC8C4,size:.05,transparent:true,opacity:.35,sizeAttenuation:true})));
+
+let curHL='all';
+function setHL(hl){curHL=hl;}
+
+function applyHL(t){
+  NM.forEach((m,i)=>{const n=NODES[i],isH=(i===hovIdx),isS=(i===selIdx);let tOp=1,tSc=1;if(isS)tSc=1.85;else if(isH)tSc=1.5;else if(curHL==='employees'){if(n.type!=='employee'){tOp=.06;tSc=.82;}}else if(curHL==='departments'){if(n.type==='department'){}else if(n.type==='employee')tOp=.18;else tOp=.06;}else if(curHL==='facia'){if(n.type==='facia')tSc=1.2;else if(n.type!=='department')tOp=.06;else tOp=.22;}else if(curHL==='cao'){if(n.type==='cao')tSc=1.75;else if(n.type==='facia')tOp=.55;else tOp=.06;}// In 'all' (default) state — rings are visible on non-employee nodes
+  const ringTarget = curHL==='all' ? (n.type!=='employee'?0.4+Math.sin(n.phase+t*.0008)*.1:0) : (isH||isS||['facia','departments','cao'].includes(curHL))?tOp*.55:0;
+  m.material.opacity=lerp(m.material.opacity??1,tOp,.09);m.scale.x=m.scale.y=m.scale.z=lerp(m.scale.x,tSc,.09);if(m.userData.ring){m.userData.ring.material.opacity=lerp(m.userData.ring.material.opacity,ringTarget,.06);}});
+  EM.forEach((e,i)=>{const lk=e.userData,g=new THREE.Color(0xD3412C);let tOp=.4,tEm=new THREE.Color(0,0,0);if(curHL==='employees'&&lk.t==='ed'){tOp=.8;tEm.setRGB(.15,.15,.15);}else if(curHL==='departments'&&(lk.t==='ed'||lk.t==='dd')){tOp=.85;tEm=g.clone().multiplyScalar(.3);}else if(curHL==='facia'&&(lk.t==='df'||lk.t==='fc')){tOp=.9;tEm=g.clone().multiplyScalar(.45);}else if(curHL==='cao'&&(lk.t==='df'||lk.t==='fc')){tOp=.95;tEm=g.clone().multiplyScalar(.6);}else if(curHL==='synthesis'){tOp=.55+Math.sin(i*.4+t*.001)*.12;tEm=g.clone().multiplyScalar(.22);}else if(curHL!=='all')tOp=.04;e.material.opacity=lerp(e.material.opacity,tOp,.09);e.material.emissive.lerp(tEm,.09);});
+  const frOp=(curHL==='facia'||curHL==='cao'||curHL==='synthesis')?.6:0;fr1.material.opacity=lerp(fr1.material.opacity,frOp,.07);fr2.material.opacity=lerp(fr2.material.opacity,frOp*.65,.07);caoA.material.opacity=lerp(caoA.material.opacity,curHL==='cao'?.25:0,.07);
+}
+
+const tipEl=document.getElementById('arch-tip');
+function showTip(idx){const n=NODES[idx],m=META[n.type],c=n.hex||m.hex;tipEl.querySelector('.tip-type').style.color=c;tipEl.querySelector('.tip-type').textContent=m.badge;tipEl.querySelector('.tip-name').textContent=n.label;tipEl.querySelector('.tip-desc').textContent=m.desc.substring(0,80)+'…';tipEl.style.left=Math.min(rmx+20,W()-240)+'px';tipEl.style.top=Math.max(rmy-85,8)+'px';tipEl.classList.add('on');}
+function hideTip(){tipEl.classList.remove('on');}
+
+const npPanel=document.getElementById('node-panel'),npBody=document.getElementById('np-body');
+function openPanel(idx){selIdx=idx;const n=NODES[idx],m=META[n.type],c=n.hex||m.hex;const attrs=m.attrs.map(a=>`<div class="np-attr"><span class="np-ak">${a.k}</span><span class="np-av">${a.v}</span></div>`).join('');const conns=m.conns.map(c2=>`<div class="np-conn"><div class="np-cd" style="background:${c}"></div>${c2}</div>`).join('');npBody.innerHTML=`<div class="np-badge" style="background:${c}22;border:1px solid ${c}44;color:${c}"><div class="np-dot" style="background:${c}"></div>${m.badge}</div><div class="np-name">${n.label}</div><div class="np-desc">${m.desc}</div><div class="np-label">Properties</div><div class="np-attrs">${attrs}</div><div class="np-label">Connections</div><div class="np-conns">${conns}</div>`;npPanel.classList.add('open');}
+document.getElementById('np-close').addEventListener('click',()=>{npPanel.classList.remove('open');selIdx=-1;});
+
+// ── SCROLL + TABS ──────────────────────────────────────────
+const archTrack=document.getElementById('archScrollTrack');
+const pFill=document.getElementById('archProgressFill');
+const slides=Array.from(document.querySelectorAll('.arch-slide'));
+const tabs=Array.from(document.querySelectorAll('.arch-tab-btn'));
+const N=slides.length;
+let cur=-1;
+
+function goSlide(idx,force){
+  idx=Math.max(0,Math.min(N-1,idx));
+  if(idx===cur&&!force)return;
+  const prev=cur;cur=idx;
+  slides.forEach((s,i)=>{s.classList.remove('active','out');if(i===idx)s.classList.add('active');else if(i===prev&&prev>=0)s.classList.add('out');});
+  tabs.forEach((b,i)=>b.classList.toggle('active',i===idx));
+  const s=slides[idx];
+  if(s.dataset.hl)setHL(s.dataset.hl);
+  if(!free&&s.dataset.cam){const[r,th,ph]=s.dataset.cam.split(',').map(Number);tR=r;tTh=th;tPh=ph;}
+}
+
+window.addEventListener('scroll',()=>{
+  if(!archTrack)return;
+  const rect=archTrack.getBoundingClientRect();
+  const scrolled=-rect.top;
+  const trackH=archTrack.offsetHeight;
+  if(trackH===0)return;
+  const pct=Math.max(0,Math.min(1,scrolled/trackH));
+  pFill.style.height=(pct*100)+'%';
+  goSlide(Math.min(N-1,Math.max(0,Math.floor(pct*N+.08))));
+},{passive:true});
+
+tabs.forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    const i=+btn.dataset.idx;
+    const stepH=archTrack.offsetHeight/N;
+    const top=archTrack.getBoundingClientRect().top+window.scrollY+i*stepH+10;
+    window.scrollTo({top,behavior:'smooth'});
+  });
+});
+
+setTimeout(()=>goSlide(0,true),200);
+
+// ── RENDER LOOP ────────────────────────────────────────────
+const clock=new THREE.Clock();
+let sz=false;
+(function loop(){
+  requestAnimationFrame(loop);
+  if(!sz){const w=W(),h=H();if(w>0&&h>0){renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();sz=true;}}
+  const t=clock.getElapsedTime()*1000;
+  if(!free)autoA+=.0008;
+  oTh=lerp(oTh,tTh+autoA,.06);oPh=lerp(oPh,tPh,.06);oR=lerp(oR,tR,.08);
+  setCam(oR,oTh,oPh);
+  wg.rotation.x=Math.sin(t*.00006)*.015;
+  fr1.rotation.x+=.003;fr1.rotation.z+=.002;fr2.rotation.y+=.002;fr2.rotation.x-=.002;
+  if(caoA.material.opacity>.01)caoA.scale.setScalar(1+Math.sin(t*.003)*.06);
+  if(!drag){ray.setFromCamera(mndc,cam);const hits=ray.intersectObjects(NM,false);if(hits.length>0){const ni=hits[0].object.userData.nodeIdx;if(ni!==hovIdx){hovIdx=ni;canvasEl.style.cursor='pointer';}showTip(ni);}else{if(hovIdx>-1){hovIdx=-1;hideTip();canvasEl.style.cursor='grab';}}}
+  applyHL(t);
+  renderer.render(scene,cam);
+})();
+
+new ResizeObserver(()=>{const w=W(),h=H();if(w>0&&h>0){renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();sz=true;}}).observe(archPane);
+window.addEventListener('load',()=>{const w=W(),h=H();if(w>0&&h>0){renderer.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix();sz=true;}});
+</script>
+</body>
+</html>
