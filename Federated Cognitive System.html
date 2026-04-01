@@ -81,7 +81,7 @@ nav.scrolled{box-shadow:0 1px 0 var(--border),0 4px 20px rgba(0,0,0,.05)}
 .nav-link.active{color:var(--red);background:rgba(228,32,10,.06)}
 .nav-cta{
   font-family:var(--ff-sans);font-size:12px;font-weight:500;
-  letter-spacing:.02em;color:var(--text);
+  letter-spacing:.02em;color:#fff;
   padding:8px 20px;border-radius:100px;
   background:var(--red);
   transition:background var(--t200),transform var(--t200);
@@ -239,6 +239,10 @@ nav.scrolled{box-shadow:0 1px 0 var(--border),0 4px 20px rgba(0,0,0,.05)}
 .arch-canvas-pane{
   position:relative;height:100%;overflow:hidden;
   border-right:1px solid rgba(0,0,0,.08);
+}
+.arch-canvas-pane::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 40%,rgba(255,255,255,.35) 100%);
 }
 #archCanvas{width:100%;height:100%;display:block;cursor:grab}
 #arch-reset{
@@ -618,14 +622,14 @@ footer{
           <button class="arch-tab-btn" data-idx="5">Synthesis</button>
         </div>
         <div class="arch-slides-wrap">
-          <div class="arch-slide active" data-hl="all" data-cam="22,0.4,1.2" data-idx="0">
+          <div class="arch-slide active" data-hl="all" data-cam="26,0.4,1.15" data-idx="0">
             <div class="arch-state-num">01 — The System</div>
             <h3 class="arch-slide-title">A federated system of <em>enterprise intelligence</em></h3>
             <p class="arch-slide-body">At its core, the organisation is a network of distributed intelligence. Each employee operates a personal Shadow — a private system that understands how work is actually done.</p>
             <p class="arch-slide-body">These individual systems do not exist in isolation. They form a connected structure — where intelligence can scale without losing control.</p>
             <p class="arch-slide-insight">The enterprise is no longer a collection of roles — <strong>it becomes a system of intelligence.</strong></p>
           </div>
-          <div class="arch-slide" data-hl="employees" data-cam="13,0.3,1.4" data-idx="1">
+          <div class="arch-slide" data-hl="employees" data-cam="18,0.3,1.35" data-idx="1">
             <div class="arch-state-num">02 — Individual Intelligence</div>
             <h3 class="arch-slide-title">Intelligence begins with <em>the individual</em></h3>
             <p class="arch-slide-body">Each node represents an employee and their Shadow.</p>
@@ -636,13 +640,13 @@ footer{
             </ul>
             <p class="arch-slide-insight"><strong>AI starts where work actually happens.</strong></p>
           </div>
-          <div class="arch-slide" data-hl="departments" data-cam="17,-0.3,1.1" data-idx="2">
+          <div class="arch-slide" data-hl="departments" data-cam="20,-0.3,1.1" data-idx="2">
             <div class="arch-state-num">03 — Structured Capability</div>
             <h3 class="arch-slide-title">Capability is structured at the <em>organisational level</em></h3>
             <p class="arch-slide-body">Departments define how intelligence becomes consistent. Through shared tools, workflows, and knowledge, individual systems align into structured capability.</p>
             <p class="arch-slide-insight"><strong>From distributed intelligence to coordinated capability.</strong></p>
           </div>
-          <div class="arch-slide" data-hl="facia" data-cam="16,0.1,1.0" data-idx="3">
+          <div class="arch-slide" data-hl="facia" data-cam="19,0.1,1.0" data-idx="3">
             <div class="arch-state-num red">04 — Facia</div>
             <h3 class="arch-slide-title"><em>Facia</em> — the coordination and control plane</h3>
             <p class="arch-slide-body">Every interaction is mediated through Facia. It governs:</p>
@@ -653,7 +657,7 @@ footer{
             </ul>
             <p class="arch-slide-insight">Without Facia, intelligence fragments. <strong>With it, the system operates.</strong></p>
           </div>
-          <div class="arch-slide" data-hl="cao" data-cam="20,0.6,0.8" data-idx="4">
+          <div class="arch-slide" data-hl="cao" data-cam="22,0.6,0.55" data-idx="4">
             <div class="arch-state-num">05 — CAO Operations</div>
             <h3 class="arch-slide-title">Operational control at the <em>enterprise level</em></h3>
             <p class="arch-slide-body">The Chief Agentic Officer operates as the control interface — overseeing how intelligence moves, interacts, and executes through Facia.</p>
@@ -664,7 +668,7 @@ footer{
             </ul>
             <p class="arch-slide-insight">Governance defined centrally — <strong>enforced in real time.</strong></p>
           </div>
-          <div class="arch-slide" data-hl="synthesis" data-cam="22,0.2,1.15" data-idx="5">
+          <div class="arch-slide" data-hl="synthesis" data-cam="26,0.2,1.1" data-idx="5">
             <div class="arch-state-num">06 — Synthesis</div>
             <h3 class="arch-slide-title">A system that can <em>actually operate</em></h3>
             <ul class="arch-slide-list">
@@ -858,27 +862,37 @@ function H(){return archPane.clientHeight;}
 
 const renderer=new THREE.WebGLRenderer({canvas:canvasEl,antialias:true});
 renderer.setPixelRatio(Math.min(window.devicePixelRatio,2));
-renderer.setClearColor(0xFFFFFF,1);
+renderer.setClearColor(0xFCFBFA,1);
 renderer.setSize(W()||800, H()||600);
 
 const scene=new THREE.Scene();
 
 const cam=new THREE.PerspectiveCamera(50,W()/H(),.1,200);
-cam.position.set(0,2,22);
+cam.position.set(0,2,26);
 
-const amb=new THREE.AmbientLight(0xffffff,.9); scene.add(amb);
-const kl=new THREE.DirectionalLight(0xffffff,.8); kl.position.set(8,14,10); scene.add(kl);
+const amb=new THREE.AmbientLight(0xffffff,.85); scene.add(amb);
+const kl=new THREE.DirectionalLight(0xffffff,.7); kl.position.set(8,14,10); scene.add(kl);
 const fl=new THREE.DirectionalLight(0xfff4f0,.35); fl.position.set(-8,-4,-6); scene.add(fl);
+const bl=new THREE.DirectionalLight(0xfff8f4,.3); bl.position.set(0,-10,0); scene.add(bl); // bottom fill for CAO area
 
 function lerp(a,b,t){return a+(b-a)*t;}
 const ray=new THREE.Raycaster();
 const mndc=new THREE.Vector2(-999,-999);
 let rmx=0,rmy=0;
 let drag=false,lmx=0,lmy=0,ltd=0;
-let oTh=.4,oPh=1.2,oR=22,tTh=.4,tPh=1.2,tR=22,autoA=0,free=false;
+let oTh=.4,oPh=1.15,oR=26,tTh=.4,tPh=1.15,tR=26,autoA=0,free=false;
 let hovIdx=-1,selIdx=-1,zoomT=null;
+// LookAt target — smoothly lerps so clicked node ends up centered
+let oLx=0,oLy=0,oLz=0,tLx=0,tLy=0,tLz=0;
 
-function setCam(r,th,ph){cam.position.set(r*Math.sin(ph)*Math.cos(th),r*Math.cos(ph),r*Math.sin(ph)*Math.sin(th));cam.lookAt(0,0,0);}
+function setCam(r,th,ph){
+  cam.position.set(
+    oLx+r*Math.sin(ph)*Math.cos(th),
+    oLy+r*Math.cos(ph),
+    oLz+r*Math.sin(ph)*Math.sin(th)
+  );
+  cam.lookAt(oLx,oLy,oLz);
+}
 
 let wasDragging=false;
 let mouseDownX=0,mouseDownY=0;
@@ -926,26 +940,23 @@ function zoomToNode(idx){
   const wp=new THREE.Vector3();
   mesh.getWorldPosition(wp);
 
-  // Direction from origin to node in current world space
-  const d=wp.clone().normalize();
-  const nodePh=Math.acos(Math.max(-1,Math.min(1,d.y)));
-  const nodeTh=Math.atan2(d.z,d.x);
+  // Set lookAt target to the node's world position — this centers it on screen
+  tLx=wp.x; tLy=wp.y; tLz=wp.z;
 
-  // Zoom distance: closer for bigger nodes
-  const dist=Math.max(2.8, NODES[idx].size*14);
-
-  // Set target angles — subtract autoA so oTh stays locked on node despite auto-spin
-  tPh=nodePh;
-  tTh=nodeTh - autoA; // compensate for accumulated auto rotation
+  // Zoom distance based on node type
+  const n=NODES[idx];
+  const dist=n.type==='cao'?4.5:n.type==='department'?5:n.type==='facia'?4.5:3.5;
   tR=dist;
 
+  // Keep current viewing angles so camera moves smoothly to node
   // Freeze auto-spin during zoom
   free=true;
   clearTimeout(zoomT);
-  zoomT=setTimeout(()=>{free=false;},5000);
+  zoomT=setTimeout(()=>{free=false;},6000);
 }
 document.getElementById('arch-reset').addEventListener('click',()=>{
   free=false;autoA=0;
+  tLx=0;tLy=0;tLz=0; // Reset lookAt to origin
   const s=document.querySelector('.arch-slide.active');
   if(s&&s.dataset.cam){const[r,th,ph]=s.dataset.cam.split(',').map(Number);tR=r;tTh=th;tPh=ph;}
   document.getElementById('node-panel').classList.remove('open');selIdx=-1;
@@ -953,17 +964,82 @@ document.getElementById('arch-reset').addEventListener('click',()=>{
 
 function sph(r,n=0){const t=Math.random()*Math.PI*2,p=Math.acos(2*Math.random()-1),rad=r+(Math.random()-.5)*n;return new THREE.Vector3(rad*Math.sin(p)*Math.cos(t),rad*Math.sin(p)*Math.sin(t),rad*Math.cos(p));}
 const NODES=[],LINKS=[],nc={employee:0,department:0,facia:0,cao:0};
-function addN(type,pos,size,ov={}){const m=META[type];let col=m.col;if(type==='employee')col=EMP_COLS[Math.floor(Math.random()*EMP_COLS.length)];else if(type==='department')col=DEPT_COLS[nc.department%DEPT_COLS.length];else if(type==='facia')col=FACIA_COLS[Math.floor(Math.random()*FACIA_COLS.length)];NODES.push({type,pos,size,phase:Math.random()*Math.PI*2,label:m.names[nc[type]++%m.names.length],col,hex:'#'+col.toString(16).padStart(6,'0'),...ov});}
-for(let i=0;i<20;i++)addN('employee',sph(7,2),.14+Math.random()*.07);
-['Engineering','Legal & Compliance','Finance','Product','Operations','Marketing'].forEach((nm,d)=>{const a=(d/6)*Math.PI*2,c=new THREE.Vector3(Math.cos(a)*4.8,(Math.random()-.5)*2.2,Math.sin(a)*4.8);addN('department',c.clone(),.35+Math.random()*.08,{label:nm});for(let j=0;j<3;j++)addN('employee',c.clone().add(new THREE.Vector3((Math.random()-.5)*2,(Math.random()-.5)*1.8,(Math.random()-.5)*2)),.12+Math.random()*.05);});
-for(let i=0;i<8;i++)addN('facia',sph(2.2,.7),.16+Math.random()*.08);
-addN('cao',new THREE.Vector3(0,0,0),.52,{label:'Chief Agentic Officer'});
-NODES.forEach((n,i)=>{if(n.type==='employee'){let b=-1,bd=999;NODES.forEach((m,j)=>{if(m.type==='department'){const d=n.pos.distanceTo(m.pos);if(d<bd){bd=d;b=j;}}});if(b>-1&&Math.random()>.2)LINKS.push({a:i,b,t:'ed'});}if(n.type==='department'){NODES.forEach((m,j)=>{if(m.type==='facia'&&Math.random()>.45)LINKS.push({a:i,b:j,t:'df'});});NODES.forEach((m,j)=>{if(j!==i&&m.type==='department'&&Math.random()>.7)LINKS.push({a:i,b:j,t:'dd'});});}if(n.type==='facia')LINKS.push({a:i,b:NODES.length-1,t:'fc'});});
+const UNIFORM_EMP_COL=0x6E6A67;const UNIFORM_EMP_SIZE=0.11;
+function addN(type,pos,size,ov={}){const m=META[type];let col=m.col;if(type==='employee')col=UNIFORM_EMP_COL;else if(type==='department')col=DEPT_COLS[nc.department%DEPT_COLS.length];else if(type==='facia')col=FACIA_COLS[Math.floor(Math.random()*FACIA_COLS.length)];NODES.push({type,pos,size,phase:Math.random()*Math.PI*2,label:m.names[nc[type]++%m.names.length],col,hex:'#'+col.toString(16).padStart(6,'0'),...ov});}
+// Scattered individuals — fewer, wider spread
+for(let i=0;i<10;i++)addN('employee',sph(9,2.5),UNIFORM_EMP_SIZE);
+// Department icons/symbols for labels
+const DEPT_ICONS=['⚙','⚖','$','◆','⊞','◎'];
+// Departments — wider ring, 2 employees each
+['Engineering','Legal & Compliance','Finance','Product','Operations','Marketing'].forEach((nm,d)=>{const a=(d/6)*Math.PI*2,c=new THREE.Vector3(Math.cos(a)*6.5,(Math.random()-.5)*1.5,Math.sin(a)*6.5);addN('department',c.clone(),.32,{label:nm,icon:DEPT_ICONS[d]});for(let j=0;j<2;j++)addN('employee',c.clone().add(new THREE.Vector3((Math.random()-.5)*2.8,(Math.random()-.5)*2,(Math.random()-.5)*2.8)),UNIFORM_EMP_SIZE);});
+// Facia — spread throughout as connective web nodes
+for(let i=0;i<6;i++)addN('facia',sph(3.5,1.5),.14);
+// CAO — outer orbit observer, not at center
+addN('cao',new THREE.Vector3(0,9.5,0),.42,{label:'Chief Agentic Officer'});
+// Build links: Facia is the web connecting everything, CAO observes from outside
+const caoIdx=NODES.length-1;
+NODES.forEach((n,i)=>{
+  if(n.type==='employee'){
+    // Employees link to nearest department
+    let b=-1,bd=999;NODES.forEach((m,j)=>{if(m.type==='department'){const d=n.pos.distanceTo(m.pos);if(d<bd){bd=d;b=j;}}});
+    if(b>-1&&bd<6)LINKS.push({a:i,b,t:'ed'});
+    // Some employees also link to nearest facia node
+    let f=-1,fd=999;NODES.forEach((m,j)=>{if(m.type==='facia'){const d=n.pos.distanceTo(m.pos);if(d<fd){fd=d;f=j;}}});
+    if(f>-1&&Math.random()>.5)LINKS.push({a:i,b:f,t:'ef'});
+  }
+  if(n.type==='department'){
+    // Departments connect to ALL facia nodes (web)
+    NODES.forEach((m,j)=>{if(m.type==='facia')LINKS.push({a:i,b:j,t:'df'});});
+    // Some inter-department links
+    NODES.forEach((m,j)=>{if(j>i&&m.type==='department'&&Math.random()>.6)LINKS.push({a:i,b:j,t:'dd'});});
+  }
+  if(n.type==='facia'){
+    // Facia nodes link to each other (the web)
+    NODES.forEach((m,j)=>{if(j>i&&m.type==='facia'&&Math.random()>.3)LINKS.push({a:i,b:j,t:'ff'});});
+  }
+});
+// CAO links thinly to facia nodes (observer connections)
+NODES.forEach((n,i)=>{if(n.type==='facia')LINKS.push({a:caoIdx,b:i,t:'fc'});});
 
 const wg=new THREE.Group();scene.add(wg);
+
+// Text sprite helper for department labels
+function makeLabel(text,icon,col,size){
+  const c=document.createElement('canvas');c.width=512;c.height=160;
+  const ctx=c.getContext('2d');
+  ctx.clearRect(0,0,512,160);
+  const hexCol='#'+col.toString(16).padStart(6,'0');
+  // Icon
+  ctx.font='bold 44px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillStyle=hexCol;
+  ctx.fillText(icon,256,50);
+  // Name with subtle shadow for readability
+  ctx.font='500 24px sans-serif';
+  ctx.fillStyle='rgba(255,255,255,0.7)';
+  ctx.fillText(text,257,112);ctx.fillText(text,255,112);
+  ctx.fillStyle=hexCol;
+  ctx.fillText(text,256,111);
+  const tex=new THREE.CanvasTexture(c);tex.needsUpdate=true;
+  const mat=new THREE.SpriteMaterial({map:tex,transparent:true,depthTest:false});
+  const sp=new THREE.Sprite(mat);sp.scale.set(size*9,size*2.8,1);
+  return sp;
+}
+
 const NM=NODES.map((n,i)=>{
-  const mesh=new THREE.Mesh(new THREE.SphereGeometry(n.size,48,48),new THREE.MeshLambertMaterial({color:n.col}));
+  const mesh=new THREE.Mesh(new THREE.SphereGeometry(n.size,48,48),new THREE.MeshLambertMaterial({color:n.col,transparent:true,opacity:1,emissive:new THREE.Color(0,0,0)}));
   mesh.position.copy(n.pos);mesh.userData={nodeIdx:i};wg.add(mesh);
+  // Department labels with icon + name
+  if(n.type==='department'){
+    const lbl=makeLabel(n.label,n.icon||'●',n.col,n.size);
+    lbl.position.set(0,n.size*3.5,0);
+    mesh.add(lbl);mesh.userData.label=lbl;
+  }
+  // CAO label
+  if(n.type==='cao'){
+    const lbl=makeLabel('Chief Agentic Officer','◉',0xE4200A,n.size);
+    lbl.position.set(0,n.size*3,0);
+    mesh.add(lbl);mesh.userData.label=lbl;
+  }
   if(n.type!=='employee'){
     const rc=new THREE.Color(n.col).multiplyScalar(.6);
     const ring=new THREE.Mesh(new THREE.RingGeometry(n.size*1.75,n.size*2.2,48),new THREE.MeshLambertMaterial({color:rc,transparent:true,opacity:0,side:THREE.DoubleSide}));
@@ -974,29 +1050,74 @@ const NM=NODES.map((n,i)=>{
 });
 
 function tube(pA,pB,r,col,op){const dir=new THREE.Vector3().subVectors(pB,pA),len=dir.length(),geo=new THREE.CylinderGeometry(r,r,len,6,1),mat=new THREE.MeshLambertMaterial({color:col,transparent:true,opacity:op,emissive:new THREE.Color(0,0,0)}),m=new THREE.Mesh(geo,mat);m.position.copy(new THREE.Vector3().addVectors(pA,pB).multiplyScalar(.5));m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());return m;}
-const EM=LINKS.map(lk=>{const t=tube(NODES[lk.a].pos.clone(),NODES[lk.b].pos.clone(),.007,0x4A4645,.4);t.userData=lk;wg.add(t);return t;});
+const EM=LINKS.map(lk=>{const r=lk.t==='fc'?.004:.005;const t=tube(NODES[lk.a].pos.clone(),NODES[lk.b].pos.clone(),r,lk.t==='fc'?0xE4200A:0x4A4645,lk.t==='fc'?.2:.3);t.userData=lk;wg.add(t);return t;});
 
-const fr1=new THREE.Mesh(new THREE.TorusGeometry(2.8,.018,12,96),new THREE.MeshLambertMaterial({color:0xD3412C,transparent:true,opacity:0}));
-const fr2=new THREE.Mesh(new THREE.TorusGeometry(2.4,.012,12,96),new THREE.MeshLambertMaterial({color:0xBF3A28,transparent:true,opacity:0}));
+const fr1=new THREE.Mesh(new THREE.TorusGeometry(4.2,.012,12,96),new THREE.MeshLambertMaterial({color:0xD3412C,transparent:true,opacity:0}));
+const fr2=new THREE.Mesh(new THREE.TorusGeometry(3.5,.008,12,96),new THREE.MeshLambertMaterial({color:0xBF3A28,transparent:true,opacity:0}));
 fr2.rotation.y=.9;scene.add(fr1);scene.add(fr2);
-const caoA=new THREE.Mesh(new THREE.SphereGeometry(1.1,24,24),new THREE.MeshLambertMaterial({color:0xE4200A,transparent:true,opacity:0,wireframe:true}));
+// CAO aura at outer orbit position
+const caoA=new THREE.Mesh(new THREE.SphereGeometry(1.0,24,24),new THREE.MeshLambertMaterial({color:0xE4200A,transparent:true,opacity:0,wireframe:true}));
+caoA.position.set(0,9.5,0);
 scene.add(caoA);
+// CAO orbit ring — dashed circle showing observer vantage
+const caoOrbit=new THREE.Mesh(new THREE.TorusGeometry(3,.006,8,96),new THREE.MeshLambertMaterial({color:0xE4200A,transparent:true,opacity:0}));
+caoOrbit.position.set(0,9.5,0);
+caoOrbit.rotation.x=Math.PI/2;
+scene.add(caoOrbit);
 
-// Particle field
-const pg=new THREE.BufferGeometry(),pp=new Float32Array(600*3);
-for(let i=0;i<600*3;i++)pp[i]=(Math.random()-.5)*40;
+// Particle field — sparse for clean look
+const pg=new THREE.BufferGeometry(),pp=new Float32Array(300*3);
+for(let i=0;i<300*3;i++)pp[i]=(Math.random()-.5)*50;
 pg.setAttribute('position',new THREE.BufferAttribute(pp,3));
-scene.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xCCC8C4,size:.05,transparent:true,opacity:.35,sizeAttenuation:true})));
+scene.add(new THREE.Points(pg,new THREE.PointsMaterial({color:0xCCC8C4,size:.04,transparent:true,opacity:.25,sizeAttenuation:true})));
 
 let curHL='all';
 function setHL(hl){curHL=hl;}
 
 function applyHL(t){
-  NM.forEach((m,i)=>{const n=NODES[i],isH=(i===hovIdx),isS=(i===selIdx);let tOp=1,tSc=1;if(isS)tSc=1.85;else if(isH)tSc=1.5;else if(curHL==='employees'){if(n.type!=='employee'){tOp=.06;tSc=.82;}}else if(curHL==='departments'){if(n.type==='department'){}else if(n.type==='employee')tOp=.18;else tOp=.06;}else if(curHL==='facia'){if(n.type==='facia')tSc=1.2;else if(n.type!=='department')tOp=.06;else tOp=.22;}else if(curHL==='cao'){if(n.type==='cao')tSc=1.75;else if(n.type==='facia')tOp=.55;else tOp=.06;}// In 'all' (default) state — rings are visible on non-employee nodes
-  const ringTarget = curHL==='all' ? (n.type!=='employee'?0.4+Math.sin(n.phase+t*.0008)*.1:0) : (isH||isS||['facia','departments','cao'].includes(curHL))?tOp*.55:0;
-  m.material.opacity=lerp(m.material.opacity??1,tOp,.09);m.scale.x=m.scale.y=m.scale.z=lerp(m.scale.x,tSc,.09);if(m.userData.ring){m.userData.ring.material.opacity=lerp(m.userData.ring.material.opacity,ringTarget,.06);}});
-  EM.forEach((e,i)=>{const lk=e.userData,g=new THREE.Color(0xD3412C);let tOp=.4,tEm=new THREE.Color(0,0,0);if(curHL==='employees'&&lk.t==='ed'){tOp=.8;tEm.setRGB(.15,.15,.15);}else if(curHL==='departments'&&(lk.t==='ed'||lk.t==='dd')){tOp=.85;tEm=g.clone().multiplyScalar(.3);}else if(curHL==='facia'&&(lk.t==='df'||lk.t==='fc')){tOp=.9;tEm=g.clone().multiplyScalar(.45);}else if(curHL==='cao'&&(lk.t==='df'||lk.t==='fc')){tOp=.95;tEm=g.clone().multiplyScalar(.6);}else if(curHL==='synthesis'){tOp=.55+Math.sin(i*.4+t*.001)*.12;tEm=g.clone().multiplyScalar(.22);}else if(curHL!=='all')tOp=.04;e.material.opacity=lerp(e.material.opacity,tOp,.09);e.material.emissive.lerp(tEm,.09);});
-  const frOp=(curHL==='facia'||curHL==='cao'||curHL==='synthesis')?.6:0;fr1.material.opacity=lerp(fr1.material.opacity,frOp,.07);fr2.material.opacity=lerp(fr2.material.opacity,frOp*.65,.07);caoA.material.opacity=lerp(caoA.material.opacity,curHL==='cao'?.25:0,.07);
+  NM.forEach((m,i)=>{const n=NODES[i],isH=(i===hovIdx),isS=(i===selIdx);
+  let tOp=1,tSc=1;
+  if(isS){tSc=1.85;tOp=1;}
+  else if(isH){tSc=1.5;tOp=1;}
+  else if(curHL==='employees'){
+    tOp=n.type==='employee'?1:0.04;tSc=n.type==='employee'?1:0.75;
+  }else if(curHL==='departments'){
+    if(n.type==='department'){tOp=1;tSc=1.1;}else if(n.type==='employee'){tOp=0.12;}else{tOp=0.04;}
+  }else if(curHL==='facia'){
+    if(n.type==='facia'){tSc=1.2;tOp=1;}else if(n.type==='department'){tOp=0.18;}else if(n.type==='cao'){tOp=0.06;}else{tOp=0.04;}
+  }else if(curHL==='cao'){
+    if(n.type==='cao'){tSc=1.6;tOp=1;}else if(n.type==='facia'){tOp=0.35;}else{tOp=0.04;}
+  }else if(curHL==='synthesis'){
+    tOp=0.7+Math.sin(n.phase+t*.001)*.3;
+  }
+  // 'all' default — everything visible
+  const ringTarget=curHL==='all'?(n.type!=='employee'?0.35+Math.sin(n.phase+t*.0008)*.1:0):(isH||isS)?tOp*.55:(tOp>.15?tOp*.4:0);
+  m.material.opacity=lerp(m.material.opacity??1,tOp,.09);
+  m.scale.x=m.scale.y=m.scale.z=lerp(m.scale.x,tSc,.09);
+  // Emissive glow on hover/select
+  const tEm=isS?new THREE.Color(n.col).multiplyScalar(.35):isH?new THREE.Color(n.col).multiplyScalar(.2):new THREE.Color(0,0,0);
+  m.material.emissive.lerp(tEm,.08);
+  if(m.userData.ring){m.userData.ring.material.opacity=lerp(m.userData.ring.material.opacity,ringTarget,.06);}
+  // Label opacity matches node
+  if(m.userData.label){m.userData.label.material.opacity=lerp(m.userData.label.material.opacity??1,tOp,.09);}
+  });
+
+  EM.forEach((e,i)=>{const lk=e.userData,g=new THREE.Color(0xD3412C);
+  let tOp=.35,tEm=new THREE.Color(0,0,0);
+  if(curHL==='employees'&&(lk.t==='ed'||lk.t==='ef')){tOp=.75;tEm.setRGB(.1,.1,.1);}
+  else if(curHL==='departments'&&(lk.t==='ed'||lk.t==='dd'||lk.t==='df')){tOp=.8;tEm=g.clone().multiplyScalar(.25);}
+  else if(curHL==='facia'&&(lk.t==='df'||lk.t==='ff'||lk.t==='ef'||lk.t==='fc')){tOp=.85;tEm=g.clone().multiplyScalar(.4);}
+  else if(curHL==='cao'&&(lk.t==='fc')){tOp=.9;tEm=g.clone().multiplyScalar(.55);}
+  else if(curHL==='synthesis'){tOp=.45+Math.sin(i*.4+t*.001)*.12;tEm=g.clone().multiplyScalar(.18);}
+  else if(curHL!=='all'){tOp=.02;}
+  e.material.opacity=lerp(e.material.opacity,tOp,.09);e.material.emissive.lerp(tEm,.09);});
+
+  const frOp=(curHL==='facia'||curHL==='synthesis')?.5:(curHL==='cao'?.2:0);
+  fr1.material.opacity=lerp(fr1.material.opacity,frOp,.07);
+  fr2.material.opacity=lerp(fr2.material.opacity,frOp*.65,.07);
+  caoA.material.opacity=lerp(caoA.material.opacity,curHL==='cao'?.3:(curHL==='all'?.08:0),.07);
+  const orbOp=curHL==='cao'?.4:(curHL==='all'?.12:0);
+  caoOrbit.material.opacity=lerp(caoOrbit.material.opacity,orbOp,.07);
 }
 
 const tipEl=document.getElementById('arch-tip');
@@ -1005,7 +1126,14 @@ function hideTip(){tipEl.classList.remove('on');}
 
 const npPanel=document.getElementById('node-panel'),npBody=document.getElementById('np-body');
 function openPanel(idx){selIdx=idx;const n=NODES[idx],m=META[n.type],c=n.hex||m.hex;const attrs=m.attrs.map(a=>`<div class="np-attr"><span class="np-ak">${a.k}</span><span class="np-av">${a.v}</span></div>`).join('');const conns=m.conns.map(c2=>`<div class="np-conn"><div class="np-cd" style="background:${c}"></div>${c2}</div>`).join('');npBody.innerHTML=`<div class="np-badge" style="background:${c}22;border:1px solid ${c}44;color:${c}"><div class="np-dot" style="background:${c}"></div>${m.badge}</div><div class="np-name">${n.label}</div><div class="np-desc">${m.desc}</div><div class="np-label">Properties</div><div class="np-attrs">${attrs}</div><div class="np-label">Connections</div><div class="np-conns">${conns}</div>`;npPanel.classList.add('open');}
-document.getElementById('np-close').addEventListener('click',()=>{npPanel.classList.remove('open');selIdx=-1;});
+document.getElementById('np-close').addEventListener('click',()=>{
+  npPanel.classList.remove('open');selIdx=-1;
+  // Return camera to overview
+  tLx=0;tLy=0;tLz=0;
+  const s=document.querySelector('.arch-slide.active');
+  if(s&&s.dataset.cam){const[r,th,ph]=s.dataset.cam.split(',').map(Number);tR=r;tTh=th;tPh=ph;}
+  free=false;autoA=0;
+});
 
 // ── SCROLL + TABS ──────────────────────────────────────────
 const archTrack=document.getElementById('archScrollTrack');
@@ -1023,7 +1151,9 @@ function goSlide(idx,force){
   tabs.forEach((b,i)=>b.classList.toggle('active',i===idx));
   const s=slides[idx];
   if(s.dataset.hl)setHL(s.dataset.hl);
-  if(!free&&s.dataset.cam){const[r,th,ph]=s.dataset.cam.split(',').map(Number);tR=r;tTh=th;tPh=ph;}
+  if(!free&&s.dataset.cam){const[r,th,ph]=s.dataset.cam.split(',').map(Number);tR=r;tTh=th;tPh=ph;tLx=0;tLy=0;tLz=0;}
+  // Close node panel when switching slides
+  if(!free){selIdx=-1;document.getElementById('node-panel').classList.remove('open');}
 }
 
 window.addEventListener('scroll',()=>{
@@ -1057,10 +1187,13 @@ let sz=false;
   const t=clock.getElapsedTime()*1000;
   if(!free)autoA+=.0008;
   oTh=lerp(oTh,tTh+autoA,.06);oPh=lerp(oPh,tPh,.06);oR=lerp(oR,tR,.08);
+  // Smoothly move lookAt target
+  oLx=lerp(oLx,tLx,.06);oLy=lerp(oLy,tLy,.06);oLz=lerp(oLz,tLz,.06);
   setCam(oR,oTh,oPh);
   wg.rotation.x=Math.sin(t*.00006)*.015;
   fr1.rotation.x+=.003;fr1.rotation.z+=.002;fr2.rotation.y+=.002;fr2.rotation.x-=.002;
   if(caoA.material.opacity>.01)caoA.scale.setScalar(1+Math.sin(t*.003)*.06);
+  if(caoOrbit.material.opacity>.01)caoOrbit.rotation.z+=.001;
   if(!drag){ray.setFromCamera(mndc,cam);const hits=ray.intersectObjects(NM,false);if(hits.length>0){const ni=hits[0].object.userData.nodeIdx;if(ni!==hovIdx){hovIdx=ni;canvasEl.style.cursor='pointer';}showTip(ni);}else{if(hovIdx>-1){hovIdx=-1;hideTip();canvasEl.style.cursor='grab';}}}
   applyHL(t);
   renderer.render(scene,cam);
