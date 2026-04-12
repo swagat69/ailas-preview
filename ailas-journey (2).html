@@ -59,7 +59,8 @@ body{font-family:'Acumin Pro','DM Sans',sans-serif;background:#F4F4F4;font-varia
 .stat{display:flex;flex-direction:column;align-items:center;gap:2px}
 .stat-val{font-size:16px;font-weight:700;color:var(--dark)}
 .stat-label{font-size:11px;color:var(--grey62);text-align:center;white-space:nowrap}
-.diag-sec{background:#fff;border:1px solid var(--grey90);border-radius:14px;padding:24px}
+.diag-sec{background:#fff;border:none;border-radius:0;padding:20px 0 20px}
+.diag-sec+.diag-sec{border-top:1.5px solid #F0F0F0;padding-top:24px}
 .global-actions{display:flex;align-items:center;gap:10px;padding:14px 0}
 .note-yellow{background:var(--island);border:1px solid var(--yellow-border);border-radius:8px;padding:11px 15px;font-size:12px;color:#8A7800;line-height:18px}
 .note-red{background:var(--island);border:1px solid rgba(228,32,10,.12);border-radius:8px;padding:10px 15px;font-size:11.5px;color:#7A3020;line-height:18.4px;margin-top:16px}
@@ -207,6 +208,43 @@ tbody td.tl{text-align:left}
 .sel-summary{font-size:14px;color:#6E7174}
 .sel-summary b{color:var(--dark);font-weight:600}
 
+/* ── Diagnostics side-by-side layout ── */
+.diag-sec-label{font-size:20px;font-weight:700;color:var(--dark);line-height:1;margin-bottom:2px}
+.diag-columns{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:stretch}
+.diag-col{display:flex;flex-direction:column;gap:0}
+.diag-col-inner{background:#fff;border:1px solid var(--grey90);border-radius:12px;padding:20px;height:100%;display:flex;flex-direction:column}
+.diag-col-title{font-size:15px;font-weight:700;color:var(--dark);line-height:1;margin-bottom:2px}
+.diag-col-helper{font-size:12px;color:var(--grey56);line-height:18px;margin-bottom:14px}
+.diag-col-actions{display:flex;align-items:center;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.uc-diag-sec{margin-top:0}
+.uc-diag-header-row{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:0 0 14px}
+.uc-continue-btn{flex-shrink:0}
+/* UC cards now use same diag-card pattern */
+.uc-diag-card{background:#fff;border:1px solid var(--grey90);border-radius:10px;overflow:hidden}
+.uc-card-header{display:flex;align-items:center;gap:12px;padding:17px 21px;cursor:pointer;user-select:none}
+.uc-card-header-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.uc-dots{font-size:18px;color:#bbb;cursor:pointer;letter-spacing:2px;padding:0 4px;flex-shrink:0}
+.uc-card-body{display:flex;align-items:center;justify-content:space-between;padding:10px 21px 0}
+.uc-status-left{display:flex;align-items:center;gap:10px}
+.uc-status-label{font-size:13px;font-weight:600;color:#27AE60;line-height:1.2}
+.uc-status-sub{font-size:11px;color:var(--grey62);margin-top:1px}
+.uc-progress-right{text-align:right}
+.uc-pct{font-size:15px;font-weight:700;color:var(--dark);line-height:1.2}
+.uc-pct-lbl{font-size:11px;color:var(--grey62);margin-top:1px}
+.uc-progress-bar-wrap{height:4px;background:#E8F9EE;margin:12px 21px 16px;border-radius:4px;overflow:hidden}
+.uc-progress-bar{height:100%;background:var(--red);border-radius:4px;transition:width .3s ease}
+.uc-score-inline{font-size:12px;color:#6E7174}
+.uc-score-inline b{font-weight:600;color:var(--dark)}
+/* UC flow progress banner */
+.uc-flow-banner{background:var(--yellow-bg);border:1px solid var(--yellow-border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.uc-flow-steps{display:flex;gap:4px;align-items:center;flex:1;min-width:0}
+.uc-flow-step{width:20px;height:4px;border-radius:2px;background:var(--yellow-border)}
+.uc-flow-step.done{background:#B08A00}
+.uc-flow-label{font-size:11px;color:#8A7800;white-space:nowrap}
+@media(max-width:900px){
+  .diag-columns{grid-template-columns:1fr}
+}
+
 /* RESPONSIVE */
 @media(max-width:900px){
   .sections{padding:16px}
@@ -314,203 +352,377 @@ tbody td.tl{text-align:left}
       </div>
     </div>
 
-    <!-- DIAGNOSTICS -->
-    <div class="diag-sec">
-      <div class="sec-title">Diagnostics</div>
-      <div class="sec-helper" style="padding-bottom:0">Evaluate selected use cases across readiness, ethics, governance, and compliance</div>
-      <!-- GLOBAL ACTIONS -->
-      <div class="global-actions" style="align-items:center">
-        <!-- Analyse — primary, prominent, with helper -->
-        <button class="btn-filled" id="analyseBtn" style="font-size:14px;font-weight:600;padding:10px 20px;border-radius:28px;letter-spacing:-.1px">Analyse Use Cases →</button>
-        <button class="btn-outline-sm">Start Assessment</button>
-        <div class="ml-auto"><button class="btn-grey" id="resetBtn">Reset Diagnostics</button></div>
+    <!-- DIAGNOSTICS WRAPPER -->
+    <div class="sec-card" style="padding:0;overflow:hidden">
+      <div style="padding:25px 25px 16px">
+        <div class="sec-title">Diagnostics</div>
+        <div class="sec-helper">Evaluate use cases across readiness, ethics, governance, and compliance — at org and use-case level</div>
+        <!-- TOP ACTION ROW -->
+        <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <button class="btn-filled" id="analyseBtn" style="font-size:14px;font-weight:600;padding:10px 20px;border-radius:28px;letter-spacing:-.1px">Analyse Use Cases →</button>
+          <div class="ml-auto"><button class="btn-grey" id="resetBtn">Reset Diagnostics</button></div>
+        </div>
+        <!-- Yellow note -->
+        <div class="note-yellow" id="noteYellow" style="margin-top:12px">New use cases will be added to the analysed portfolio. Reports and system outputs will update automatically.</div>
       </div>
 
-      <!-- Yellow note: shown only before diagnostics are run (contextual) -->
-      <div class="note-yellow" id="noteYellow">New use cases will be added to the analysed portfolio. Reports and system outputs will update automatically.</div>
+      <!-- SIDE-BY-SIDE COLUMNS -->
+      <div class="diag-columns" style="padding:0 25px 25px">
 
-      <!-- DIAGNOSTIC CARDS with collapsible dropdown -->
-      <div class="diag-mods">
+        <!-- ── LEFT: ORG-LEVEL DIAGNOSTICS ── -->
+        <div class="diag-col">
+          <div class="diag-col-inner">
+            <div class="diag-col-title">Org-Level Diagnostics</div>
+            <div class="diag-col-helper">Each diagnostic is updated individually. Baseline changes reflect across all use cases.</div>
+            <div class="diag-col-actions">
+              <button class="btn-outline-sm">Start Assessment</button>
+            </div>
 
-        <!-- AI Readiness Diagnostic — has run, open by default -->
-        <div class="diag-card open" onclick="toggleDiag(this)">
-          <div class="diag-header">
-            <div class="diag-header-info">
-              <div class="diag-title-row">
-                <div class="mod-title">AI Readiness Diagnostic</div>
-              </div>
-              <div class="diag-score-inline"><b>Score: 68</b> · Coverage: 6 use cases analysed</div>
-            </div>
-            <div class="diag-chevron">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-          </div>
-          <div class="diag-dropdown" style="max-height:220px">
-            <div class="diag-drop-row">
-              <div class="diag-drop-details" style="flex:1">
-                <div class="diag-stat-row">
-                  <div class="diag-stat">
-                    <div class="diag-stat-val">68%</div>
-                    <div class="diag-stat-lbl">Progress</div>
-                  </div>
-                </div>
-                <div class="diag-drop-line" style="margin-top:10px">Coverage: 6 use cases analysed</div>
-                <div class="diag-drop-line">Reflects organisational baseline and analysed use cases</div>
-                <div class="diag-drop-line upd">Baseline last updated 45 days ago</div>
-              </div>
-              <div class="diag-drop-actions" onclick="event.stopPropagation()">
-                <button class="btn-outline">Update Baseline →</button>
-              </div>
-            </div>
-          </div>
-          <div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:68%"></div></div></div>
-        </div>
+            <div class="diag-mods">
 
-        <!-- AI Ethics Diagnostic — locked -->
-        <div class="diag-card" onclick="toggleDiag(this)">
-          <div class="diag-header">
-            <div class="diag-header-info">
-              <div class="diag-title-row">
-                <div class="mod-title">AI Ethics Diagnostic</div>
-                <span class="pill">Locked</span>
-              </div>
-              <div class="diag-score-inline"><b>Score: —</b> · Not yet run</div>
-            </div>
-            <div class="diag-chevron">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-          </div>
-          <div class="diag-dropdown">
-            <div class="diag-drop-row">
-              <div class="diag-drop-details" style="flex:1">
-                <div class="diag-stat-row">
-                  <div class="diag-stat">
-                    <div class="diag-stat-locked">
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="#B08A00" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#B08A00" stroke-width="1.3" stroke-linecap="round"/></svg>
-                      <span>Locked</span>
+              <!-- AI Readiness Diagnostic — has run, open by default -->
+              <div class="diag-card open" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">AI Readiness Diagnostic</div>
                     </div>
-                    <div class="diag-stat-lbl">Current Status</div>
+                    <div class="diag-score-inline"><b>Score: 68</b> · Coverage: 6 use cases</div>
                   </div>
-                  <div style="width:1px;height:32px;background:#EDEDED;flex-shrink:0"></div>
-                  <div class="diag-stat">
-                    <div class="diag-stat-val">0%</div>
-                    <div class="diag-stat-lbl">Progress</div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
                   </div>
                 </div>
-              </div>
-              <div class="diag-drop-actions" onclick="event.stopPropagation()">
-                <button class="btn-outline">Update Baseline →</button>
-              </div>
-            </div>
-          </div>
-          <div class="progress-row"><div class="progress-track"></div></div>
-        </div>
-
-        <!-- AI Governance Diagnostic — locked -->
-        <div class="diag-card" onclick="toggleDiag(this)">
-          <div class="diag-header">
-            <div class="diag-header-info">
-              <div class="diag-title-row">
-                <div class="mod-title">AI Governance Diagnostic</div>
-                <span class="pill">Locked</span>
-              </div>
-              <div class="diag-score-inline"><b>Score: —</b> · Not yet run</div>
-            </div>
-            <div class="diag-chevron">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-          </div>
-          <div class="diag-dropdown">
-            <div class="diag-drop-row">
-              <div class="diag-drop-details" style="flex:1">
-                <div class="diag-stat-row">
-                  <div class="diag-stat">
-                    <div class="diag-stat-locked">
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="#B08A00" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#B08A00" stroke-width="1.3" stroke-linecap="round"/></svg>
-                      <span>Locked</span>
+                <div class="diag-dropdown" style="max-height:220px">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-val">68%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">Coverage: 6 use cases analysed</div>
+                      <div class="diag-drop-line">Reflects organisational baseline and analysed use cases</div>
+                      <div class="diag-drop-line upd">Baseline last updated 45 days ago</div>
                     </div>
-                    <div class="diag-stat-lbl">Current Status</div>
-                  </div>
-                  <div style="width:1px;height:32px;background:#EDEDED;flex-shrink:0"></div>
-                  <div class="diag-stat">
-                    <div class="diag-stat-val">0%</div>
-                    <div class="diag-stat-lbl">Progress</div>
-                  </div>
-                </div>
-                <div class="diag-drop-line" style="margin-top:10px">Coverage: — use cases analysed</div>
-                <div class="diag-drop-line">Reflects organisational baseline and analysed use cases</div>
-                <div class="diag-drop-line upd">Diagnostic not yet run</div>
-              </div>
-              <div class="diag-drop-actions" onclick="event.stopPropagation()">
-                <button class="btn-outline">Update Baseline →</button>
-              </div>
-            </div>
-          </div>
-          <div class="progress-row"><div class="progress-track"></div></div>
-        </div>
-
-        <!-- AI Compliance Diagnostic — locked -->
-        <div class="diag-card" onclick="toggleDiag(this)">
-          <div class="diag-header">
-            <div class="diag-header-info">
-              <div class="diag-title-row">
-                <div class="mod-title">AI Compliance Diagnostic</div>
-                <span class="pill">Locked</span>
-              </div>
-              <div class="diag-score-inline"><b>Score: —</b> · Not yet run</div>
-            </div>
-            <div class="diag-chevron">
-              <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </div>
-          </div>
-          <div class="diag-dropdown">
-            <div class="diag-drop-row">
-              <div class="diag-drop-details" style="flex:1">
-                <div class="diag-stat-row">
-                  <div class="diag-stat">
-                    <div class="diag-stat-locked">
-                      <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="#B08A00" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#B08A00" stroke-width="1.3" stroke-linecap="round"/></svg>
-                      <span>Locked</span>
+                    <div class="diag-drop-actions" onclick="event.stopPropagation()">
+                      <button class="btn-outline">Update Baseline →</button>
                     </div>
-                    <div class="diag-stat-lbl">Current Status</div>
-                  </div>
-                  <div style="width:1px;height:32px;background:#EDEDED;flex-shrink:0"></div>
-                  <div class="diag-stat">
-                    <div class="diag-stat-val">0%</div>
-                    <div class="diag-stat-lbl">Progress</div>
                   </div>
                 </div>
-                <div class="diag-drop-line" style="margin-top:10px">Coverage: — use cases analysed</div>
-                <div class="diag-drop-line">Reflects organisational baseline and analysed use cases</div>
-                <div class="diag-drop-line upd">Diagnostic not yet run</div>
+                <div class="progress-row"><div class="progress-track"><div class="progress-fill" style="width:68%"></div></div></div>
               </div>
-              <div class="diag-drop-actions" onclick="event.stopPropagation()">
-                <button class="btn-outline">Update Baseline →</button>
+
+              <!-- AI Ethics Diagnostic — locked -->
+              <div class="diag-card" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">AI Ethics Diagnostic</div>
+                      <span class="pill">Locked</span>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: —</b> · Not yet run</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-locked">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="#B08A00" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#B08A00" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <span>Locked</span>
+                          </div>
+                          <div class="diag-stat-lbl">Current Status</div>
+                        </div>
+                        <div style="width:1px;height:32px;background:#EDEDED;flex-shrink:0"></div>
+                        <div class="diag-stat">
+                          <div class="diag-stat-val">0%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">Complete AI Readiness first to unlock</div>
+                      <div class="diag-drop-line upd">Diagnostic not yet run</div>
+                    </div>
+                    <div class="diag-drop-actions" onclick="event.stopPropagation()">
+                      <button class="btn-outline">Update Baseline →</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track"></div></div>
+              </div>
+
+              <!-- AI Governance Diagnostic — locked -->
+              <div class="diag-card" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">AI Governance Diagnostic</div>
+                      <span class="pill">Locked</span>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: —</b> · Not yet run</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-locked">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="#B08A00" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#B08A00" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <span>Locked</span>
+                          </div>
+                          <div class="diag-stat-lbl">Current Status</div>
+                        </div>
+                        <div style="width:1px;height:32px;background:#EDEDED;flex-shrink:0"></div>
+                        <div class="diag-stat">
+                          <div class="diag-stat-val">0%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">Coverage: — use cases analysed</div>
+                      <div class="diag-drop-line upd">Diagnostic not yet run</div>
+                    </div>
+                    <div class="diag-drop-actions" onclick="event.stopPropagation()">
+                      <button class="btn-outline">Update Baseline →</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track"></div></div>
+              </div>
+
+              <!-- AI Compliance Diagnostic — locked -->
+              <div class="diag-card" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">AI Compliance Diagnostic</div>
+                      <span class="pill">Locked</span>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: —</b> · Not yet run</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-locked">
+                            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="2.5" y="6" width="9" height="6.5" rx="1.5" stroke="#B08A00" stroke-width="1.3"/><path d="M4.5 6V4.5a2.5 2.5 0 0 1 5 0V6" stroke="#B08A00" stroke-width="1.3" stroke-linecap="round"/></svg>
+                            <span>Locked</span>
+                          </div>
+                          <div class="diag-stat-lbl">Current Status</div>
+                        </div>
+                        <div style="width:1px;height:32px;background:#EDEDED;flex-shrink:0"></div>
+                        <div class="diag-stat">
+                          <div class="diag-stat-val">0%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">Coverage: — use cases analysed</div>
+                      <div class="diag-drop-line upd">Diagnostic not yet run</div>
+                    </div>
+                    <div class="diag-drop-actions" onclick="event.stopPropagation()">
+                      <button class="btn-outline">Update Baseline →</button>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track"></div></div>
+              </div>
+
+            </div><!-- /org diag-mods -->
+
+            <div class="divider" style="margin-top:16px"></div>
+            <div class="diag-sum-bar">
+              <div class="icon-wrap">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#E4200A" stroke-width="1.4"/><path d="M6.5 10l2.5 2.5 4.5-5" stroke="#E4200A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="sum-title">1/4 Diagnostics Completed</div>
+                <div style="font-size:12px;color:var(--grey62);margin-top:2px">Complete all to generate full report</div>
+              </div>
+              <div class="ml-auto">
+                <button class="btn-grad-lg">Generate Report <img style="width:13px;height:13px;margin-left:4px" src="https://www.figma.com/api/mcp/asset/8f6e3850-7689-4b42-bb93-1abd51b737df" alt=""/></button>
               </div>
             </div>
+            <div class="note-red" style="margin-top:12px">Selected use cases will be evaluated across all diagnostics. Existing results remain unchanged.</div>
           </div>
-          <div class="progress-row"><div class="progress-track"></div></div>
-        </div>
+        </div><!-- /left col -->
 
-      </div><!-- /diag-mods -->
+        <!-- ── RIGHT: UC-LEVEL DIAGNOSTICS ── -->
+        <div class="diag-col">
+          <div class="diag-col-inner">
+            <div class="diag-col-title">Use-Case-Level Diagnostics</div>
+            <div class="diag-col-helper">All 4 diagnostics run as a single guided flow. Complete them in sequence for the selected portfolio.</div>
+            <div class="diag-col-actions" style="justify-content:space-between">
+              <button class="btn-outline uc-continue-btn">Continue Assessment</button>
+              <button class="btn-outline-sm">View Results →</button>
+            </div>
 
-      <div class="divider"></div>
-      <div class="diag-sum-bar">
-        <div class="icon-wrap">
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#E4200A" stroke-width="1.4"/><path d="M6.5 10l2.5 2.5 4.5-5" stroke="#E4200A" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        </div>
-        <div>
-          <div class="sum-title">2/4 Diagnostics Completed</div>
-          <div style="font-size:12px;color:var(--grey62);margin-top:2px">Complete diagnostics to generate report</div>
-        </div>
-        <div class="ml-auto">
-          <button class="btn-grad-lg">Generate Report <img style="width:13px;height:13px;margin-left:4px" src="https://www.figma.com/api/mcp/asset/8f6e3850-7689-4b42-bb93-1abd51b737df" alt=""/></button>
-        </div>
-      </div>
+            <!-- UC flow progress banner -->
+            <div class="uc-flow-banner">
+              <div class="uc-flow-steps">
+                <div class="uc-flow-step done"></div>
+                <div class="uc-flow-step done"></div>
+                <div class="uc-flow-step done"></div>
+                <div class="uc-flow-step done"></div>
+              </div>
+              <div class="uc-flow-label">4/4 steps complete</div>
+            </div>
 
-      <!-- single-line note -->
-      <div class="note-red" style="margin-top:12px">Selected use cases will be evaluated across all diagnostics. Existing use case results remain unchanged. Reports and system outputs will update accordingly.</div>
-    </div>
+            <div class="diag-mods">
+
+              <!-- UC Readiness — completed, using same diag-card pattern -->
+              <div class="diag-card open" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">UC-Level AI Readiness</div>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: 82</b> · 8 use cases covered</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown" style="max-height:200px">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-val" style="color:#27AE60">100%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">All 8 selected use cases assessed</div>
+                      <div class="diag-drop-line upd">Completed · Part of guided flow</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track" style="background:#E8F9EE"><div class="progress-fill" style="width:100%;background:#34C759"></div></div></div>
+              </div>
+
+              <!-- UC Ethics — completed -->
+              <div class="diag-card" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">UC-Level AI Ethics</div>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: 76</b> · 8 use cases covered</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-val" style="color:#27AE60">100%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">All 8 selected use cases assessed</div>
+                      <div class="diag-drop-line upd">Completed · Part of guided flow</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track" style="background:#E8F9EE"><div class="progress-fill" style="width:100%;background:#34C759"></div></div></div>
+              </div>
+
+              <!-- UC Governance — completed -->
+              <div class="diag-card" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">UC-Level AI Governance</div>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: 71</b> · 8 use cases covered</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-val" style="color:#27AE60">100%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">All 8 selected use cases assessed</div>
+                      <div class="diag-drop-line upd">Completed · Part of guided flow</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track" style="background:#E8F9EE"><div class="progress-fill" style="width:100%;background:#34C759"></div></div></div>
+              </div>
+
+              <!-- UC Compliance — completed -->
+              <div class="diag-card" onclick="toggleDiag(this)">
+                <div class="diag-header">
+                  <div class="diag-header-info">
+                    <div class="diag-title-row">
+                      <div class="mod-title">UC-Level AI Compliance</div>
+                    </div>
+                    <div class="diag-score-inline"><b>Score: 89</b> · 8 use cases covered</div>
+                  </div>
+                  <div class="diag-chevron">
+                    <svg width="14" height="8" viewBox="0 0 14 8" fill="none"><path d="M1 1l6 6 6-6" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                  </div>
+                </div>
+                <div class="diag-dropdown">
+                  <div class="diag-drop-row">
+                    <div class="diag-drop-details" style="flex:1">
+                      <div class="diag-stat-row">
+                        <div class="diag-stat">
+                          <div class="diag-stat-val" style="color:#27AE60">100%</div>
+                          <div class="diag-stat-lbl">Progress</div>
+                        </div>
+                      </div>
+                      <div class="diag-drop-line" style="margin-top:10px">All 8 selected use cases assessed</div>
+                      <div class="diag-drop-line upd">Completed · Part of guided flow</div>
+                    </div>
+                  </div>
+                </div>
+                <div class="progress-row"><div class="progress-track" style="background:#E8F9EE"><div class="progress-fill" style="width:100%;background:#34C759"></div></div></div>
+              </div>
+
+            </div><!-- /uc diag-mods -->
+
+            <div class="divider" style="margin-top:16px"></div>
+            <div class="diag-sum-bar">
+              <div class="icon-wrap" style="background:rgba(52,199,89,.1)">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8" stroke="#34C759" stroke-width="1.4"/><path d="M6.5 10l2.5 2.5 4.5-5" stroke="#34C759" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+              <div>
+                <div class="sum-title">4/4 UC Diagnostics Completed</div>
+                <div style="font-size:12px;color:var(--grey62);margin-top:2px">All use-case diagnostics complete</div>
+              </div>
+              <div class="ml-auto" style="display:flex;gap:8px;align-items:center">
+                <button class="btn-grad-lg">Generate Report <img style="width:13px;height:13px;margin-left:4px" src="https://www.figma.com/api/mcp/asset/8f6e3850-7689-4b42-bb93-1abd51b737df" alt=""/></button>
+              </div>
+            </div>
+            <div class="note-red" style="margin-top:12px">Re-running the flow will re-evaluate all 4 diagnostics for the current use case selection.</div>
+          </div>
+        </div><!-- /right col -->
+
+      </div><!-- /diag-columns -->
+    </div><!-- /diagnostics wrapper sec-card -->
 
   </div>
 </div><!-- /screen1 -->
