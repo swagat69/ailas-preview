@@ -1021,7 +1021,7 @@ td:last-child { overflow: visible; position: relative; }
       </div>
     </div>
 
-    <!-- Table: Name · Function · Provenance · Deployment Stage · Actions -->
+    <!-- Table: Name · Function · Priority · Provenance · Deployment Stage · Actions -->
     <div class="table-wrap">
       <div class="table-scroll">
         <table>
@@ -1029,9 +1029,9 @@ td:last-child { overflow: visible; position: relative; }
             <tr>
               <th style="min-width:240px">Name</th>
               <th style="width:130px">Function</th>
+              <th style="width:120px">Priority</th>
               <th style="width:180px">Provenance</th>
               <th style="width:150px">Deployment Stage</th>
-              <th style="width:120px">Priority</th>
               <th style="width:80px">Actions</th>
             </tr>
           </thead>
@@ -1043,10 +1043,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Legal</span></td>
+              <td><span class="pri pri-h">High</span></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-pilot">Pilot</span></td>
-              <td><span class="pri pri-h">High</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1055,10 +1055,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">HR</span></td>
+              <td><span class="pri pri-m">Medium</span></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-explore">Exploration</span></td>
-              <td><span class="pri pri-m">Medium</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-ailas')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-ailas')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1067,10 +1067,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Finance</span></td>
+              <td><span class="pri pri-h">High</span></td>
               <td><span class="tag tag-org">Org Mapped</span></td>
               <td><span class="tag tag-prod">Production</span></td>
-              <td><span class="pri pri-h">High</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-2')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-2')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1079,10 +1079,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Compliance</span></td>
+              <td><span class="pri pri-m">Medium</span></td>
               <td><span class="tag tag-org">Org Mapped</span></td>
               <td><span class="tag tag-explore">Exploration</span></td>
-              <td><span class="pri pri-m">Medium</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-org')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-org')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1091,10 +1091,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Operations</span></td>
+              <td><span class="pri pri-m">Medium</span></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-pilot">Pilot</span></td>
-              <td><span class="pri pri-m">Medium</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1103,10 +1103,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Sales</span></td>
+              <td><span class="pri pri-l">Low</span></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-explore">Exploration</span></td>
-              <td><span class="pri pri-l">Low</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-ailas')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-ailas')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1115,10 +1115,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Procurement</span></td>
+              <td><span class="pri pri-l">Low</span></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-explore">Exploration</span></td>
-              <td><span class="pri pri-l">Low</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1127,10 +1127,10 @@ td:last-child { overflow: visible; position: relative; }
                 </div>
               </td>
               <td><span style="font-size:var(--fs-sm);color:var(--ink-2)">Strategy</span></td>
+              <td><span class="pri pri-l">Low</span></td>
               <td><span class="tag tag-org">Org Mapped</span></td>
               <td><span class="tag tag-explore">Exploration</span></td>
-              <td><span class="pri pri-l">Low</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-org')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-unassessed-org')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-delete')">Delete Use Case</li></ul></div></td>
             </tr>
           </tbody>
         </table>
@@ -1213,7 +1213,7 @@ td:last-child { overflow: visible; position: relative; }
               <td class="td-center"><span class="score score-hi">81</span></td>
               <td class="td-center"><span class="score score-mid">72</span></td>
               <td class="td-center"><span class="score score-mid">79</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1228,7 +1228,7 @@ td:last-child { overflow: visible; position: relative; }
               <td class="td-center"><span class="score score-hi">82</span></td>
               <td class="td-center"><span class="score score-mid">65</span></td>
               <td class="td-center"><span class="score score-hi">88</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-2')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-2')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1243,7 +1243,7 @@ td:last-child { overflow: visible; position: relative; }
               <td class="td-center"><span class="score score-mid">69</span></td>
               <td class="td-center"><span class="score score-mid">74</span></td>
               <td class="td-center"><span class="score score-mid">71</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1258,7 +1258,7 @@ td:last-child { overflow: visible; position: relative; }
               <td class="td-center"><span class="score score-mid">70</span></td>
               <td class="td-center"><span class="score score-mid">64</span></td>
               <td class="td-center"><span class="score score-mid">73</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1273,7 +1273,7 @@ td:last-child { overflow: visible; position: relative; }
               <td class="td-center"><span class="score score-mid">63</span></td>
               <td class="td-center"><span class="score score-mid">58</span></td>
               <td class="td-center"><span class="score score-mid">66</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-add" onclick="openModal('modal-portfolio')">Add to Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-add" onclick="openModal('modal-portfolio')">Add to Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td>
@@ -1288,7 +1288,7 @@ td:last-child { overflow: visible; position: relative; }
               <td class="td-center"><span class="score score-hi">75</span></td>
               <td class="td-center"><span class="score score-mid">69</span></td>
               <td class="td-center"><span class="score score-hi">78</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-2')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-add" onclick="openModal('modal-portfolio')">Add to Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-2')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-add" onclick="openModal('modal-portfolio')">Add to Portfolio</li></ul></div></td>
             </tr>
           </tbody>
         </table>
@@ -1363,28 +1363,28 @@ td:last-child { overflow: visible; position: relative; }
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-pilot">Pilot</span></td>
               <td><span class="pri pri-h">High</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td><div class="name-cell"><span class="uc-name">Automated Invoice Processing</span></div></td>
               <td><span class="tag tag-org">Org Mapped</span></td>
               <td><span class="tag tag-prod">Production</span></td>
               <td><span class="pri pri-h">High</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td><div class="name-cell"><span class="uc-name">Meeting Summarisation Tool</span></div></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-pilot">Pilot</span></td>
               <td><span class="pri pri-m">Medium</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
             <tr class="data-row">
               <td><div class="name-cell"><span class="uc-name">Supplier Risk Scoring</span></div></td>
               <td><span class="tag tag-ailas">AILAS</span></td>
               <td><span class="tag tag-explore">Exploration</span></td>
               <td><span class="pri pri-l">Low</span></td>
-              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="showSubMenu(this,'status')">Change Status<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setStatusFromMenu(this,'active')">Active</li><li onclick="setStatusFromMenu(this,'testing')">Testing</li><li onclick="setStatusFromMenu(this,'planned')">Planned</li></ul></li><li onclick="showSubMenu(this,'priority')">Change Priority<span class="dot-arrow">›</span><ul class="dot-submenu"><li onclick="setPriorityFromMenu(this,'h')">High</li><li onclick="setPriorityFromMenu(this,'m')">Medium</li><li onclick="setPriorityFromMenu(this,'l')">Low</li></ul></li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
+              <td onclick="event.stopPropagation()"><div class="dot-wrap" onclick="event.stopPropagation();toggleMenu(this)"><button class="dot-btn" title="Actions">···</button><ul class="dot-menu"><li onclick="openPanel('panel-assessed-1')">View Details</li><li class="dot-sep"></li><li onclick="openStatusModal(this)">Change Status</li><li onclick="openPriorityModal(this)">Change Priority</li><li class="dot-sep"></li><li class="dot-danger" onclick="openModal('modal-remove')">Remove from Portfolio</li></ul></div></td>
             </tr>
           </tbody>
         </table>
@@ -1511,16 +1511,9 @@ td:last-child { overflow: visible; position: relative; }
     </div>
   </div>
 
-
-  <div class="panel-meta-grid">
-    <div class="pmg-item" style="grid-column:1/-1"><span class="pmg-label">Summary</span><p class="panel-section-text" style="margin:4px 0 0">AI reviews and flags contract clauses, risk provisions, and anomalies against predefined legal standards. Enables legal teams to process higher volumes with reduced manual effort.</p></div>
-    <div class="pmg-item"><span class="pmg-label">Department</span><span class="pmg-value">Legal</span></div>
-    <div class="pmg-item"><span class="pmg-label">Responsible Person</span><span class="pmg-value">General Counsel, Legal</span></div>
-  </div>
-  <div class="panel-divider"></div>
-
   <div class="panel-tabs">
-    <button class="panel-tab active" onclick="switchPanelTab('a1','readiness',this)">Readiness</button>
+    <button class="panel-tab active" onclick="switchPanelTab('a1','overview',this)">Overview</button>
+    <button class="panel-tab" onclick="switchPanelTab('a1','readiness',this)">Readiness</button>
     <button class="panel-tab" onclick="switchPanelTab('a1','ethics',this)">Ethics</button>
     <button class="panel-tab" onclick="switchPanelTab('a1','governance',this)">Governance</button>
     <button class="panel-tab" onclick="switchPanelTab('a1','compliance',this)">Compliance</button>
@@ -1528,8 +1521,17 @@ td:last-child { overflow: visible; position: relative; }
 
   <div class="panel-body">
 
+    <!-- Overview -->
+    <div class="panel-tc active" id="a1-overview">
+      <div class="panel-meta-grid">
+        <div class="pmg-item" style="grid-column:1/-1"><span class="pmg-label">Summary</span><p class="panel-section-text" style="margin:4px 0 0">AI reviews and flags contract clauses, risk provisions, and anomalies against predefined legal standards. Enables legal teams to process higher volumes with reduced manual effort.</p></div>
+        <div class="pmg-item"><span class="pmg-label">Department</span><span class="pmg-value">Legal</span></div>
+        <div class="pmg-item"><span class="pmg-label">Responsible Person</span><span class="pmg-value">General Counsel, Legal</span></div>
+      </div>
+    </div>
+
     <!-- Readiness: 68 -->
-    <div class="panel-tc active" id="a1-readiness">
+    <div class="panel-tc" id="a1-readiness">
       <div class="score-ring-wrap">
         <svg class="score-ring-svg" width="140" height="140" viewBox="0 0 140 140">
           <circle cx="70" cy="70" r="56" fill="none" stroke="#EEF1F5" stroke-width="11"/>
@@ -1681,16 +1683,9 @@ td:last-child { overflow: visible; position: relative; }
     </div>
   </div>
 
-
-  <div class="panel-meta-grid">
-    <div class="pmg-item" style="grid-column:1/-1"><span class="pmg-label">Summary</span><p class="panel-section-text" style="margin:4px 0 0">Automatically extracts invoice data, matches against purchase orders, and routes exceptions for human review. Reduces processing time and improves accuracy across high-volume finance operations.</p></div>
-    <div class="pmg-item"><span class="pmg-label">Department</span><span class="pmg-value">Finance & Accounting</span></div>
-    <div class="pmg-item"><span class="pmg-label">Responsible Person</span><span class="pmg-value">CFO, Finance & Accounting</span></div>
-  </div>
-  <div class="panel-divider"></div>
-
   <div class="panel-tabs">
-    <button class="panel-tab active" onclick="switchPanelTab('a2','r2',this)">Readiness</button>
+    <button class="panel-tab active" onclick="switchPanelTab('a2','ov2',this)">Overview</button>
+    <button class="panel-tab" onclick="switchPanelTab('a2','r2',this)">Readiness</button>
     <button class="panel-tab" onclick="switchPanelTab('a2','e2',this)">Ethics</button>
     <button class="panel-tab" onclick="switchPanelTab('a2','g2',this)">Governance</button>
     <button class="panel-tab" onclick="switchPanelTab('a2','c2',this)">Compliance</button>
@@ -1698,8 +1693,17 @@ td:last-child { overflow: visible; position: relative; }
 
   <div class="panel-body">
 
+    <!-- Overview -->
+    <div class="panel-tc active" id="a2-ov2">
+      <div class="panel-meta-grid">
+        <div class="pmg-item" style="grid-column:1/-1"><span class="pmg-label">Summary</span><p class="panel-section-text" style="margin:4px 0 0">Automatically extracts invoice data, matches against purchase orders, and routes exceptions for human review. Reduces processing time and improves accuracy across high-volume finance operations.</p></div>
+        <div class="pmg-item"><span class="pmg-label">Department</span><span class="pmg-value">Finance & Accounting</span></div>
+        <div class="pmg-item"><span class="pmg-label">Responsible Person</span><span class="pmg-value">CFO, Finance & Accounting</span></div>
+      </div>
+    </div>
+
     <!-- Readiness: 74 -->
-    <div class="panel-tc active" id="a2-r2">
+    <div class="panel-tc" id="a2-r2">
       <div class="score-ring-wrap">
         <svg class="score-ring-svg" width="140" height="140" viewBox="0 0 140 140">
           <circle cx="70" cy="70" r="56" fill="none" stroke="#EEF1F5" stroke-width="11"/>
@@ -1840,6 +1844,54 @@ td:last-child { overflow: visible; position: relative; }
 </div>
 
 
+<!-- ── MODAL: Change Status ─────────────── -->
+<div class="modal-overlay" id="modal-change-status" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h2 class="modal-title">Change Status</h2>
+    <p class="modal-body">Select a new status for this use case.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:4px 0 8px">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink-2);transition:background .12s" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <input type="radio" name="modal-status" value="active" style="accent-color:var(--red)"> <span style="color:#00C3D0;font-weight:600">Active</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink-2);transition:background .12s" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <input type="radio" name="modal-status" value="testing" style="accent-color:var(--red)"> <span style="color:#34C759;font-weight:600">Testing</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink-2);transition:background .12s" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <input type="radio" name="modal-status" value="planned" style="accent-color:var(--red)"> <span style="color:#FF8D28;font-weight:600">Planned</span>
+      </label>
+    </div>
+    <div class="modal-rule"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-change-status')">Cancel</button>
+      <button class="btn-primary" onclick="confirmStatusChange()">Apply</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL: Change Priority ────────────── -->
+<div class="modal-overlay" id="modal-change-priority" role="dialog" aria-modal="true">
+  <div class="modal">
+    <h2 class="modal-title">Change Priority</h2>
+    <p class="modal-body">Select a new priority level for this use case.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin:4px 0 8px">
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink-2);transition:background .12s" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <input type="radio" name="modal-priority" value="h" style="accent-color:var(--red)"> <span style="color:#FF383C;font-weight:600">High</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink-2);transition:background .12s" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <input type="radio" name="modal-priority" value="m" style="accent-color:var(--red)"> <span style="color:#FF8D28;font-weight:600">Medium</span>
+      </label>
+      <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:9px 12px;border:1px solid var(--border-md);border-radius:var(--r-sm);font-size:var(--fs-sm);color:var(--ink-2);transition:background .12s" onmouseover="this.style.background='var(--surface-2)'" onmouseout="this.style.background=''">
+        <input type="radio" name="modal-priority" value="l" style="accent-color:var(--red)"> <span style="color:#00B894;font-weight:600">Low</span>
+      </label>
+    </div>
+    <div class="modal-rule"></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('modal-change-priority')">Cancel</button>
+      <button class="btn-primary" onclick="confirmPriorityChange()">Apply</button>
+    </div>
+  </div>
+</div>
+
 <script>
 
 
@@ -1913,6 +1965,56 @@ function setStatusFromMenu(li, val) {
     if (sel) { sel.value = val; updateStatus(sel); }
   }
 }
+
+/* ── Status / Priority modal helpers ── */
+let _pendingStatusRow = null;
+let _pendingPriorityRow = null;
+
+function openStatusModal(li) {
+  closeAllMenus();
+  _pendingStatusRow = li.closest('tr');
+  // Pre-select current status if detectable
+  document.querySelectorAll('input[name="modal-status"]').forEach(r => r.checked = false);
+  openModal('modal-change-status');
+}
+function confirmStatusChange() {
+  const sel = document.querySelector('input[name="modal-status"]:checked');
+  if (!sel) { closeModal('modal-change-status'); return; }
+  if (_pendingStatusRow) {
+    const pillWrap = _pendingStatusRow.querySelector('.sel-pill');
+    if (pillWrap) {
+      const s = pillWrap.querySelector('select');
+      if (s) { s.value = sel.value; updateStatus(s); }
+    }
+  }
+  closeModal('modal-change-status');
+  _pendingStatusRow = null;
+}
+
+function openPriorityModal(li) {
+  closeAllMenus();
+  _pendingPriorityRow = li.closest('tr');
+  document.querySelectorAll('input[name="modal-priority"]').forEach(r => r.checked = false);
+  openModal('modal-change-priority');
+}
+function confirmPriorityChange() {
+  const sel = document.querySelector('input[name="modal-priority"]:checked');
+  if (!sel) { closeModal('modal-change-priority'); return; }
+  if (_pendingPriorityRow) {
+    // Update the Priority pill/cell in the row
+    const priEl = _pendingPriorityRow.querySelector('.pri, .sel-pill.sel-pri-h, .sel-pill.sel-pri-m, .sel-pill.sel-pri-l');
+    if (priEl) {
+      const labels = {h:'High', m:'Medium', l:'Low'};
+      priEl.className = priEl.className.replace(/\bpri-[hml]\b|\bsel-pri-[hml]\b/g, '');
+      if (priEl.tagName === 'SPAN') {
+        priEl.classList.add('pri-' + sel.value);
+        priEl.textContent = labels[sel.value];
+      }
+    }
+  }
+  closeModal('modal-change-priority');
+  _pendingPriorityRow = null;
+}
 function setPriorityFromMenu(li, val) {
   closeAllMenus();
   const row = li.closest('tr');
@@ -1979,11 +2081,13 @@ function closePanel(silent) {
 
 /* ── PANEL INNER TABS ── */
 function switchPanelTab(panelId, tabId, btn) {
-  const panel = document.getElementById('panel-assessed-' + (panelId==='a1'?'1':'2'));
-  panel.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
+  const panelEl = panelId === 'a1'
+    ? document.getElementById('panel-assessed-1')
+    : document.getElementById('panel-assessed-2');
+  panelEl.querySelectorAll('.panel-tab').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  panel.querySelectorAll('.panel-tc').forEach(c => c.classList.remove('active'));
-  const t = document.getElementById(panelId+'-'+tabId);
+  panelEl.querySelectorAll('.panel-tc').forEach(c => c.classList.remove('active'));
+  const t = document.getElementById(panelId + '-' + tabId);
   if (t) t.classList.add('active');
 }
 
