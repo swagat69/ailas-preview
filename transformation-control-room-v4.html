@@ -1,0 +1,2161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AILAS — Transformation Control Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://use.typekit.net/hjx4qdl.css">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#F4F4F4;--white:#FFFFFF;
+  --text:#0E1317;--t60:#6E7174;--t40:#9FA1A2;--t11:#E4E5E5;--t5:#F3F3F3;
+  --primary:#E4200A;--p60:#EF796C;--p40:#F4A69D;--p11:#FCE6E4;--p5:#FDF4F2;
+  --success:#09C557;--s60:#6BDC9A;--s11:#E4F9ED;--s5:#F2FCF6;
+  --error:#E61313;--e60:#F07171;--e11:#FCE5E5;--e5:#FDF3F3;
+  --yellow:#F5C813;--y60:#F9DE71;--y11:#FEF9E5;--y5:#FEFCF3;
+  --blue:#147FF9;--b60:#72B2FB;--b11:#E5F1FE;--b5:#F3F8FE;
+  --border:rgba(14,19,23,0.07);--bh:rgba(14,19,23,0.13);
+  --sh:0 1px 3px rgba(14,19,23,0.04),0 1px 2px rgba(14,19,23,0.03);
+  --sh2:0 4px 16px rgba(14,19,23,0.07),0 1px 3px rgba(14,19,23,0.04);
+  --sh3:0 12px 40px rgba(14,19,23,0.1),0 2px 6px rgba(14,19,23,0.04);
+  --r:12px;--rs:8px;
+  --sw:60px;--swe:224px;
+  --f:'acumin-pro','Acumin Pro','Outfit',system-ui,sans-serif;
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--f);min-height:100vh;display:flex;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--t11);border-radius:8px}
+::-webkit-scrollbar-thumb:hover{background:var(--t40)}
+
+/* ═══ SIDEBAR — Animated (from Add Sidebar Animation Effects) ═══ */
+.sidebar{
+  width:var(--sw);min-height:100vh;background:var(--white);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  align-items:flex-start;padding:0;position:fixed;left:0;top:0;bottom:0;
+  z-index:100;transition:width .3s cubic-bezier(.4,0,.2,1);overflow:hidden;
+  box-shadow:2px 0 12px rgba(14,19,23,.06);
+}
+.sidebar.expanded,.sidebar:hover{width:var(--swe)}
+
+/* Sidebar top branding zone */
+.s-brand{
+  display:flex;align-items:center;gap:0;padding:18px 0 14px;
+  border-bottom:1px solid var(--border);width:100%;flex-shrink:0;overflow:hidden;
+  min-height:64px;
+}
+.s-brand-icon{width:var(--sw);min-width:var(--sw);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.s-wordmark{opacity:0;transition:opacity .18s .06s;white-space:nowrap;overflow:hidden;flex-shrink:0}
+.sidebar.expanded .s-wordmark,.sidebar:hover .s-wordmark{opacity:1}
+
+/* Nav section */
+.s-nav{display:flex;flex-direction:column;gap:2px;width:100%;padding:10px 8px;flex:1;overflow:hidden}
+
+/* Nav section label */
+.s-section-label{
+  font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;
+  color:var(--t40);padding:6px 12px 2px;white-space:nowrap;overflow:hidden;
+  opacity:0;transition:opacity .18s .04s;height:24px;
+}
+.sidebar.expanded .s-section-label,.sidebar:hover .s-section-label{opacity:1}
+
+.si{
+  display:flex;align-items:center;gap:0;padding:0;height:40px;
+  border-radius:var(--rs);color:var(--t60);font-size:13px;
+  font-weight:500;cursor:pointer;white-space:nowrap;transition:all .18s;text-decoration:none;
+  overflow:hidden;position:relative;
+}
+.si:hover{background:var(--t5);color:var(--text)}
+.si.active{background:var(--p11);color:var(--primary);font-weight:600}
+.si.active::before{content:'';position:absolute;left:0;top:8px;bottom:8px;width:3px;background:var(--primary);border-radius:0 3px 3px 0}
+
+/* Icon container — fixed width = collapsed sidebar */
+.si-ic{
+  width:var(--sw);min-width:var(--sw);height:40px;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;transition:all .18s;
+}
+.si-icon{width:20px;height:20px;flex-shrink:0;object-fit:contain;opacity:.5;transition:opacity .18s;filter:grayscale(1)}
+.si:hover .si-icon,.si.active .si-icon{opacity:1;filter:none}
+
+/* Label — slides in */
+.si-lbl{
+  opacity:0;transform:translateX(-8px);
+  transition:opacity .18s .04s,transform .18s .04s;
+  flex-shrink:0;font-size:13px;
+}
+.sidebar.expanded .si-lbl,.sidebar:hover .si-lbl{opacity:1;transform:translateX(0)}
+
+/* Sidebar footer */
+.s-footer{
+  padding:12px 8px;border-top:1px solid var(--border);width:100%;flex-shrink:0;
+  display:flex;flex-direction:column;gap:2px;
+}
+.s-user{
+  display:flex;align-items:center;gap:0;padding:8px 0;height:44px;
+  border-radius:var(--rs);overflow:hidden;cursor:pointer;transition:all .18s;
+}
+.s-user:hover{background:var(--t5)}
+.s-avatar{
+  width:var(--sw);min-width:var(--sw);height:44px;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;
+}
+.s-avatar-img{
+  width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--p60));
+  display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;
+}
+.s-user-info{opacity:0;transform:translateX(-6px);transition:opacity .18s .04s,transform .18s .04s;white-space:nowrap}
+.sidebar.expanded .s-user-info,.sidebar:hover .s-user-info{opacity:1;transform:translateX(0)}
+
+/* ═══ MAIN ═══ */
+.main{margin-left:var(--sw);flex:1;min-height:100vh;transition:margin-left .28s}
+
+/* ═══ TAB BAR ═══ */
+.tbar{
+  position:sticky;top:0;z-index:50;background:rgba(255,255,255,0.88);
+  backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 32px;height:48px;
+  overflow-x:auto;scrollbar-width:none;
+}
+.tbar::-webkit-scrollbar{display:none}
+.tab{
+  padding:13px 20px;font-size:11px;font-weight:600;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--t40);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .18s;white-space:nowrap;flex-shrink:0;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ═══ CONTENT ═══ */
+.cnt{padding:24px 32px 64px;max-width:1440px;margin:0 auto}
+.sec{margin-bottom:32px}
+.st{font-size:16px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em;color:var(--text)}
+.ss{font-size:11px;color:var(--t40);margin-bottom:16px;font-weight:400;letter-spacing:.01em}
+
+/* ═══ CARD ═══ */
+.card{
+  background:var(--white);border:1px solid var(--border);border-radius:var(--r);
+  padding:16px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);
+  box-shadow:var(--sh);
+}
+.card:hover{border-color:var(--bh);transform:translateY(-2px);box-shadow:var(--sh3)}
+.card:active{transform:translateY(0);box-shadow:var(--sh2)}
+
+/* ═══ S1: EXECUTIVE COMMAND STRIP ═══ */
+.er1{display:grid;grid-template-columns:280px 1fr;gap:12px;margin-bottom:12px;align-items:stretch}
+/* Right column stretches to match hero height */
+.er1-right{display:flex;flex-direction:column;gap:8px;align-self:stretch}
+/* Each row takes equal share of the available height */
+.er1-top{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;flex:1}
+.er1-top .card{display:flex;flex-direction:column;justify-content:space-between;height:100%}
+.er1-top .card .ml{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t40);margin-bottom:6px;border-bottom:1px solid var(--t11);padding-bottom:6px;display:flex;align-items:center;gap:4px}
+.er1-top .card .ml svg{display:none}
+.er1-top .card .mv{font-size:17px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.er1-top .card .ms{font-size:10px;font-weight:500}
+/* Row 2: driver ring cards fill remaining height */
+.er1-right .er2{flex-wrap:nowrap;gap:8px;flex:1}
+.er1-right .er2 .dc{
+  text-align:center;align-items:center;justify-content:center;
+  gap:5px;flex:1 1 0;min-width:0;padding:12px 8px;height:100%;
+}
+.er1-right .er2 .dc .ml{justify-content:center}
+.er1-right .er2 .dc .ring-wrap{width:46px;height:46px}
+.er1-right .er2 .dc .ring-txt{font-size:13px}
+.er2{display:flex;gap:8px;flex-wrap:nowrap}
+.er2 .dc{flex:1 1 0;min-width:0}
+
+/* Hero Transformation Score card — clean flat design, no gradients */
+.ts-hero{
+  background:var(--white);
+  border:1px solid var(--border);
+  border-radius:var(--r);padding:24px 20px 20px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:10px;cursor:pointer;transition:all .22s cubic-bezier(.4,0,.2,1);
+  box-shadow:var(--sh);
+  position:relative;overflow:hidden;
+}
+.ts-hero:hover{border-color:var(--bh);transform:translateY(-2px);box-shadow:var(--sh3)}
+.ts-hero-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.12em;color:var(--t40);text-align:center}
+.ts-hero-ring{position:relative;width:148px;height:148px}
+.ts-hero-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ts-hero-ring circle{fill:none;stroke-linecap:round}
+.ts-ring-bg{stroke:#F0EDED;stroke-width:10}
+.ts-ring-track{stroke:var(--t11);stroke-width:10}
+.ts-ring-fill{stroke:var(--primary);stroke-width:10;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+.ts-hero-ring-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ts-hero-ring-txt .tsv{font-size:42px;font-weight:800;color:var(--text);letter-spacing:-.05em;line-height:1}
+.ts-hero-ring-txt .tss{font-size:11px;color:var(--t40);font-weight:600;margin-top:3px;letter-spacing:.04em}
+.ts-hero-delta{font-size:13px;font-weight:700;color:var(--success);display:flex;align-items:center;gap:5px;background:var(--s11);padding:4px 12px;border-radius:20px;border:1px solid rgba(9,197,87,.2)}
+.ts-hero-sub{font-size:10px;color:var(--t40);text-align:center;font-weight:500;letter-spacing:.02em}
+
+.ml{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t40);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:5px;line-height:1}
+.ml svg{width:12px;height:12px;opacity:.5;flex-shrink:0}
+.mv{font-size:22px;font-weight:700;line-height:1.1;margin-bottom:3px;color:var(--text);letter-spacing:-.02em}
+.ms{font-size:11px;color:var(--t60);display:flex;align-items:center;gap:3px;font-weight:500}
+.up{color:var(--success)}.down{color:var(--error)}.neutral{color:var(--yellow)}
+
+/* Driver cards — flat square style (used outside er1 too) */
+.dc{text-align:center;display:flex;flex-direction:column;align-items:center;gap:6px;background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 12px;box-shadow:var(--sh);cursor:pointer;transition:all .18s}
+.dc:hover{border-color:var(--bh);transform:translateY(-2px);box-shadow:var(--sh2)}
+.dc .ml{justify-content:center;margin-bottom:2px;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--t40);font-weight:700}
+/* Circular score ring */
+.ring-wrap{position:relative;width:56px;height:56px;margin:0 auto}
+.ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-svg circle{fill:none;stroke-linecap:round}
+.ring-bg{stroke:var(--t5);stroke-width:4}
+.ring-val{stroke-width:4;transition:stroke-dashoffset .8s cubic-bezier(.4,0,.2,1)}
+.ring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+
+/* ═══ S2: TRAJECTORY ═══ */
+.tg{display:grid;grid-template-columns:1fr 280px;gap:12px}
+.ga{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh)}
+.gh{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;gap:8px;flex-wrap:wrap}
+.gh h3{font-size:13px;font-weight:600;color:var(--text)}
+.gh-r{display:flex;gap:6px;align-items:center}
+.tb{font-size:11px;padding:5px 14px;border:1px solid var(--border);border-radius:20px;background:var(--white);color:var(--t60);cursor:pointer;transition:all .18s;font-family:var(--f);font-weight:500}
+.tb:hover,.tb.on{background:var(--p11);color:var(--primary);border-color:var(--p40)}
+.cc-h{width:100%;height:220px}
+/* Driver legend (shown when overlay active) */
+.dl-leg{display:none;gap:12px;margin-top:10px;flex-wrap:wrap}
+.dl-leg.show{display:flex}
+.dl-li{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t60);font-weight:500}
+.dl-li i{width:16px;height:3px;border-radius:2px;display:block}
+
+.ip{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.ip h3{font-size:10px;font-weight:600;margin-bottom:14px;color:var(--t40);text-transform:uppercase;letter-spacing:.08em}
+.sig{padding:10px 0;border-bottom:1px solid var(--t5);display:flex;align-items:flex-start;gap:8px;font-size:12px;line-height:1.45;color:var(--t60)}
+.sig:last-child{border:none}
+.sd{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin-top:5px}
+
+.ct{margin-top:14px;font-size:11px;color:var(--t40);cursor:pointer;display:flex;align-items:center;gap:5px;user-select:none;font-weight:500;transition:color .18s}
+.ct:hover{color:var(--text)}
+.ct svg{transition:transform .3s}
+.ct.open svg{transform:rotate(180deg)}
+.cl{max-height:0;overflow:hidden;transition:max-height .35s cubic-bezier(.4,0,.2,1)}
+.cl.open{max-height:400px}
+.ce{display:grid;grid-template-columns:90px 1fr 80px 120px;gap:8px;padding:8px 0;border-bottom:1px solid var(--t5);font-size:11px;color:var(--t60);align-items:center}
+.ce .ts{font-variant-numeric:tabular-nums;color:var(--t40);font-size:10px}
+
+/* ═══ S3: PORTFOLIO ═══ */
+.pm{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.pmc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--sh)}
+.pmv{font-size:22px;font-weight:700;color:var(--text);letter-spacing:-.02em}
+.pml{font-size:10px;color:var(--t40);text-transform:uppercase;letter-spacing:.06em;margin-top:4px;font-weight:500}
+.sw{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px 24px;box-shadow:var(--sh)}
+.sc{width:100%;height:320px;position:relative}
+.sl{display:flex;gap:16px;margin-top:14px;flex-wrap:wrap}
+.li{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--t60);font-weight:500}
+.ld{width:8px;height:8px;border-radius:50%}
+
+.stt{position:absolute;pointer-events:none;background:var(--white);border:1px solid var(--bh);border-radius:var(--r);padding:12px 16px;font-size:12px;line-height:1.6;opacity:0;transition:opacity .12s;z-index:10;white-space:nowrap;box-shadow:var(--sh3);min-width:180px}
+.stt.show{opacity:1}
+.stt .tn{font-weight:700;color:var(--text);margin-bottom:6px;font-size:13px;padding-bottom:6px;border-bottom:1px solid var(--t5)}
+.stt .tr{color:var(--t60);display:flex;align-items:center;gap:5px;font-size:11px}
+.stt .tr::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--t11);flex-shrink:0}
+
+/* Size legend */
+.sz-legend{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap}
+.sz-item{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--t60);font-weight:500}
+.sz-circle{border-radius:50%;background:var(--t11);display:block;flex-shrink:0}
+
+/* Better card hover */
+.card:hover .ml{color:var(--primary)}
+.pmc:hover{border-color:var(--bh);box-shadow:var(--sh2)}
+.pmc{transition:all .18s}
+
+/* Cleaner section titles */
+.st{font-size:15px;font-weight:700;margin-bottom:3px;letter-spacing:-.02em;color:var(--text);display:flex;align-items:center;gap:8px}
+.st::before{content:'';width:3px;height:16px;background:var(--primary);border-radius:2px;display:block;flex-shrink:0}
+
+/* Better panel sub-sections */
+.sp-sec-title{font-size:11px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.07em;margin:20px 0 10px;display:flex;align-items:center;gap:7px}
+.sp-sec-title::after{content:'';flex:1;height:1px;background:var(--t11)}
+
+/* AILAS box polish */
+.sp-ailas{border-left:3px solid #6c5ce7;background:linear-gradient(135deg,rgba(108,92,231,.05),rgba(162,155,254,.03));border-radius:0 var(--r) var(--r) 0;padding:14px 16px;margin-bottom:16px}
+.sp-ailas .ai-label{font-size:10px;font-weight:700;color:#6c5ce7;text-transform:uppercase;letter-spacing:.1em;margin-bottom:7px;display:flex;align-items:center;gap:5px}
+.sp-ailas .ai-text{font-size:12px;color:#404040;line-height:1.65}
+
+/* ═══ S4: HEATMAP ═══ */
+.hw{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px;overflow-x:auto;box-shadow:var(--sh)}
+.ht{width:100%;border-collapse:separate;border-spacing:3px}
+.ht th{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--t40);font-weight:600;padding:8px 12px;text-align:left}
+.ht td{padding:10px 14px;border-radius:var(--rs);font-size:12px;font-weight:600;text-align:center;cursor:pointer;transition:all .18s}
+.ht td:first-child{text-align:left;font-weight:500;color:var(--text);background:transparent!important;font-size:13px}
+.ht tr{cursor:pointer}
+.ht tr:hover td{filter:brightness(.97)}
+.hh{background:var(--s11);color:var(--success)}
+.hm{background:var(--y11);color:#B8880D}
+.hl{background:var(--e11);color:var(--error)}
+
+/* ═══ 3-COL ═══ */
+.tc{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.cc h4{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--t40);font-weight:600;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--t5)}
+.ri{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--t5);font-size:12px;line-height:1.5;color:var(--t60)}
+.ri:last-child{border:none}
+.ric{width:28px;height:28px;border-radius:var(--rs);display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;font-weight:700}
+.ric.red{background:var(--e11);color:var(--error)}
+.ric.yellow{background:var(--y11);color:#B8880D}
+.ric.green{background:var(--s11);color:var(--success)}
+.ric.blue{background:var(--b11);color:var(--blue)}
+.cb{display:flex;gap:2px;height:6px;border-radius:4px;overflow:hidden;margin:8px 0}
+.cb .d{background:var(--success);flex:10}.cb .p{background:var(--yellow);flex:8}.cb .cr{background:var(--error);flex:2}
+.cn{display:flex;gap:14px;font-size:11px;color:var(--t60);margin-top:4px;font-weight:500}
+
+/* ═══ SIDE PANEL — upgraded to match use-case-library style ═══ */
+.ov{position:fixed;inset:0;background:rgba(14,19,23,0.25);z-index:190;opacity:0;pointer-events:none;transition:opacity .25s;backdrop-filter:blur(2px)}
+.ov.open{opacity:1;pointer-events:all}
+.sp{
+  position:fixed;right:0;top:0;bottom:0;width:520px;background:var(--white);
+  border-left:1px solid var(--border);z-index:200;
+  transform:translateX(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);
+  display:flex;flex-direction:column;
+  box-shadow:-12px 0 48px rgba(14,19,23,0.1);
+}
+.sp.open{transform:translateX(0)}
+/* Panel header */
+.sph{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  padding:20px 24px 16px;border-bottom:1px solid var(--border);flex-shrink:0;
+  background:var(--white);
+}
+.sph h2{font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em;line-height:1.3}
+.xb{
+  width:30px;height:30px;border:1px solid var(--border);border-radius:var(--rs);
+  background:var(--white);color:var(--t40);cursor:pointer;display:flex;
+  align-items:center;justify-content:center;font-size:13px;transition:all .18s;flex-shrink:0;margin-top:2px;
+}
+.xb:hover{background:var(--t5);color:var(--text);border-color:var(--bh)}
+/* Panel body — scrollable */
+#pC{flex:1;overflow-y:auto;padding:20px 24px}
+.ps{margin-bottom:20px}
+.ps h5{font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--t40);font-weight:700;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--t5)}
+.pr{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;gap:8px}
+.pr .k{color:var(--t60);flex-shrink:0}.pr .v{font-weight:600;color:var(--text);text-align:right}
+.badge{display:inline-block;padding:3px 10px;border-radius:16px;font-size:10px;font-weight:600}
+.bg{background:var(--s11);color:var(--success)}
+.by{background:var(--y11);color:#B8880D}
+.br{background:var(--e11);color:var(--error)}
+.bb{background:var(--b11);color:var(--blue)}
+
+/* ═══ SIDE PANEL COMPONENTS ═══ */
+
+/* Score header with large ring */
+.sp-score{display:flex;align-items:center;gap:16px;padding:16px;background:var(--t5);border-radius:var(--r);margin-bottom:20px}
+.sp-ring{position:relative;width:64px;height:64px;flex-shrink:0}
+.sp-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.sp-ring circle{fill:none;stroke-linecap:round}
+.sp-ring .bg-r{stroke:var(--t11);stroke-width:5}
+.sp-ring .vl-r{stroke-width:5}
+.sp-ring-txt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
+.sp-score-info{flex:1}
+.sp-score-info .sp-big{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.sp-score-info .sp-sub{font-size:11px;color:var(--t60)}
+
+/* Score bar (horizontal) */
+.sb-wrap{margin-bottom:6px}
+.sb-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:4px}
+.sb-label .k{color:var(--t60)}.sb-label .v{font-weight:600;color:var(--text)}
+.sb-bar{height:6px;background:var(--t5);border-radius:3px;overflow:hidden}
+.sb-fill{height:100%;border-radius:3px;transition:width .6s cubic-bezier(.4,0,.2,1)}
+
+/* Timeline */
+.sp-tl{position:relative;padding-left:20px}
+.sp-tl::before{content:'';position:absolute;left:5px;top:4px;bottom:4px;width:2px;background:var(--t11);border-radius:1px}
+.sp-tl-item{position:relative;padding:8px 0;font-size:11px}
+.sp-tl-item::before{content:'';position:absolute;left:-18px;top:12px;width:8px;height:8px;border-radius:50%;background:var(--primary);border:2px solid var(--white)}
+.sp-tl-item .tl-date{color:var(--t40);font-size:10px;margin-bottom:2px;font-weight:500}
+.sp-tl-item .tl-text{color:var(--text);font-weight:500}
+.sp-tl-item .tl-impact{font-size:10px;margin-top:2px}
+
+/* Divider */
+.sp-div{height:1px;background:var(--t11);margin:16px 0}
+
+/* Alert card */
+.sp-alert{display:flex;gap:10px;padding:12px;border-radius:var(--rs);margin-bottom:8px;font-size:12px;line-height:1.45;align-items:flex-start}
+.sp-alert.critical{background:var(--e5);border:1px solid var(--e11)}
+.sp-alert.warning{background:var(--y5);border:1px solid var(--y11)}
+.sp-alert.info{background:var(--b5);border:1px solid var(--b11)}
+.sp-alert.success{background:var(--s5);border:1px solid var(--s11)}
+.sp-alert-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.sp-alert.critical .sp-alert-icon{background:var(--e11);color:var(--error)}
+.sp-alert.warning .sp-alert-icon{background:var(--y11);color:#B8880D}
+.sp-alert.info .sp-alert-icon{background:var(--b11);color:var(--blue)}
+.sp-alert.success .sp-alert-icon{background:var(--s11);color:var(--success)}
+.sp-alert-body{flex:1;color:var(--t60)}
+.sp-alert-body strong{color:var(--text);font-weight:600}
+
+/* Pillar grid (for readiness breakdown like Figma) */
+.sp-pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:8px 0}
+.sp-pillar{text-align:center;padding:10px 4px;border-radius:var(--rs);background:var(--t5)}
+.sp-pillar .p-label{font-size:9px;color:var(--t40);text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px;font-weight:600}
+.sp-pillar .p-score{font-size:16px;font-weight:700;color:var(--text);margin-bottom:4px}
+.sp-pillar .p-badge{font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;display:inline-block}
+
+/* Clickable risk/intervention items removed — spec does not define side panel for S5/S6 */
+
+/* ═══ EXPANDED DRIVER PANELS ═══ */
+.sp-score-card{background:var(--t5);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:20px}
+.sp-score-big-ring{position:relative;width:90px;height:90px;margin:0 auto 10px}
+.sp-score-big-ring svg{width:100%;height:100%;transform:rotate(-90deg)}
+.sp-score-big-ring circle{fill:none;stroke-linecap:round}
+.sp-score-big-ring .bg-r{stroke:var(--t11);stroke-width:7}
+.sp-score-big-ring .vl-r{stroke-width:7}
+.sp-score-big-txt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.sp-score-big-txt .bv{font-size:20px;font-weight:800;line-height:1;letter-spacing:-.03em}
+.sp-score-big-txt .bl{font-size:10px;color:var(--t40);font-weight:500;margin-top:2px}
+.sp-score-card .sc-label{font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px}
+.sp-score-card .sc-trend{font-size:11px;font-weight:500}
+.sp-score-legend{display:flex;gap:12px;justify-content:center;margin-top:10px;flex-wrap:wrap}
+.sp-score-legend span{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--t60);font-weight:500}
+.sp-score-legend i{width:9px;height:9px;border-radius:50%;display:block}
+
+.sp-pillar5{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin:0 0 20px}
+.sp-p5{text-align:center;padding:10px 3px;border-radius:var(--rs);background:var(--white);border:1px solid var(--border)}
+.sp-p5 .p5l{font-size:9px;color:var(--t40);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:4px}
+.sp-p5 .p5v{font-size:18px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1}
+.sp-p5 .p5b{font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;display:inline-block}
+
+.sp-pillar7{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 20px}
+.sp-p7{text-align:center;padding:9px 3px;border-radius:var(--rs);background:var(--white);border:1px solid var(--border)}
+.sp-p7 .p7l{font-size:8px;color:var(--t40);text-transform:uppercase;letter-spacing:.03em;font-weight:600;margin-bottom:3px;line-height:1.2}
+.sp-p7 .p7v{font-size:16px;font-weight:700;color:var(--text);margin-bottom:3px;line-height:1}
+.sp-p7 .p7b{font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;display:inline-block}
+
+.p5-high,.p7-high{background:var(--s11);color:var(--success)}
+.p5-med,.p7-med{background:var(--y11);color:#B8880D}
+.p5-low,.p7-low{background:var(--e11);color:var(--error)}
+
+.sp-ailas{border-left:3px solid #6c5ce7;background:linear-gradient(135deg,rgba(108,92,231,.04),rgba(162,155,254,.04));border-radius:0 var(--rs) var(--rs) 0;padding:12px 14px;margin-bottom:20px}
+.sp-ailas .ai-label{font-size:10px;font-weight:700;color:#6c5ce7;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px}
+.sp-ailas .ai-text{font-size:12px;color:var(--t60);line-height:1.6}
+
+.sp-sec-title{font-size:10px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.sp-sec-title::after{content:'';flex:1;height:1px;background:var(--t11)}
+
+.sp-bullets{margin:0 0 18px;padding:0;list-style:none}
+.sp-bullets li{display:flex;align-items:flex-start;gap:8px;padding:7px 0;border-bottom:1px solid var(--t5);font-size:12px;color:var(--t60);line-height:1.45}
+.sp-bullets li:last-child{border:none}
+.sp-bullets li .bi{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-top:5px}
+.bi-red{background:var(--error)}.bi-green{background:var(--success)}.bi-blue{background:var(--blue)}.bi-yellow{background:var(--yellow)}
+
+.sp-data-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:20px}
+.sp-dc{background:var(--t5);border-radius:var(--rs);padding:9px 11px}
+.sp-dc .dc-label{font-size:9px;color:var(--t40);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:3px}
+.sp-dc .dc-val{font-size:12px;font-weight:600;color:var(--text)}
+
+.sp-mini-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px}
+.sp-mc{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:13px;overflow:hidden}
+.sp-mc-head{display:flex;align-items:center;gap:7px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid var(--t5)}
+.sp-mc-icon{width:22px;height:22px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0}
+.sp-mc-title{font-size:11px;font-weight:700;color:var(--text)}
+.sp-kv{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;font-size:11px;gap:6px}
+.sp-kv .k{color:var(--t60);flex-shrink:0}.sp-kv .v{font-weight:600;color:var(--text);font-size:10px;text-align:right}
+.sp-tags{display:flex;flex-wrap:wrap;gap:3px;margin-top:5px}
+.sp-tag{display:inline-flex;align-items:center;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:600;border:1px solid}
+.sp-tag.purple{background:#f3e8ff;color:#8200db;border-color:#e9d4ff}
+.sp-tag.blue{background:var(--b11);color:var(--blue);border-color:#bedbff}
+.sp-tag.green{background:var(--s11);color:var(--success);border-color:rgba(9,197,87,.2)}
+.sp-tag.orange{background:var(--y11);color:#B8880D;border-color:rgba(245,200,19,.3)}
+.sp-tag.red{background:var(--e11);color:var(--error);border-color:rgba(230,19,19,.2)}
+.sp-tag.teal{background:#e0fafa;color:#00c3d0;border-color:rgba(0,195,208,.2)}
+.sp-tag.gray{background:var(--t5);color:var(--t60);border-color:var(--t11)}
+
+.sp-legal-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:20px}
+.sp-lg{background:var(--t5);border-radius:var(--rs);padding:11px;text-align:center}
+.sp-lg .lg-label{font-size:9px;color:var(--t40);text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-bottom:5px}
+.sp-lg .lg-val{font-size:14px;font-weight:700;color:var(--text)}
+.sp-lg .lg-sub{font-size:10px;color:var(--t60);margin-top:2px}
+
+.sp-ob{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--t5);font-size:12px;line-height:1.45}
+.sp-ob:last-child{border:none}
+.sp-ob-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:10px;flex-shrink:0;font-weight:700;margin-top:1px}
+.sp-ob-icon.ok{background:var(--s11);color:var(--success)}
+.sp-ob-icon.warn{background:var(--y11);color:#B8880D}
+.sp-ob-icon.err{background:var(--e11);color:var(--error)}
+.sp-ob-body{flex:1;color:var(--t60)}
+.sp-ob-body strong{color:var(--text);display:block;margin-bottom:2px;font-size:12px}
+
+.sp-close-btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px;border-radius:var(--r);background:linear-gradient(135deg,#6c5ce7,#a29bfe);color:white;font-size:13px;font-weight:700;cursor:pointer;border:none;font-family:var(--f);margin-top:4px;transition:opacity .2s;letter-spacing:.02em}
+.sp-close-btn:hover{opacity:.9}
+
+.sp-feasibility{background:linear-gradient(135deg,var(--s5),white);border:1px solid rgba(9,197,87,.15);border-radius:var(--rs);padding:12px;margin-bottom:18px;font-size:12px;color:var(--t60);line-height:1.5}
+.sp-feasibility .fe-title{font-size:11px;font-weight:700;color:var(--text);margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.sp-feasibility .fe-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600;background:linear-gradient(135deg,#00b894,#55efc4);color:white}
+
+.sp-pillar-row{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:20px}
+.sp-pr{text-align:center;padding:10px 4px;border-radius:var(--rs);background:var(--white);border:1px solid var(--border)}
+.sp-pr .prl{font-size:9px;color:var(--t40);text-transform:uppercase;letter-spacing:.04em;font-weight:600;margin-bottom:4px;line-height:1.2}
+.sp-pr .prv{font-size:17px;font-weight:700;color:var(--text);margin-bottom:4px;line-height:1}
+.sp-pr .prb{font-size:9px;font-weight:600;padding:2px 6px;border-radius:10px;display:inline-block}
+
+/* ═══ CHART DROPDOWN ═══ */
+.chart-dd{position:absolute;right:0;top:calc(100% + 4px);background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:4px;min-width:200px;z-index:50;box-shadow:var(--sh3);display:none}
+.chart-dd.open{display:block}
+.chart-dd-item{padding:9px 12px;font-size:12px;font-weight:500;color:var(--t60);border-radius:var(--rs);cursor:pointer;transition:all .15s;line-height:1.4}
+.chart-dd-item:hover{background:var(--t5);color:var(--text)}
+.chart-dd-item.active{background:var(--p11);color:var(--primary);font-weight:600}
+.chart-dd-item strong{display:block;color:inherit}
+
+/* ═══ PORTFOLIO SCATTER REDESIGN ═══ */
+.portfolio-controls{display:flex;align-items:center;justify-content:flex-start;gap:10px;margin-bottom:14px;flex-wrap:wrap}
+/* Dropdown wrapper */
+.pf-dd-wrap{position:relative;display:inline-flex;align-items:center}
+.pf-dd{
+  appearance:none;-webkit-appearance:none;
+  padding:7px 32px 7px 12px;
+  font-size:12px;font-weight:600;font-family:var(--f);
+  color:var(--text);background:var(--white);
+  border:1px solid var(--border);border-radius:var(--rs);
+  cursor:pointer;outline:none;
+  transition:border-color .15s,box-shadow .15s;
+  min-width:150px;
+}
+.pf-dd:hover{border-color:var(--bh)}
+.pf-dd:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(20,127,249,.1)}
+.pf-dd-chevron{
+  position:absolute;right:10px;pointer-events:none;
+  width:12px;height:12px;color:var(--t40);flex-shrink:0;
+}
+
+/* Scatter tooltip */
+.scatter-tip{
+  position:absolute;pointer-events:none;background:var(--white);
+  border:1px solid var(--border);border-radius:10px;padding:12px 16px;
+  font-size:12px;line-height:1.6;opacity:0;transition:opacity .12s;
+  z-index:20;white-space:nowrap;box-shadow:var(--sh3);min-width:200px;
+}
+.scatter-tip.show{opacity:1}
+.scatter-tip-name{font-weight:700;color:var(--text);margin-bottom:6px;font-size:13px;padding-bottom:6px;border-bottom:1px solid var(--t5)}
+.scatter-tip-row{color:var(--t60);font-size:11px;display:flex;gap:4px}
+.scatter-tip-row strong{color:var(--text)}
+
+/* Scatter axis labels */
+.scatter-wrap{position:relative;width:100%;background:var(--white);padding:0}
+.scatter-title{text-align:center;font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em;margin-bottom:16px}
+.scatter-subtitle{text-align:center;font-size:11px;color:var(--t60);margin-top:-12px;margin-bottom:16px}
+.scatter-note{font-size:10px;color:var(--t40);font-style:italic;margin-top:10px;font-weight:500;text-align:center}
+
+/* ═══ MINI ICON SVG IN PANEL ═══ */
+.sp-mc-svg{width:14px;height:14px;display:block}
+
+/* ═══ ORG DISTRIBUTION BAR CHART ═══ */
+/* ═══ ORGANISATIONAL DISTRIBUTION TABLE ═══ */
+.org-table-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden}
+.org-table{width:100%;border-collapse:collapse;font-family:var(--f)}
+.org-table thead tr{background:var(--t5);border-bottom:1px solid var(--t11)}
+.org-table thead th{padding:12px 20px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t40);text-align:left;white-space:nowrap}
+.org-table tbody tr{border-bottom:1px solid var(--t5);cursor:pointer;transition:background .15s}
+.org-table tbody tr:last-child{border-bottom:none}
+.org-table tbody tr:hover{background:var(--t5)}
+.org-table td{padding:14px 20px;vertical-align:middle}
+.org-dept{font-size:13px;font-weight:700;color:var(--text)}
+.org-num{font-size:13px;font-weight:500;color:var(--text)}
+/* Coloured pill badges */
+.org-pill{display:inline-flex;align-items:center;justify-content:center;padding:5px 14px;border-radius:20px;font-size:12px;font-weight:700;min-width:64px;text-align:center}
+.org-pill.green{background:#e8f9ef;color:#09843a}
+.org-pill.red{background:#fde8e8;color:#c41c1c}
+.org-pill.yellow{background:#fef8e1;color:#9a6a00}
+  position:fixed;background:var(--white);border:1px solid var(--border);
+  border-radius:10px;padding:10px 14px;font-size:12px;box-shadow:var(--sh3);
+/* ═══ USE CASE RISKS SECTION ═══ */
+.ucr-layout{display:grid;grid-template-columns:280px 1fr 200px;gap:24px;align-items:center;background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:28px;box-shadow:var(--sh)}
+.ucr-left{}
+.ucr-left-label{font-size:9px;font-weight:700;color:var(--t40);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.ucr-item{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid var(--t5);font-size:12px;line-height:1.45}
+.ucr-item:last-child{border:none}
+.ucr-item-icon{width:22px;height:22px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
+.ucr-item-icon.red{background:var(--e11);color:var(--error)}
+.ucr-item-icon.yellow{background:var(--y11);color:#B8880D}
+.ucr-item-body strong{display:block;font-weight:700;color:var(--text);margin-bottom:1px;font-size:12px}
+.ucr-item-body span{color:var(--t60);font-size:11px}
+.ucr-donut-wrap{position:relative;display:flex;align-items:center;justify-content:center}
+.ucr-donut-tooltip{
+  position:absolute;background:var(--white);border:1px solid var(--border);
+  border-radius:10px;padding:10px 14px;font-size:12px;box-shadow:var(--sh3);
+  z-index:10;pointer-events:none;opacity:0;transition:opacity .12s;white-space:nowrap;
+  top:30px;left:50%;transform:translateX(-50%);text-align:left;min-width:240px;
+}
+.ucr-donut-tooltip.show{opacity:1}
+.ucr-donut-tt-pct{font-size:12px;color:var(--t60);font-weight:600;margin-bottom:4px}
+.ucr-donut-tt-msg{font-size:11px;color:var(--t60);line-height:1.45}
+.ucr-legend{display:flex;flex-direction:column;gap:10px}
+.ucr-leg-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text);font-weight:500}
+.ucr-leg-dot{width:14px;height:14px;border-radius:50%;flex-shrink:0}
+
+/* ═══ COMPLIANCE OBLIGATIONS ═══ */
+.compliance-wrap{background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:20px;box-shadow:var(--sh)}
+.compliance-summary{background:var(--t5);border-radius:var(--rs);padding:16px;margin-bottom:16px}
+.compliance-summary-label{font-size:9px;font-weight:700;color:var(--t40);text-transform:uppercase;letter-spacing:.1em;margin-bottom:12px}
+.compliance-row{display:flex;align-items:flex-start;gap:10px;padding:8px 0;font-size:12px}
+.compliance-row-icon{width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
+.compliance-row-icon.red{background:var(--e11);color:var(--error)}
+.compliance-row-icon.yellow{background:var(--y11);color:#B8880D}
+.compliance-row-body strong{color:var(--text);font-weight:700;font-size:12px}
+.compliance-row-body span{color:var(--t60);font-size:11px}
+.compliance-progress-bar{height:8px;border-radius:4px;background:var(--t11);overflow:hidden;margin:10px 0;position:relative;display:flex}
+.cpb-done{background:var(--success);border-radius:4px 0 0 4px;transition:width .6s}
+.cpb-pending{background:var(--yellow);transition:width .6s}
+.cpb-critical{background:var(--error);border-radius:0 4px 4px 0;transition:width .6s}
+.compliance-progress-legend{display:flex;gap:14px;font-size:11px;color:var(--t60);font-weight:500;flex-wrap:wrap}
+.compliance-progress-legend span{display:flex;align-items:center;gap:4px}
+.ob-list{display:flex;flex-direction:column;gap:4px;margin-top:12px}
+.ob-item{
+  display:flex;align-items:flex-start;gap:12px;padding:12px 14px;
+  border-radius:var(--rs);border:1px solid var(--t11);background:var(--white);
+  font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:all .18s;
+  margin-bottom:4px;
+}
+.ob-item:hover{border-color:var(--bh);background:var(--t5)}
+.ob-item.open{border-color:rgba(228,32,10,.2);background:var(--p5)}
+.ob-critical{border-left:3px solid var(--error)}
+.ob-pending{border-left:3px solid var(--yellow)}
+.ob-done{border-left:3px solid var(--success);opacity:.8}
+.ob-icon{width:24px;height:24px;border-radius:50%;border:2px solid var(--error);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ob-icon svg{width:12px;height:12px;stroke-width:2.5}
+
+/* ═══ BETTER SECTION TITLES ═══ */
+.st{font-size:15px;font-weight:700;margin-bottom:4px;letter-spacing:-.02em;color:var(--text)}
+.lc{width:100%;height:100%}
+.gl{stroke:var(--t11);stroke-width:.5}
+.al{fill:var(--t40);font-size:10px;font-family:var(--f)}
+.mln{fill:none;stroke:var(--primary);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.ma{fill:url(#aG)}
+.ed{fill:var(--primary);cursor:pointer;transition:all .2s}
+.ed:hover{r:6;filter:drop-shadow(0 0 4px rgba(228,32,10,.3))}
+.dl{fill:none;stroke-width:1.5;stroke-dasharray:5 3;opacity:0;transition:opacity .4s}
+.dl.show{opacity:.55}
+.scd{cursor:pointer;transition:all .2s;transform-origin:center}
+.scd:hover{filter:brightness(1.1) drop-shadow(0 2px 4px rgba(0,0,0,.15))}
+
+/* ═══ RESPONSIVE ═══ */
+
+/* Tablet landscape */
+@media(max-width:1280px){
+  .er1 .card{padding:12px 14px}
+  .er1 .mv{font-size:18px}
+  .ring-wrap{width:48px;height:48px}
+  .ring-txt{font-size:14px}
+  .tg{grid-template-columns:1fr 240px}
+}
+
+/* Tablet */
+@media(max-width:1024px){
+  .tg{grid-template-columns:1fr}
+  .er1 .mv{font-size:16px}
+  .er2 .ring-wrap{width:44px;height:44px}
+  .er2 .ring-txt{font-size:13px}
+}
+
+/* Tablet portrait / large phone */
+@media(max-width:900px){
+  .sidebar{width:0;border:none;box-shadow:none}
+  .sidebar:hover{width:var(--swe);box-shadow:var(--sh3)}
+  .main{margin-left:0}
+  .cnt{padding:16px}
+  .tbar{padding:0 16px}
+  .er1,.er2{overflow-x:auto;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding-bottom:4px}
+  .er1 .card,.er2 .card{min-width:160px;flex:0 0 auto;scroll-snap-align:start}
+  .tc{grid-template-columns:1fr}
+  .pm{grid-template-columns:repeat(2,1fr)}
+  .sp{width:100%;max-width:420px}
+  /* show a sidebar toggle */
+  .s-toggle{display:flex}
+}
+
+/* Phone */
+@media(max-width:640px){
+  .cnt{padding:12px}
+  .tbar{padding:0 12px;height:44px}
+  .tab{padding:11px 14px;font-size:10px}
+  .er1 .card{min-width:140px;padding:12px}
+  .er1 .mv{font-size:15px}
+  .er2 .card{min-width:120px;padding:12px}
+  .pm{grid-template-columns:1fr 1fr}
+  .pmv{font-size:18px}
+  .sc{height:240px}
+  .sp{width:100%;max-width:100%}
+  .ce{grid-template-columns:70px 1fr 60px;font-size:10px}
+  .ce>:last-child{display:none}
+  .sec{margin-bottom:24px}
+  .st{font-size:14px}
+  .ht{font-size:11px}
+  .ht td{padding:8px 10px}
+  .gh{flex-direction:column;align-items:flex-start;gap:10px}
+}
+
+/* ═══ ANIMATIONS ═══ */
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.sec{animation:fu .45s cubic-bezier(.4,0,.2,1) backwards}
+.sec:nth-child(1){animation-delay:.04s}.sec:nth-child(2){animation-delay:.08s}
+.sec:nth-child(3){animation-delay:.12s}.sec:nth-child(4){animation-delay:.16s}
+.sec:nth-child(5){animation-delay:.2s}.sec:nth-child(6){animation-delay:.24s}
+
+@keyframes pulse{0%,100%{box-shadow:var(--sh),0 0 0 0 rgba(230,19,19,0)}50%{box-shadow:var(--sh),0 0 0 5px rgba(230,19,19,0.06)}}
+.ap{animation:pulse 2.5s infinite}
+
+/* Ring animation on page load */
+@keyframes ringIn{from{stroke-dashoffset:150.8}to{}}
+.ring-val{animation:ringIn .9s cubic-bezier(.4,0,.2,1) backwards}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR — Animated -->
+<nav class="sidebar" id="sb">
+  <!-- Brand zone -->
+  <div class="s-brand">
+    <div class="s-brand-icon">
+      <svg viewBox="0 0 30 26" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:28px;height:24px;flex-shrink:0">
+        <path d="M0.268 13.391L14.858 0.315L29.293 13.391V20.481L14.781 8.508L0.268 20.481V13.391Z" fill="#E4200A"/>
+        <path d="M11.059 18.512H19.099L15.353 25.247L11.059 18.512Z" fill="#E4200A"/>
+      </svg>
+    </div>
+    <svg class="s-wordmark" viewBox="0 0 120 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:96px;height:18px">
+      <path d="M15.719 12.583L13.5 18.133H10.777L18.125 -0.367H21.494L29.157 18.133H26.241L23.953 12.583H15.719ZM23.25 10.482C21.284 5.62 20.203 3.036 19.756 1.627H19.726C19.222 3.196 18.014 6.324 16.43 10.482H23.25Z" fill="#0E1317"/>
+      <path d="M41.08-0.367V18.133H38.344V-0.367H41.08Z" fill="#0E1317"/>
+      <path d="M52.607-0.367H55.343V16.032H66.103L65.722 18.133H52.607V-0.367Z" fill="#0E1317"/>
+      <path d="M79.029 12.583L76.81 18.133H74.088L81.436-0.367H84.804L92.467 18.133H89.552L87.263 12.583H79.029ZM86.561 10.482C84.594 5.62 83.513 3.036 83.066 1.627H83.037C82.532 3.196 81.324 6.324 79.74 10.482H86.561Z" fill="#0E1317"/>
+      <path d="M103.155 12.984C103.714 15.203 105.406 16.402 108.396 16.402C111.614 16.402 112.888 15.048 112.888 13.301C112.888 11.445 111.871 10.405 107.736 9.508C102.874 8.449 101.187 6.956 101.187 4.355C101.187 1.608 103.447-0.633 108.052-0.633C112.965-0.633 114.986 1.914 115.264 4.343H112.481C112.112 2.697 110.963 1.346 107.954 1.346C105.442 1.346 104.032 2.36 104.032 4.123C104.032 5.859 105.196 6.544 108.812 7.33C114.695 8.614 115.734 10.668 115.734 13.042C115.734 16.026 113.269 18.364 108.223 18.364C103.034 18.364 100.8 15.822 100.373 12.983H103.155V12.984Z" fill="#0E1317"/>
+    </svg>
+  </div>
+
+  <!-- Nav items -->
+  <div class="s-nav">
+    <div class="s-section-label">Navigation</div>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/570a9d3d-a867-4706-8f33-3da17b892452" alt="" class="si-icon"></div>
+      <span class="si-lbl">Dashboard</span>
+    </a>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/59445f74-7ccf-422c-a28d-83b723c21900" alt="" class="si-icon"></div>
+      <span class="si-lbl">Base Layer</span>
+    </a>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/4577a8bb-910c-4f88-b664-329dff2dff50" alt="" class="si-icon"></div>
+      <span class="si-lbl">Workflow Layer</span>
+    </a>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/008a2cbc-e8c1-4664-8003-fd6e53f1f97c" alt="" class="si-icon"></div>
+      <span class="si-lbl">AILAS Journey</span>
+    </a>
+    <a class="si active">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/6b5eb5d2-76c3-4c61-8e26-72622c8c7c02" alt="" class="si-icon"></div>
+      <span class="si-lbl">Control Room</span>
+    </a>
+
+    <div class="s-section-label" style="margin-top:8px">Tools</div>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/3d7e7c66-d94b-4f4e-b09f-b589110b4639" alt="" class="si-icon"></div>
+      <span class="si-lbl">Compliance</span>
+    </a>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/5f45bf5b-8262-43a5-aa5d-780ab2bd43ed" alt="" class="si-icon"></div>
+      <span class="si-lbl">Tools</span>
+    </a>
+    <a class="si">
+      <div class="si-ic"><img src="https://www.figma.com/api/mcp/asset/35f3d3a6-421b-40e9-b839-73daae3b7696" alt="" class="si-icon"></div>
+      <span class="si-lbl">Reports</span>
+    </a>
+  </div>
+
+  <!-- Footer: user -->
+  <div class="s-footer">
+    <div class="s-user">
+      <div class="s-avatar">
+        <div class="s-avatar-img">JD</div>
+      </div>
+      <div class="s-user-info">
+        <div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.2">Jane Doe</div>
+        <div style="font-size:10px;color:var(--t40);font-weight:500">Admin</div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="tbar">
+    <div class="tab active">Transformation Control Room</div>
+    <div class="tab">Use Case Portfolio</div>
+    <div class="tab">Decision Engine</div>
+    <div class="tab">Reports</div>
+  </div>
+  <div class="cnt">
+    <!-- Context header -->
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:18px;font-weight:700;color:var(--text);letter-spacing:-.02em">Transformation Control Room</div>
+        <div style="font-size:11px;color:var(--t40);margin-top:2px;font-weight:500">Last updated: Today, 09:41 · Auto-refreshes every 30 min</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <div style="font-size:11px;color:var(--t60);font-weight:500;background:var(--s11);color:var(--success);padding:4px 10px;border-radius:20px;border:1px solid rgba(9,197,87,.2)">● Live</div>
+        <div style="font-size:11px;color:var(--t60);font-weight:500;background:var(--t5);padding:4px 10px;border-radius:20px;border:1px solid var(--border)">Q3 2025</div>
+        <div style="font-size:11px;color:var(--t60);font-weight:500;background:var(--t5);padding:4px 10px;border-radius:20px;border:1px solid var(--border)">36 Use Cases</div>
+      </div>
+    </div>
+    <div class="sec">
+      <div class="st">Executive Command Strip</div>
+      <div class="ss">Real-time summary of your organisation's AI transformation — Q3 2025</div>
+      <div class="er1">
+        <!-- HERO: Transformation Score -->
+        <div class="ts-hero" onclick="op('readiness')">
+          <div class="ts-hero-label">Transformation Score</div>
+          <div class="ts-hero-ring">
+            <svg viewBox="0 0 148 148">
+              <circle class="ts-ring-bg" cx="74" cy="74" r="62"/>
+              <circle class="ts-ring-track" cx="74" cy="74" r="62" stroke="var(--t11)" stroke-width="10" fill="none"/>
+              <circle class="ts-ring-fill" cx="74" cy="74" r="62"
+                stroke-dasharray="389.56"
+                stroke-dashoffset="108.9"/>
+            </svg>
+            <div class="ts-hero-ring-txt">
+              <span class="tsv">72</span>
+              <span class="tss">/ 100</span>
+            </div>
+          </div>
+          <div class="ts-hero-delta">↑ +4 this quarter</div>
+          <div class="ts-hero-sub">Improving · Confidence 84%</div>
+        </div>
+        <!-- Right: row 1 — 5 KPI cards, row 2 — Readiness/Governance/Ethics/Compliance/Opportunity rings -->
+        <div class="er1-right">
+          <div class="er1-top">
+            <div class="card">
+              <div class="ml">Direction</div>
+              <div class="mv up" style="font-size:15px">Improving ↑</div>
+              <div class="ms">Confidence: <strong style="color:var(--text)">84%</strong></div>
+            </div>
+            <div class="card">
+              <div class="ml">Value Generated</div>
+              <div class="mv">CHF 1.2M</div>
+              <div class="ms up">↑ +180k this month</div>
+            </div>
+            <div class="card">
+              <div class="ml">Cost Invested</div>
+              <div class="mv">CHF 650k</div>
+              <div class="ms" style="color:var(--t40)">↑ +90k this month</div>
+            </div>
+            <div class="card">
+              <div class="ml">Net Impact</div>
+              <div class="mv up">CHF +550k</div>
+              <div class="ms">Payback on 3 UCs</div>
+            </div>
+            <div class="card ap">
+              <div class="ml">Critical Alerts</div>
+              <div class="mv down">3</div>
+              <div class="ms down">2 require exec decision</div>
+            </div>
+          </div>
+          <div class="er2" id="driverRow"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S2: TRANSFORMATION TRAJECTORY -->
+    <div class="sec">
+      <div class="st">Transformation Trajectory</div>
+      <div class="ss">Overall transformation health over time — Transformation Score is the primary line; diagnostic drivers shown as overlay</div>
+      <div class="tg">
+        <div class="ga">
+          <div class="gh">
+            <h3>Transformation Score</h3>
+            <div class="gh-r">
+              <div style="display:flex;gap:4px;background:var(--t5);border-radius:20px;padding:3px">
+                <button class="tb on" id="dT" onclick="tD()" style="padding:5px 12px;font-size:11px">Show Drivers</button>
+              </div>
+            </div>
+          </div>
+          <div class="cc-h">
+            <svg class="lc" viewBox="0 0 700 200" preserveAspectRatio="none" id="trajSVG">
+              <defs>
+                <linearGradient id="aG" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#E4200A" stop-opacity="0.12"/>
+                  <stop offset="100%" stop-color="#E4200A" stop-opacity="0"/>
+                </linearGradient>
+                <!-- Glow filter for event markers -->
+                <filter id="glow">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              </defs>
+              <!-- Grid lines -->
+              <line class="gl" x1="50" y1="10" x2="680" y2="10"/>
+              <line class="gl" x1="50" y1="55" x2="680" y2="55"/>
+              <line class="gl" x1="50" y1="100" x2="680" y2="100"/>
+              <line class="gl" x1="50" y1="145" x2="680" y2="145"/>
+              <!-- Y axis labels -->
+              <text class="al" x="44" y="14" text-anchor="end">100</text>
+              <text class="al" x="44" y="59" text-anchor="end">75</text>
+              <text class="al" x="44" y="104" text-anchor="end">50</text>
+              <text class="al" x="44" y="149" text-anchor="end">25</text>
+              <!-- X axis labels -->
+              <text class="al" x="92" y="175">Jan</text>
+              <text class="al" x="197" y="175">Mar</text>
+              <text class="al" x="302" y="175">May</text>
+              <text class="al" x="407" y="175">Jul</text>
+              <text class="al" x="512" y="175">Sep</text>
+              <text class="al" x="617" y="175">Nov</text>
+              <!-- Area under Transformation Line -->
+              <path class="ma" d="M92,120 L155,115 L218,108 L281,100 L344,92 L407,83 L470,74 L533,67 L596,60 L659,52 L659,160 L92,160Z"/>
+              <!-- DRIVER LINES (overlay, shown/hidden) -->
+              <path class="dl" id="dlReadiness" d="M92,130 L155,126 L218,118 L281,108 L344,100 L407,93 L470,86 L533,78 L596,70 L659,62" stroke="#09C557"/>
+              <path class="dl" id="dlGovernance" d="M92,90 L155,92 L218,96 L281,100 L344,104 L407,110 L470,114 L533,117 L596,120 L659,122" stroke="#E61313"/>
+              <path class="dl" id="dlEthics" d="M92,72 L155,72 L218,70 L281,70 L344,68 L407,68 L470,66 L533,66 L596,64 L659,64" stroke="#F5C813"/>
+              <path class="dl" id="dlCompliance" d="M92,110 L155,108 L218,102 L281,98 L344,93 L407,89 L470,85 L533,82 L596,80 L659,78" stroke="#147FF9"/>
+              <!-- MAIN TRANSFORMATION LINE (thicker, on top) -->
+              <path class="mln" d="M92,120 L155,115 L218,108 L281,100 L344,92 L407,83 L470,74 L533,67 L596,60 L659,52" style="stroke-width:3"/>
+              <!-- EVENT MARKERS on Transformation Line — pulsing red dots -->
+              <g id="eventMarkers">
+                <!-- Event 1 -->
+                <circle cx="281" cy="100" r="10" fill="rgba(228,32,10,.12)" class="evt-ring">
+                  <animate attributeName="r" values="8;13;8" dur="2.5s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="281" cy="100" r="5" fill="#E4200A" stroke="white" stroke-width="2" class="ed" onclick="op('ev1')" filter="url(#glow)">
+                  <title>UC-12 moved to Active</title>
+                </circle>
+                <!-- Event 2 -->
+                <circle cx="470" cy="74" r="10" fill="rgba(228,32,10,.12)" class="evt-ring">
+                  <animate attributeName="r" values="8;13;8" dur="2.5s" begin="0.8s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" begin="0.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="470" cy="74" r="5" fill="#E4200A" stroke="white" stroke-width="2" class="ed" onclick="op('ev2')" filter="url(#glow)">
+                  <title>Governance delay</title>
+                </circle>
+                <!-- Event 3 -->
+                <circle cx="596" cy="60" r="10" fill="rgba(228,32,10,.12)" class="evt-ring">
+                  <animate attributeName="r" values="8;13;8" dur="2.5s" begin="1.6s" repeatCount="indefinite"/>
+                  <animate attributeName="opacity" values="0.3;0;0.3" dur="2.5s" begin="1.6s" repeatCount="indefinite"/>
+                </circle>
+                <circle cx="596" cy="60" r="5" fill="#E4200A" stroke="white" stroke-width="2" class="ed" onclick="op('ev3')" filter="url(#glow)">
+                  <title>New vendor</title>
+                </circle>
+              </g>
+            </svg>
+          </div>
+          <div class="dl-leg" id="dlLeg">
+            <div style="font-size:10px;font-weight:700;color:var(--t40);text-transform:uppercase;letter-spacing:.07em;margin-right:4px">Drivers:</div>
+            <div class="dl-li"><i style="background:#09C557"></i>Readiness</div>
+            <div class="dl-li"><i style="background:#E61313"></i>Governance</div>
+            <div class="dl-li"><i style="background:#F5C813"></i>Ethics</div>
+            <div class="dl-li"><i style="background:#147FF9"></i>Compliance</div>
+            <div style="margin-left:8px;font-size:10px;color:var(--t40)">— Transformation Line is bold red</div>
+          </div>
+          <div class="ct" id="ctBtn" onclick="tC()"><svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 5l3 3 3-3"/></svg>Recent Changes</div>
+          <div class="cl" id="cL">
+            <div class="ce"><span class="ts">Mar 12, 14:32</span><span>UC-08 moved Pilot → Active</span><span class="up">+3 Readiness</span><span>Dept Head</span></div>
+            <div class="ce"><span class="ts">Mar 10, 09:15</span><span>Governance delay increased</span><span class="down">-2 Gov.</span><span>System</span></div>
+            <div class="ce"><span class="ts">Mar 08, 16:40</span><span>New vendor onboarded</span><span class="up">+1 Compl.</span><span>Procurement</span></div>
+            <div class="ce"><span class="ts">Mar 05, 11:20</span><span>UC-14 entered Pilot</span><span class="up">+2 Opp.</span><span>R&D Lead</span></div>
+          </div>
+        </div>
+        <div class="ip">
+          <h3>System Signals</h3>
+          <div class="sig"><div class="sd" style="background:var(--success)"></div><div><strong class="up">Readiness improving</strong> (+6)<br>Adoption accelerating in 3 depts</div></div>
+          <div class="sig"><div class="sd" style="background:var(--error)"></div><div><strong class="down">Governance slowing</strong> (-3)<br>Review backlog in Operations</div></div>
+          <div class="sig"><div class="sd" style="background:var(--yellow)"></div><div><strong class="neutral">Compliance pressure</strong><br>2 new obligations identified</div></div>
+          <div class="sig"><div class="sd" style="background:var(--success)"></div><div><strong class="up">Adoption accelerating</strong><br>Marketing — 4 UCs advancing</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S3: USE CASE PORTFOLIO -->
+    <div class="sec">
+      <div class="st">Portfolio Intelligence</div>
+      <div class="ss">36 use cases · Colour = Priority · Size = Complexity · Click any bubble to drill down</div>
+      <div class="pm">
+        <div class="pmc" style="border-left:3px solid var(--success)">
+          <div class="pmv">36</div>
+          <div class="pml">Total Use Cases</div>
+          <div style="font-size:11px;color:var(--success);font-weight:500;margin-top:6px">14 active · 9 pilot</div>
+        </div>
+        <div class="pmc" style="border-left:3px solid var(--success)">
+          <div class="pmv">42%</div>
+          <div class="pml">Pilot → Active Rate</div>
+          <div style="font-size:11px;color:var(--success);font-weight:500;margin-top:6px">↑ +6% vs last quarter</div>
+        </div>
+        <div class="pmc" style="border-left:3px solid var(--yellow)">
+          <div class="pmv">CHF 1.2M</div>
+          <div class="pml">Value Captured</div>
+          <div style="font-size:11px;color:var(--yellow);font-weight:500;margin-top:6px">↑ +180k this month</div>
+        </div>
+        <div class="pmc" style="border-left:3px solid var(--error)">
+          <div class="pmv">3</div>
+          <div class="pml">Blocked / High Risk</div>
+          <div style="font-size:11px;color:var(--error);font-weight:500;margin-top:6px">Requires exec review</div>
+        </div>
+      </div>
+
+    </div><!-- end Portfolio Intelligence sec -->
+
+    <!-- S3b: USE CASE PORTFOLIO GRAPH -->
+    <div class="sec">
+      <div class="st">Use Case Portfolio</div>
+      <div class="ss">Portfolio Graph — strategic relevance vs readiness / risk</div>
+
+      <div class="sw">
+        <!-- Controls Row — Filter by Stage on right -->
+        <div class="portfolio-controls" style="justify-content:flex-end;margin-bottom:12px">
+          <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-end">
+            <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t40)">Filter by Stage</label>
+            <div class="pf-dd-wrap">
+              <select class="pf-dd" id="stageFilterDD" onchange="applyStageFilter(this.value)">
+                <option value="all">All Stages</option>
+                <option value="exploration">Exploration</option>
+                <option value="pilot">Pilot</option>
+                <option value="production">Production</option>
+              </select>
+              <svg class="pf-dd-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5l3 3 3-3"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Scatter Chart Container -->
+        <div style="position:relative;background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:16px 16px 0;box-shadow:none">
+          <div class="scatter-title" id="scatterTitle">Strategic Fit vs Ethical Exposure</div>
+          <div class="scatter-subtitle" id="scatterSubtitle"></div>
+
+          <div style="display:flex;gap:0;align-items:stretch">
+            <!-- Y axis label -->
+            <div style="display:flex;align-items:center;justify-content:center;width:32px;flex-shrink:0">
+              <div style="font-size:11px;color:var(--t60);font-weight:500;transform:rotate(-90deg);white-space:nowrap;letter-spacing:.01em">Strategic Fit (Low → High)</div>
+            </div>
+            <!-- Chart area -->
+            <div style="flex:1;position:relative" id="scatterContainer">
+              <svg id="mainScatter" viewBox="0 0 680 320" preserveAspectRatio="xMidYMid meet" style="width:100%;height:320px;display:block">
+                <defs>
+                  <clipPath id="cp-tl"><rect x="0" y="0" width="315" height="150"/></clipPath>
+                  <clipPath id="cp-tr"><rect x="315" y="0" width="365" height="150"/></clipPath>
+                  <clipPath id="cp-bl"><rect x="0" y="150" width="315" height="150"/></clipPath>
+                  <clipPath id="cp-br"><rect x="315" y="150" width="365" height="150"/></clipPath>
+                </defs>
+                <rect id="q-tl" x="10" y="5" width="305" height="145" fill="white" opacity=".5" rx="3"/>
+                <rect id="q-tr" x="315" y="5" width="355" height="145" fill="#F0FAF4" opacity=".7" rx="3"/>
+                <rect id="q-bl" x="10" y="150" width="305" height="150" fill="white" opacity=".5" rx="3"/>
+                <rect id="q-br" x="315" y="150" width="355" height="150" fill="#FFF3F2" opacity=".6" rx="3"/>
+                <!-- Grid lines vertical -->
+                <line x1="111" y1="5" x2="111" y2="300" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="213" y1="5" x2="213" y2="300" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="315" y1="5" x2="315" y2="300" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="417" y1="5" x2="417" y2="300" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="519" y1="5" x2="519" y2="300" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <!-- Grid lines horizontal -->
+                <line x1="10" y1="55" x2="675" y2="55" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="10" y1="105" x2="675" y2="105" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="10" y1="150" x2="675" y2="150" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="10" y1="200" x2="675" y2="200" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <line x1="10" y1="250" x2="675" y2="250" stroke="var(--t11)" stroke-width="1" opacity=".6"/>
+                <!-- Axis lines -->
+                <line x1="10" y1="5" x2="10" y2="300" stroke="var(--t11)" stroke-width="1"/>
+                <line x1="10" y1="300" x2="675" y2="300" stroke="var(--t11)" stroke-width="1"/>
+                <!-- Midpoint dashed dividers -->
+                <line x1="315" y1="5" x2="315" y2="300" stroke="var(--t40)" stroke-width="1" stroke-dasharray="5 4" opacity=".5"/>
+                <line x1="10" y1="150" x2="675" y2="150" stroke="var(--t40)" stroke-width="1" stroke-dasharray="5 4" opacity=".5"/>
+                <text id="ql-tl" x="20" y="22" font-size="8" fill="var(--t40)" opacity=".7" font-family="var(--f)">Use Case Portfolio</text>
+                <text id="ql-tr" x="325" y="22" font-size="8" fill="#27ae60" opacity=".8" font-family="var(--f)"></text>
+                <text id="ql-bl" x="20" y="162" font-size="8" fill="var(--t40)" opacity=".6" font-family="var(--f)"></text>
+                <text id="ql-br" x="325" y="162" font-size="8" fill="var(--error)" opacity=".7" font-family="var(--f)"></text>
+                <g id="bubbleGroup"></g>
+              </svg>
+              <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px;margin-bottom:4px">
+                <span style="font-size:11px;color:var(--t60);font-weight:500" id="xAxisArrow">Increasing Ethical Exposure →</span>
+              </div>
+              <div style="text-align:center;font-size:11px;color:var(--t40);font-weight:500;margin-bottom:8px" id="xAxisLabel">Ethical Exposure Score (Low → High)</div>
+              <div class="scatter-tip" id="scatterTip">
+                <div class="scatter-tip-name" id="stName"></div>
+                <div class="scatter-tip-row">Complexity: <strong id="stComp"></strong></div>
+                <div class="scatter-tip-row">Priority: <strong id="stPriority"></strong></div>
+              </div>
+            </div>
+          </div>
+          <div class="scatter-note">NOTE: Colour = Priority of the UC and Size = Complexity of the Use case.</div>
+
+
+          <!-- X-axis Dimension dropdown — bottom of chart -->
+          <div style="display:flex;justify-content:center;align-items:center;gap:10px;padding:12px 0 14px;border-top:1px solid var(--t5);margin-top:4px">
+            <label style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t40)">Usecase Graph</label>
+            <div class="pf-dd-wrap">
+              <select class="pf-dd" id="xAxisDD" onchange="switchPortfolioChartDD(this.value)" style="min-width:140px">
+                <option value="ethics">Ethics</option>
+                <option value="compliance">Compliance</option>
+                <option value="readiness">Readiness</option>
+                <option value="governance">Governance</option>
+              </select>
+              <svg class="pf-dd-chevron" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 5l3 3 3-3"/></svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S4: ORGANISATIONAL DISTRIBUTION -->
+    <div class="sec">
+      <div class="st">Organisational Distribution</div>
+      <div class="ss">Department performance · click any row to open details</div>
+      <div class="org-table-wrap">
+        <table class="org-table">
+          <thead>
+            <tr>
+              <th>Department</th>
+              <th>Readiness</th>
+              <th>Adoption</th>
+              <th>Gov. Friction</th>
+              <th>UCs</th>
+              <th>Active</th>
+              <th>Stalled</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="op('dm')">
+              <td class="org-dept">Marketing</td>
+              <td><span class="org-pill green">82 ↑</span></td>
+              <td><span class="org-pill green">76 ↑</span></td>
+              <td><span class="org-pill green">Low</span></td>
+              <td class="org-num">6</td>
+              <td class="org-num">4</td>
+              <td class="org-num">0</td>
+            </tr>
+            <tr onclick="op('do')">
+              <td class="org-dept">Operations</td>
+              <td><span class="org-pill red">58 →</span></td>
+              <td><span class="org-pill red">52 ↓</span></td>
+              <td><span class="org-pill red">High</span></td>
+              <td class="org-num">12</td>
+              <td class="org-num">5</td>
+              <td class="org-num">4</td>
+            </tr>
+            <tr onclick="op('df')">
+              <td class="org-dept">Finance</td>
+              <td><span class="org-pill yellow">64 ↑</span></td>
+              <td><span class="org-pill yellow">38 ↓</span></td>
+              <td><span class="org-pill yellow">Med</span></td>
+              <td class="org-num">5</td>
+              <td class="org-num">2</td>
+              <td class="org-num">1</td>
+            </tr>
+            <tr onclick="op('dh')">
+              <td class="org-dept">Human Resources</td>
+              <td><span class="org-pill green">71 ↑</span></td>
+              <td><span class="org-pill green">60 →</span></td>
+              <td><span class="org-pill green">Low</span></td>
+              <td class="org-num">3</td>
+              <td class="org-num">2</td>
+              <td class="org-num">0</td>
+            </tr>
+            <tr onclick="op('dr')">
+              <td class="org-dept">R&amp;D</td>
+              <td><span class="org-pill green">88 ↑</span></td>
+              <td><span class="org-pill green">80 ↑</span></td>
+              <td><span class="org-pill green">Low</span></td>
+              <td class="org-num">8</td>
+              <td class="org-num">6</td>
+              <td class="org-num">0</td>
+            </tr>
+            <tr onclick="op('dl2')">
+              <td class="org-dept">Legal</td>
+              <td><span class="org-pill red">42 ↓</span></td>
+              <td><span class="org-pill red">30 ↓</span></td>
+              <td><span class="org-pill red">High</span></td>
+              <td class="org-num">2</td>
+              <td class="org-num">0</td>
+              <td class="org-num">2</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- S5: USE CASE RISKS -->
+    <div class="sec">
+      <div class="st">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" style="flex-shrink:0;margin-right:-4px">
+          <path d="M8 1l7 12H1L8 1Z" fill="#147FF9" opacity=".15" stroke="#147FF9" stroke-width="1.5"/>
+          <path d="M8 6V9M8 11V11.5" stroke="#147FF9" stroke-width="1.8" stroke-linecap="round"/>
+        </svg>
+        Use Case Risks
+      </div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);padding:32px 40px;box-shadow:var(--sh);display:grid;grid-template-columns:280px 1fr 220px;gap:32px;align-items:center">
+        <!-- Left: risk list -->
+        <div>
+          <div style="font-size:9px;font-weight:700;color:var(--t40);text-transform:uppercase;letter-spacing:.1em;margin-bottom:14px">USE CASE RISKS</div>
+          <div style="display:flex;flex-direction:column;gap:0">
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--t5)">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--e11);color:var(--error);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px">!</div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">High-risk AI systems (3)</div>
+                <div style="font-size:11px;color:var(--t60)">Additional review before deployment</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid var(--t5)">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--y11);color:#B8880D;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:1px">⚠</div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">Ethical exposure flags (2)</div>
+                <div style="font-size:11px;color:var(--t60)">Bias check outstanding — UC-12, UC-19</div>
+              </div>
+            </div>
+            <div style="display:flex;align-items:flex-start;gap:10px;padding:11px 0">
+              <div style="width:22px;height:22px;border-radius:50%;background:var(--e11);color:var(--error);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px">!</div>
+              <div>
+                <div style="font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px">Deployment blocked (1)</div>
+                <div style="font-size:11px;color:var(--t60)">UC-15 pending compliance sign-off</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Center: donut chart with title -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:12px">
+          <div style="font-size:14px;font-weight:700;color:var(--text);display:flex;align-items:center;gap:8px">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M13 8A5 5 0 113 8a5 5 0 0110 0z" stroke="#147FF9" stroke-width="1.4"/><path d="M8 5v3l2 1.5" stroke="#147FF9" stroke-width="1.4" stroke-linecap="round"/></svg>
+            Use case Risks
+          </div>
+          <div class="ucr-donut-wrap" style="position:relative">
+            <svg id="ucrDonut" width="220" height="220" viewBox="0 0 220 220" style="cursor:default"></svg>
+            <div class="ucr-donut-tooltip" id="ucrTip">
+              <div class="ucr-donut-tt-pct" id="ucrTipPct"></div>
+              <div class="ucr-donut-tt-msg" id="ucrTipMsg"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Right: legend -->
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);font-weight:500">
+            <div style="width:16px;height:16px;border-radius:50%;background:#E54040;flex-shrink:0"></div>High-Risk
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);font-weight:500">
+            <div style="width:16px;height:16px;border-radius:50%;background:#F5A623;flex-shrink:0"></div>Minimal-Risk
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);font-weight:500">
+            <div style="width:16px;height:16px;border-radius:50%;background:#5CC8A0;flex-shrink:0"></div>Limited-Risk
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:var(--text);font-weight:500">
+            <div style="width:16px;height:16px;border-radius:50%;background:#4A90D9;flex-shrink:0"></div>GPAI / GPAI-Systemic
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S6: COMPLIANCE OBLIGATION LIST -->
+    <div class="sec">
+      <div class="st">Compliance Obligations</div>
+      <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)">
+
+        <!-- Summary header with stats grid -->
+        <div style="background:var(--t5);border-bottom:1px solid var(--border);padding:20px 24px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:16px">
+            <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--rs);padding:12px 16px">
+              <div style="font-size:9px;font-weight:700;color:var(--t40);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Total</div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-.03em">18</div>
+              <div style="font-size:10px;color:var(--t60);margin-top:3px">Applicable obligations</div>
+            </div>
+            <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--success);border-radius:var(--rs);padding:12px 16px">
+              <div style="font-size:9px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Done</div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-.03em">10</div>
+              <div style="font-size:10px;color:var(--t60);margin-top:3px">55.6% complete</div>
+            </div>
+            <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--yellow);border-radius:var(--rs);padding:12px 16px">
+              <div style="font-size:9px;font-weight:700;color:#B8880D;text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Pending</div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-.03em">6</div>
+              <div style="font-size:10px;color:var(--t60);margin-top:3px">In progress</div>
+            </div>
+            <div style="background:var(--white);border:1px solid var(--border);border-top:3px solid var(--error);border-radius:var(--rs);padding:12px 16px">
+              <div style="font-size:9px;font-weight:700;color:var(--error);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px">Critical</div>
+              <div style="font-size:22px;font-weight:700;color:var(--text);line-height:1;letter-spacing:-.03em">2</div>
+              <div style="font-size:10px;color:var(--t60);margin-top:3px">Exec action needed</div>
+            </div>
+          </div>
+          <!-- Progress bar -->
+          <div style="display:flex;flex-direction:column;gap:6px">
+            <div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:var(--t60);font-weight:500">
+              <span>Overall compliance progress</span><span style="font-weight:700;color:var(--text)">55.6%</span>
+            </div>
+            <div style="height:8px;border-radius:4px;background:var(--t11);overflow:hidden;display:flex">
+              <div style="width:55.6%;background:var(--success);border-radius:4px 0 0 4px;transition:width .6s"></div>
+              <div style="width:33.3%;background:var(--yellow);transition:width .6s"></div>
+              <div style="width:11.1%;background:var(--error);border-radius:0 4px 4px 0;transition:width .6s"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Obligation list -->
+        <div style="padding:8px 16px 16px">
+          <!-- Group header: Critical -->
+          <div style="display:flex;align-items:center;gap:8px;padding:14px 0 6px;font-size:9px;font-weight:700;color:var(--error);text-transform:uppercase;letter-spacing:.1em">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M6 1l5 9H1L6 1z" fill="rgba(230,19,19,.15)" stroke="var(--error)" stroke-width="1.5"/><path d="M6 5v2M6 9v.01" stroke="var(--error)" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Critical — Requires Immediate Action
+          </div>
+          <div class="ob-item ob-critical" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--e11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l5.5 10H1.5L7 1.5z" stroke="var(--error)" stroke-width="1.5"/><path d="M7 6v2.5M7 10.5v.01" stroke="var(--error)" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Technical Documentation</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--e11);color:var(--error);flex-shrink:0">Critical</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 11 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">Maintain up-to-date technical documentation including architecture, training data, and performance metrics.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--e5);border-left:3px solid var(--error);margin-bottom:4px;line-height:1.6">
+            <strong style="display:block;color:var(--text);margin-bottom:4px">What's required:</strong>
+            Maintain up-to-date technical documentation as per Art. 11 EU AI Act. Includes architecture diagrams, training data details, and performance metrics. Assign a documentation owner and establish a review cadence of at least quarterly.
+          </div>
+
+          <div class="ob-item ob-critical" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--e11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1.5l5.5 10H1.5L7 1.5z" stroke="var(--error)" stroke-width="1.5"/><path d="M7 6v2.5M7 10.5v.01" stroke="var(--error)" stroke-width="1.8" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Human Oversight</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--e11);color:var(--error);flex-shrink:0">Critical</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 14 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">Ensure human-in-the-loop mechanisms are operational with defined escalation thresholds.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--e5);border-left:3px solid var(--error);margin-bottom:4px;line-height:1.6">
+            <strong style="display:block;color:var(--text);margin-bottom:4px">What's required:</strong>
+            Ensure human-in-the-loop mechanisms are operational. Define escalation thresholds and override protocols for critical decisions. Conduct at least one human oversight review per deployment cycle.
+          </div>
+
+          <!-- Group header: Pending -->
+          <div style="display:flex;align-items:center;gap:8px;padding:16px 0 6px;font-size:9px;font-weight:700;color:#B8880D;text-transform:uppercase;letter-spacing:.1em">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" stroke="#B8880D" stroke-width="1.5"/><path d="M6 4v2.5l1.5 1" stroke="#B8880D" stroke-width="1.5" stroke-linecap="round"/></svg>
+            Pending — In Progress
+          </div>
+
+          <div class="ob-item ob-pending" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--y11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#B8880D" stroke-width="1.5"/><path d="M7 4.5V7l1.5 1.5" stroke="#B8880D" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Quality Management System</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--y11);color:#B8880D;flex-shrink:0">Pending</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 17 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">QMS covering design, development, testing, and post-market monitoring processes.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--y5);border-left:3px solid var(--yellow);margin-bottom:4px;line-height:1.6">
+            <strong style="display:block;color:var(--text);margin-bottom:4px">What's required:</strong>
+            Establish and maintain a quality management system covering design, development, testing, and post-market monitoring processes. Document all procedures and assign owners for each QMS element.
+          </div>
+
+          <div class="ob-item ob-pending" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--y11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#B8880D" stroke-width="1.5"/><path d="M7 4.5V7l1.5 1.5" stroke="#B8880D" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Data Governance</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--y11);color:#B8880D;flex-shrink:0">Pending</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 10 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">Data governance policies including lineage, access controls, bias mitigation, and retention.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--y5);border-left:3px solid var(--yellow);margin-bottom:4px;line-height:1.6">
+            <strong style="display:block;color:var(--text);margin-bottom:4px">What's required:</strong>
+            Define and enforce data governance policies including data lineage, access controls, bias mitigation, and retention schedules. Ensure all AI training and validation datasets are documented and auditable.
+          </div>
+
+          <div class="ob-item ob-pending" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--y11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" stroke="#B8880D" stroke-width="1.5"/><path d="M7 4.5V7l1.5 1.5" stroke="#B8880D" stroke-width="1.5" stroke-linecap="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Accuracy, Robustness &amp; Cybersecurity</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--y11);color:#B8880D;flex-shrink:0">Pending</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 15 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">Validate model accuracy thresholds and implement adversarial robustness and security testing.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--y5);border-left:3px solid var(--yellow);margin-bottom:4px;line-height:1.6">
+            <strong style="display:block;color:var(--text);margin-bottom:4px">What's required:</strong>
+            Validate model accuracy at defined thresholds. Implement adversarial robustness testing and security measures against data poisoning and model extraction attacks.
+          </div>
+
+          <!-- Group header: Done -->
+          <div style="display:flex;align-items:center;gap:8px;padding:16px 0 6px;font-size:9px;font-weight:700;color:var(--success);text-transform:uppercase;letter-spacing:.1em">
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4.5" fill="rgba(9,197,87,.15)" stroke="var(--success)" stroke-width="1.5"/><path d="M4 6l1.5 1.5 2.5-2.5" stroke="var(--success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Done — Completed
+          </div>
+
+          <div class="ob-item ob-done" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--s11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" fill="rgba(9,197,87,.15)" stroke="var(--success)" stroke-width="1.5"/><path d="M4.5 7l1.8 1.8 3.2-3.2" stroke="var(--success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Logging &amp; Traceability</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--s11);color:var(--success);flex-shrink:0">Done</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 12 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">Automatic logging of inputs, outputs, and decisions with full audit traceability.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--s5);border-left:3px solid var(--success);margin-bottom:4px;line-height:1.6">
+            Logging system fully implemented. All AI operations are logged with timestamps, input/output records, and decision rationale. Audit trail available for all production systems.
+          </div>
+
+          <div class="ob-item ob-done" onclick="toggleObligation(this)">
+            <div style="width:28px;height:28px;border-radius:8px;background:var(--s11);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="5" fill="rgba(9,197,87,.15)" stroke="var(--success)" stroke-width="1.5"/><path d="M4.5 7l1.8 1.8 3.2-3.2" stroke="var(--success)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px">
+                <span style="font-size:13px;font-weight:600;color:var(--text)">Post-Market Monitoring</span>
+                <span style="font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--s11);color:var(--success);flex-shrink:0">Done</span>
+                <span style="font-size:9px;color:var(--t40);font-weight:500;flex-shrink:0;margin-left:auto">Art. 72 EU AI Act</span>
+              </div>
+              <div style="font-size:11px;color:var(--t60);margin-top:2px">Post-market surveillance system with KPIs and alert thresholds established for all deployed systems.</div>
+            </div>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="var(--t40)" stroke-width="1.5" class="ob-chevron" style="flex-shrink:0;transition:transform .25s"><path d="M3 5l3 3 3-3"/></svg>
+          </div>
+          <div class="ob-detail" style="display:none;padding:10px 16px 10px 52px;font-size:12px;color:var(--t60);background:var(--s5);border-left:3px solid var(--success);margin-bottom:4px;line-height:1.6">
+            Post-market surveillance system is live. Weekly automated KPI reports are generated and reviewed by the governance team. Alert thresholds are configured for all 8 production use cases.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- S7: INTERVENTION & DECISIONS -->
+    <div class="sec">
+      <div class="st">Intervention &amp; Decisions</div>
+      <div class="tc">
+        <div class="cc"><h4>Immediate Actions</h4>
+          <div class="ri"><div class="ric red">!</div><div>Resolve governance delay for UC-12</div></div>
+          <div class="ri"><div class="ric yellow">→</div><div>Assign owner to compliance gap</div></div>
+          <div class="ri"><div class="ric red">!</div><div>Review blocked deployment — UC-15</div></div>
+        </div>
+        <div class="cc"><h4>Executive Decisions</h4>
+          <div class="ri"><div class="ric green">✓</div><div>Approve UC-08 deployment</div></div>
+          <div class="ri"><div class="ric yellow">⚠</div><div>Accept risk classification for UC-15</div></div>
+          <div class="ri"><div class="ric blue">$</div><div>Allocate budget for scaling</div></div>
+        </div>
+        <div class="cc"><h4>Strategic Moves</h4>
+          <div class="ri"><div class="ric green">↑</div><div>Expand AI adoption in Marketing</div></div>
+          <div class="ri"><div class="ric green">⚡</div><div>Accelerate high-value use cases</div></div>
+          <div class="ri"><div class="ric blue">◆</div><div>Standardise governance process</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- OVERLAY + SIDE PANEL -->
+<div class="ov" id="ov" onclick="cp()"></div>
+<div class="sp" id="sP">
+  <div class="sph">
+    <div style="display:flex;align-items:flex-start;gap:10px;flex:1;min-width:0">
+      <img src="https://www.figma.com/api/mcp/asset/72186e91-5215-40ec-90be-9d1b64dd59e3" alt="AILAS" style="width:26px;height:26px;object-fit:contain;flex-shrink:0;margin-top:2px">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t40);margin-bottom:3px">AILAS Intelligence</div>
+        <h2 id="pT" style="font-size:15px;font-weight:700;color:var(--text);letter-spacing:-.01em">Details</h2>
+      </div>
+    </div>
+    <button class="xb" onclick="cp()">
+      <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M1 1l9 9M10 1L1 10"/></svg>
+    </button>
+  </div>
+  <div id="pC"></div>
+</div>
+
+<script>
+// ─── helpers for driver expanded panels ───
+function bigScoreRing(score,color){
+  const c=2*Math.PI*38, o=c-(score/100)*c;
+  return `<div class="sp-score-card">
+    <div class="sp-score-big-ring">
+      <svg viewBox="0 0 90 90"><circle class="bg-r" cx="45" cy="45" r="38"/><circle class="vl-r" cx="45" cy="45" r="38" stroke="${color}" stroke-dasharray="${c.toFixed(2)}" stroke-dashoffset="${o.toFixed(2)}"/></svg>
+      <div class="sp-score-big-txt"><span class="bv" style="color:${color}">${score}</span><span class="bl">Score</span></div>
+    </div>`;
+}
+function pb(score){return score>=70?'p5-high':score>=50?'p5-med':'p5-low'}
+function pl(score){return score>=70?'High':score>=50?'Med':'Low'}
+
+// ═══ DRIVER CARDS — generated with circular score rings ═══
+const drivers = [
+  {k:'readiness',label:'Readiness',score:68,delta:'↑ +6',cls:'up',color:'#09C557'},
+  {k:'governance',label:'Governance',score:54,delta:'↓ -3',cls:'down',color:'#E61313'},
+  {k:'ethics',label:'Ethics',score:72,delta:'→ 0',cls:'neutral',color:'#F5C813'},
+  {k:'compliance',label:'Compliance',score:61,delta:'↑ +4',cls:'up',color:'#09C557'},
+  {k:'opportunity',label:'Opportunity Potential',score:83,delta:'↑ +7',cls:'up',color:'#09C557'},
+];
+const C=2*Math.PI*24; // circumference for r=24
+document.getElementById('driverRow').innerHTML = drivers.map(d=>{
+  const off = C - (d.score/100)*C;
+  const descs = {
+    readiness: 'Data, Workflow & Implementation',
+    governance: 'Review cycle & policy coverage',
+    ethics: 'Fairness, oversight & transparency',
+    compliance: 'EU AI Act & regulatory posture',
+    opportunity: 'Untapped UC pipeline value',
+  };
+  return `<div class="dc" onclick="op('${d.k}')">
+    <div class="ml" style="justify-content:center">${d.label}</div>
+    <div class="ring-wrap">
+      <svg class="ring-svg" viewBox="0 0 56 56"><circle class="ring-bg" cx="28" cy="28" r="24"/><circle class="ring-val" cx="28" cy="28" r="24" stroke="${d.color}" stroke-dasharray="${C}" stroke-dashoffset="${off}" style="animation-delay:${.3+drivers.indexOf(d)*.1}s"/></svg>
+      <div class="ring-txt">${d.score}</div>
+    </div>
+    <div class="ms ${d.cls}" style="justify-content:center">${d.delta}</div>
+    <div style="font-size:9px;color:var(--t40);text-align:center;margin-top:2px;line-height:1.3;padding:0 4px">${descs[d.k]||''}</div>
+  </div>`;
+}).join('');
+
+// ═══ HELPER: Build score bar HTML ═══
+function bar(label,val,max,color){return`<div class="sb-wrap"><div class="sb-label"><span class="k">${label}</span><span class="v">${val}/${max}</span></div><div class="sb-bar"><div class="sb-fill" style="width:${val/max*100}%;background:${color}"></div></div></div>`}
+function ring(val,color){const c=2*Math.PI*26,o=c-(val/100)*c;return`<div class="sp-ring"><svg viewBox="0 0 60 60" style="transform:rotate(-90deg)"><circle class="bg-r" cx="30" cy="30" r="26"/><circle class="vl-r" cx="30" cy="30" r="26" stroke="${color}" stroke-dasharray="${c}" stroke-dashoffset="${o}"/></svg><div class="sp-ring-txt">${val}</div></div>`}
+function scoreHeader(val,label,trend,trendCls,color){return`<div class="sp-score">${ring(val,color)}<div class="sp-score-info"><div class="sp-big">${label}</div><div class="sp-sub ${trendCls}">${trend}</div></div></div>`}
+// Build UC panel per spec: Overview → Value → Diagnostics → Risks → Timeline
+function ucPanel(d){
+  let h=scoreHeader(d.readiness,'Readiness Score',d.rTrend||'','up',d.rColor||'#09C557');
+  h+=`<div class="ps"><h5>Overview</h5><div class="pr"><span class="k">Status</span><span class="v"><span class="badge ${d.bCls}">${d.status}</span></span></div><div class="pr"><span class="k">Owner</span><span class="v">${d.owner}</span></div><div class="pr"><span class="k">Department</span><span class="v">${d.dept}</span></div></div>`;
+  h+=`<div class="ps"><h5>Value</h5><div class="pr"><span class="k">Expected Value</span><span class="v">${d.expVal}</span></div><div class="pr"><span class="k">Captured Value</span><span class="v ${d.capCls||''}">${d.capVal}</span></div><div class="pr"><span class="k">ROI Status</span><span class="v ${d.roiCls||''}">${d.roi}</span></div></div>`;
+  h+=`<div class="ps"><h5>Diagnostics</h5>${bar('Readiness',d.readiness,100,d.readiness>=70?'#09C557':d.readiness>=50?'#F5C813':'#E61313')}${bar('Governance',d.governance,100,d.governance>=70?'#09C557':d.governance>=50?'#F5C813':'#E61313')}${bar('Ethics',d.ethics,100,d.ethics>=70?'#09C557':d.ethics>=50?'#F5C813':'#E61313')}${bar('Compliance',d.compliance,100,d.compliance>=70?'#09C557':d.compliance>=50?'#F5C813':'#E61313')}</div>`;
+  h+=`<div class="ps"><h5>Risks</h5><div class="pr"><span class="k">Risk Level</span><span class="v"><span class="badge ${d.rlBadge}">${d.riskLevel}</span></span></div>${d.issues?`<div class="pr"><span class="k">Key Issues</span><span class="v">${d.issues}</span></div>`:''}</div>`;
+  if(d.timeline){h+=`<div class="ps"><h5>Timeline</h5><div class="sp-tl">${d.timeline.map(t=>`<div class="sp-tl-item"><div class="tl-date">${t.date}</div><div class="tl-text">${t.text}</div>${t.impact?`<div class="tl-impact ${t.impCls||''}">${t.impact}</div>`:''}</div>`).join('')}</div></div>`}
+  return h;
+}
+// Build dept panel per spec: Summary → Activity → Bottlenecks → Signals
+function deptPanel(d){
+  let h=scoreHeader(d.score,d.name,d.trend,d.trendCls,d.score>=70?'#09C557':d.score>=50?'#F5C813':'#E61313');
+  h+=`<div class="ps"><h5>Summary</h5><div class="pr"><span class="k">Overall Score</span><span class="v">${d.score}</span></div><div class="pr"><span class="k">Trend</span><span class="v ${d.trendCls}">${d.trend}</span></div></div>`;
+  h+=`<div class="ps"><h5>Activity</h5><div class="pr"><span class="k">Number of UCs</span><span class="v">${d.ucs}</span></div><div class="pr"><span class="k">Active</span><span class="v">${d.active}</span></div><div class="pr"><span class="k">Stalled</span><span class="v ${d.stalled>0?'down':''}">${d.stalled}</span></div></div>`;
+  h+=`<div class="ps"><h5>Bottlenecks</h5>${d.bottlenecks.length?d.bottlenecks.map(b=>`<div class="sp-alert ${b.sev}"><div class="sp-alert-icon">${b.icon}</div><div class="sp-alert-body">${b.text}</div></div>`).join(''):'<div class="pr"><span class="k">Key Issues</span><span class="v up">None identified</span></div>'}</div>`;
+  h+=`<div class="ps"><h5>Signals</h5><div class="pr"><span class="k">Adoption Patterns</span><span class="v ${d.adoptCls}">${d.adoption}</span></div><div class="pr"><span class="k">Leadership Engagement</span><span class="v ${d.leadCls}">${d.leadership}</span></div>${d.shadowAI?`<div class="pr"><span class="k">Shadow AI</span><span class="v neutral">${d.shadowAI}</span></div>`:''}</div>`;
+  return h;
+}
+
+// ═══ SIDE PANEL DATA ═══
+const D={
+// ── S1 Row 2: Drivers — "Each clickable → right side panel" ──
+readiness:{t:'Readiness',h:function(){
+  const pillars=[['Data',88],['Implement.',65],['Workflow',45],['Ownership',90],['Risk',55]];
+  let h=bigScoreRing(68,'#09C557');
+  h+=`<div class="sc-label">Readiness Score</div><div class="sc-trend up">↑ +6 this quarter</div>
+    <div class="sp-score-legend"><span><i style="background:#34c759"></i>High (70+)</span><span><i style="background:#ff8d28"></i>Med (50–69)</span><span><i style="background:#ff383c"></i>Low (&lt;50)</span></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Pillar Readiness</div>
+  <div class="sp-pillar5">
+    ${pillars.map(([l,v])=>`<div class="sp-p5"><div class="p5l">${l}</div><div class="p5v">${v}</div><div class="p5b ${pb(v)}">${pl(v)}</div></div>`).join('')}
+  </div>`;
+  h+=`<div class="sp-ailas"><div class="ai-label"><svg style="width:11px;height:11px;margin-right:4px;vertical-align:-1px" viewBox="0 0 12 12" fill="none" stroke="#6c5ce7" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M6 4v2l1.5 1.5"/></svg>AILAS Intelligence Summary</div><div class="ai-text">This use case is feasible but requires improvements in workflow clarity before piloting. Data foundations are strong, and ownership is defined. Technical integration complexity and risk posture require further planning.</div></div>`;
+  h+=`<div class="sp-feasibility"><div class="fe-title">Feasibility for Your Organisation <span class="fe-badge">Easy</span></div>Low complexity — fits your current exploring stage. Pilot estimated at 2–3 months using existing ERP data streams. No major infrastructure changes needed.</div>`;
+  h+=`<div class="sp-sec-title">Key Readiness Gaps</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-red"></span>Workflow integration clarity is insufficient for production deployment</li>
+    <li><span class="bi bi-red"></span>Incident response playbook is incomplete — needs owner sign-off</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Recommended Actions</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-green"></span>Implement an automated monitoring dashboard with weekly review cadence</li>
+    <li><span class="bi bi-green"></span>Complete incident response documentation with clear escalation paths</li>
+    <li><span class="bi bi-green"></span>Consider AILAS Monitoring Assistant to close the workflow gap</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Data Profile</div>
+  <div class="sp-data-grid">
+    <div class="sp-dc"><div class="dc-label">Data Type</div><div class="dc-val">Text & Tabular</div></div>
+    <div class="sp-dc"><div class="dc-label">Sensitivity</div><div class="dc-val">Non-Sensitive</div></div>
+    <div class="sp-dc"><div class="dc-label">Structure</div><div class="dc-val">Unstructured</div></div>
+    <div class="sp-dc"><div class="dc-label">Primary Source</div><div class="dc-val">ERP / CRM</div></div>
+    <div class="sp-dc"><div class="dc-label">Volume</div><div class="dc-val">Medium</div></div>
+    <div class="sp-dc"><div class="dc-label">Freshness</div><div class="dc-val">Near Real-Time</div></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Use Case Profile</div>
+  <div class="sp-mini-grid">
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#f3e8ff"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#8200db" stroke-width="1.5"><rect x="2" y="2" width="10" height="10" rx="1.5"/><path d="M5 7h4M7 5v4"/></svg></div><div class="sp-mc-title">Implementation Details</div></div>
+      <div class="sp-kv"><span class="k">Mode</span><span class="v"><span class="sp-tag purple">Cloud-Native</span></span></div>
+      <div class="sp-kv"><span class="k">Hosting</span><span class="v"><span class="sp-tag blue">Cloud (AWS)</span></span></div>
+      <div class="sp-kv"><span class="k">Complexity</span><span class="v"><span class="sp-tag orange">Medium</span></span></div>
+      <div class="sp-kv"><span class="k">Progress</span><span class="v"><span class="sp-tag teal">Prototype</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#ffedd4"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#ff8d28" stroke-width="1.5"><path d="M7 2l1.5 3 3.5.5-2.5 2.5.5 3.5L7 10l-3 1.5.5-3.5L2 5.5 5.5 5z"/></svg></div><div class="sp-mc-title">Risk &amp; Safeguards</div></div>
+      <div class="sp-kv"><span class="k">Decision Criticality</span><span class="v"><span class="sp-tag green">High</span></span></div>
+      <div class="sp-kv"><span class="k">Human Oversight</span><span class="v"><span class="sp-tag orange">On escalations</span></span></div>
+      <div class="sp-tags"><span class="sp-tag gray">Confidence thresholds</span><span class="sp-tag gray">Handoff triggers</span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#cefafe"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#00c3d0" stroke-width="1.5"><path d="M2 7h10M8 3l4 4-4 4"/></svg></div><div class="sp-mc-title">Workflow Integration</div></div>
+      <div class="sp-kv"><span class="k">Human-in-loop</span><span class="v"><span class="sp-tag purple">After escalations</span></span></div>
+      <div class="sp-kv"><span class="k">Frequency</span><span class="v"><span class="sp-tag teal">Continuous</span></span></div>
+      <div class="sp-tags"><span class="sp-tag gray">L1 Support</span><span class="sp-tag gray">L2 Specialist</span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#d0fae5"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#09c557" stroke-width="1.5"><circle cx="7" cy="5" r="2.5"/><path d="M2 12c0-2.8 2.2-4 5-4s5 1.2 5 4"/></svg></div><div class="sp-mc-title">Ownership &amp; Accountability</div></div>
+      <div class="sp-kv"><span class="k">Business Owner</span><span class="v"><span class="sp-tag purple">VP Ops</span></span></div>
+      <div class="sp-kv"><span class="k">Operational Owner</span><span class="v"><span class="sp-tag blue">Head of Eng</span></span></div>
+      <div class="sp-tags"><span class="sp-tag gray">Support Agents</span><span class="sp-tag gray">Customers</span></div>
+    </div>
+  </div>`;
+  return h;
+}},
+governance:{t:'Governance',h:function(){
+  const pillars=[['Gov. Roles',88],['Lifecycle',65],['Monitoring',45],['Incident Mgmt',90],['Vendor Gov.',55]];
+  let h=bigScoreRing(54,'#E61313');
+  h+=`<div class="sc-label">Governance Score</div><div class="sc-trend down">↓ −3 this quarter</div>
+    <div class="sp-score-legend"><span><i style="background:#34c759"></i>Strong (70+)</span><span><i style="background:#ff8d28"></i>Moderate (50–69)</span><span><i style="background:#ff383c"></i>Weak (&lt;50)</span></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Pillar Readiness</div>
+  <div class="sp-pillar5">
+    ${pillars.map(([l,v])=>`<div class="sp-p5"><div class="p5l">${l}</div><div class="p5v">${v}</div><div class="p5b ${pb(v)}">${pl(v)}</div></div>`).join('')}
+  </div>`;
+  h+=`<div class="sp-ailas"><div class="ai-label"><svg style="width:11px;height:11px;margin-right:4px;vertical-align:-1px" viewBox="0 0 12 12" fill="none" stroke="#6c5ce7" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M6 4v2l1.5 1.5"/></svg>AILAS Intelligence Summary</div><div class="ai-text">This use case is feasible but requires improvements in workflow clarity before piloting. Data foundations are strong, and ownership is defined. Technical integration complexity and risk posture require further planning.</div></div>`;
+  h+=`<div class="sp-sec-title">Key Governance Gaps</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-red"></span>14 pending governance reviews — average cycle time has risen to 14 days</li>
+    <li><span class="bi bi-red"></span>3 use cases have no assigned governance owner or accountability structure</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Recommended Actions</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-green"></span>Implement a governance review SLA — target under 7 days per review cycle</li>
+    <li><span class="bi bi-green"></span>Assign dedicated reviewers to the 3 unowned use cases immediately</li>
+    <li><span class="bi bi-green"></span>Standardise vendor governance documentation across all active pilots</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Current Status</div>
+  <div class="sp-data-grid">
+    <div class="sp-dc"><div class="dc-label">Pending Reviews</div><div class="dc-val" style="color:var(--error)">14</div></div>
+    <div class="sp-dc"><div class="dc-label">Avg Cycle Time</div><div class="dc-val" style="color:var(--error)">14 days</div></div>
+    <div class="sp-dc"><div class="dc-label">Blocked UCs</div><div class="dc-val" style="color:var(--error)">3</div></div>
+    <div class="sp-dc"><div class="dc-label">Approved (30d)</div><div class="dc-val">8</div></div>
+    <div class="sp-dc"><div class="dc-label">Escalations</div><div class="dc-val" style="color:var(--yellow)">2</div></div>
+    <div class="sp-dc"><div class="dc-label">Vendors Active</div><div class="dc-val">5</div></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Governance Profile</div>
+  <div class="sp-mini-grid">
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#f3e8ff"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#8200db" stroke-width="1.5"><rect x="2" y="9" width="10" height="4" rx="1"/><rect x="4" y="5" width="6" height="4"/><path d="M7 2L2 5h10L7 2z"/></svg></div><div class="sp-mc-title">Structure &amp; Accountability</div></div>
+      <div class="sp-kv"><span class="k">AI Council</span><span class="v"><span class="sp-tag green">Active</span></span></div>
+      <div class="sp-kv"><span class="k">UC Owners</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+      <div class="sp-kv"><span class="k">Review Board</span><span class="v"><span class="sp-tag green">Established</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#ffedd4"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#ff8d28" stroke-width="1.5"><path d="M7 2a4 4 0 014 4v2l1 1v1H2v-1l1-1V6a4 4 0 014-4z"/><path d="M5.5 11a1.5 1.5 0 003 0"/></svg></div><div class="sp-mc-title">Monitoring &amp; Incidents</div></div>
+      <div class="sp-kv"><span class="k">Monitoring</span><span class="v"><span class="sp-tag red">Incomplete</span></span></div>
+      <div class="sp-kv"><span class="k">Incident Plan</span><span class="v"><span class="sp-tag green">In Place</span></span></div>
+      <div class="sp-kv"><span class="k">Alerts</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#cefafe"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#00c3d0" stroke-width="1.5"><rect x="3" y="2" width="8" height="10" rx="1"/><path d="M5 5h4M5 7h4M5 9h2"/></svg></div><div class="sp-mc-title">Policies &amp; Documentation</div></div>
+      <div class="sp-kv"><span class="k">AI Policy</span><span class="v"><span class="sp-tag green">Published</span></span></div>
+      <div class="sp-kv"><span class="k">Usage Guidelines</span><span class="v"><span class="sp-tag orange">Draft</span></span></div>
+      <div class="sp-kv"><span class="k">Vendor Contracts</span><span class="v"><span class="sp-tag orange">3 of 5</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#d0fae5"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#09c557" stroke-width="1.5"><path d="M2 7s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><circle cx="7" cy="7" r="1.5"/></svg></div><div class="sp-mc-title">Human Oversight</div></div>
+      <div class="sp-kv"><span class="k">Override Mechanism</span><span class="v"><span class="sp-tag green">Yes</span></span></div>
+      <div class="sp-kv"><span class="k">Audit Trail</span><span class="v"><span class="sp-tag green">Enabled</span></span></div>
+      <div class="sp-kv"><span class="k">Review Frequency</span><span class="v"><span class="sp-tag orange">Monthly</span></span></div>
+    </div>
+  </div>`;
+  return h;
+}},
+ethics:{t:'Ethics',h:function(){
+  const pillars=[['Fairness',88],['Transparency',65],['Oversight',45],['Data Ethics',90],['Sensitive Ctx',55],['Harm & Misuse',55],['Rights',55]];
+  let h=bigScoreRing(72,'#F5C813');
+  h+=`<div class="sc-label">Ethics Score</div><div class="sc-trend neutral">→ Stable (no change)</div>
+    <div class="sp-score-legend"><span><i style="background:#34c759"></i>High (70+)</span><span><i style="background:#ff8d28"></i>Med (50–69)</span><span><i style="background:#ff383c"></i>Low (&lt;50)</span></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Ethical Pillars</div>
+  <div class="sp-pillar7">
+    ${pillars.map(([l,v])=>`<div class="sp-p7"><div class="p7l">${l}</div><div class="p7v">${v}</div><div class="p7b ${pb(v).replace('p5','p7')}">${pl(v)}</div></div>`).join('')}
+  </div>`;
+  h+=`<div class="sp-ailas"><div class="ai-label"><svg style="width:11px;height:11px;margin-right:4px;vertical-align:-1px" viewBox="0 0 12 12" fill="none" stroke="#6c5ce7" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M6 4v2l1.5 1.5"/></svg>AILAS Intelligence Summary</div><div class="ai-text">This use case is feasible but requires improvements in workflow clarity before piloting. Data foundations are strong, and ownership is defined. Technical integration complexity and risk posture require further planning.</div></div>`;
+  h+=`<div class="sp-sec-title">Ethical Gaps</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-red"></span>Human oversight mechanism (score 45) is insufficient for autonomous decision UCs</li>
+    <li><span class="bi bi-red"></span>Bias check outstanding for UC-12 and UC-19 — ethical exposure flags raised</li>
+    <li><span class="bi bi-red"></span>Sensitive context handling lacks documented review for 4 active use cases</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Safeguards Required</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-blue"></span>Mandate algorithmic bias audits before any UC moves to production</li>
+    <li><span class="bi bi-blue"></span>Establish human escalation paths for all high-stakes AI decisions</li>
+    <li><span class="bi bi-blue"></span>Implement model explainability reporting for externally-facing AI systems</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Ethics Review Status</div>
+  <div class="sp-data-grid">
+    <div class="sp-dc"><div class="dc-label">Reviews Done</div><div class="dc-val">10 / 14</div></div>
+    <div class="sp-dc"><div class="dc-label">Bias Flags</div><div class="dc-val" style="color:var(--error)">2 open</div></div>
+    <div class="sp-dc"><div class="dc-label">Exposure Flags</div><div class="dc-val" style="color:var(--error)">2 active</div></div>
+    <div class="sp-dc"><div class="dc-label">Explainability</div><div class="dc-val" style="color:var(--yellow)">Partial</div></div>
+    <div class="sp-dc"><div class="dc-label">Consent Mgmt</div><div class="dc-val">In Place</div></div>
+    <div class="sp-dc"><div class="dc-label">DPIA Complete</div><div class="dc-val" style="color:var(--error)">Pending</div></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Ethics Profile</div>
+  <div class="sp-mini-grid">
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#f3e8ff"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#8200db" stroke-width="1.5"><path d="M7 2v10M4 12h6"/><path d="M2 5l2 3H2L4 5zM10 5l2 3h-4l2-3z"/></svg></div><div class="sp-mc-title">Fairness &amp; Sensitive Context</div></div>
+      <div class="sp-kv"><span class="k">Bias Testing</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+      <div class="sp-kv"><span class="k">Protected Groups</span><span class="v"><span class="sp-tag green">Defined</span></span></div>
+      <div class="sp-kv"><span class="k">Sensitive Data UCs</span><span class="v"><span class="sp-tag red">4 flagged</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#dbeafe"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#147ff9" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M9 9l3 3"/></svg></div><div class="sp-mc-title">Transparency &amp; Data Ethics</div></div>
+      <div class="sp-kv"><span class="k">Explainability</span><span class="v"><span class="sp-tag orange">In progress</span></span></div>
+      <div class="sp-kv"><span class="k">Data Minimisation</span><span class="v"><span class="sp-tag green">Applied</span></span></div>
+      <div class="sp-kv"><span class="k">Consent Tracking</span><span class="v"><span class="sp-tag green">Enabled</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#ffedd4"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#09c557" stroke-width="1.5"><path d="M2 7s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/><circle cx="7" cy="7" r="1.5"/></svg></div><div class="sp-mc-title">Oversight &amp; Rights</div></div>
+      <div class="sp-kv"><span class="k">Human Override</span><span class="v"><span class="sp-tag orange">Inconsistent</span></span></div>
+      <div class="sp-kv"><span class="k">User Rights Portal</span><span class="v"><span class="sp-tag red">Missing</span></span></div>
+      <div class="sp-kv"><span class="k">Escalation Path</span><span class="v"><span class="sp-tag orange">Draft</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#fce7f3"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#e4200a" stroke-width="1.5"><path d="M7 2L2 11h10L7 2z"/><path d="M7 6v3M7 10v.5"/></svg></div><div class="sp-mc-title">Harm &amp; Misuse Prevention</div></div>
+      <div class="sp-kv"><span class="k">Misuse Controls</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+      <div class="sp-kv"><span class="k">Red-Team Tests</span><span class="v"><span class="sp-tag red">Not done</span></span></div>
+      <div class="sp-kv"><span class="k">Harm Thresholds</span><span class="v"><span class="sp-tag orange">Defined</span></span></div>
+    </div>
+  </div>`;
+  return h;
+}},
+compliance:{t:'Compliance',h:function(){
+  let h=bigScoreRing(61,'#147FF9');
+  h+=`<div class="sc-label">Compliance Score</div><div class="sc-trend up">↑ +4 this quarter</div>
+    <div class="sp-score-legend"><span><i style="background:#34c759"></i>Compliant (70+)</span><span><i style="background:#ff8d28"></i>Partial (50–69)</span><span><i style="background:#ff383c"></i>Non-Compliant (&lt;50)</span></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Legal Classification</div>
+  <div class="sp-legal-grid">
+    <div class="sp-lg"><div class="lg-label">EU AI Act</div><div class="lg-val">Partial</div><div class="lg-sub">Applicable</div></div>
+    <div class="sp-lg"><div class="lg-label">Prohibited Practice</div><div class="lg-val" style="color:var(--success)">No</div><div class="lg-sub">Not flagged</div></div>
+    <div class="sp-lg"><div class="lg-label">GPAI Model</div><div class="lg-val" style="color:var(--success)">No</div><div class="lg-sub">Not applicable</div></div>
+    <div class="sp-lg"><div class="lg-label">Actor Role</div><div class="lg-val">Deployer</div><div class="lg-sub">Primary role</div></div>
+    <div class="sp-lg"><div class="lg-label">Risk Category</div><div class="lg-val" style="color:var(--yellow)">Limited</div><div class="lg-sub">Risk tier</div></div>
+    <div class="sp-lg"><div class="lg-label">Transparency Req.</div><div class="lg-val" style="color:var(--success)">Yes</div><div class="lg-sub">Required</div></div>
+  </div>`;
+  h+=`<div class="sp-ailas"><div class="ai-label"><svg style="width:11px;height:11px;margin-right:4px;vertical-align:-1px" viewBox="0 0 12 12" fill="none" stroke="#6c5ce7" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M6 4v2l1.5 1.5"/></svg>AILAS Intelligence Summary</div><div class="ai-text">This use case is feasible but requires improvements in workflow clarity before piloting. Data foundations are strong, and ownership is defined. Technical integration complexity and risk posture require further planning.</div></div>`;
+  h+=`<div class="sp-sec-title">Compliance Gaps</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-red"></span>Technical documentation is incomplete for 6 active use cases under EU AI Act scope</li>
+    <li><span class="bi bi-red"></span>DPIA not completed for UC-19 (facial recognition) — GDPR non-compliance risk</li>
+    <li><span class="bi bi-red"></span>Logging and audit trail coverage is partial — 4 UCs have no traceable decision log</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">High-Risk Obligations</div>
+  <div class="sp-ob"><div class="sp-ob-icon ok">✓</div><div class="sp-ob-body"><strong>Risk Management System</strong>Documented and reviewed — passed last audit</div></div>
+  <div class="sp-ob"><div class="sp-ob-icon ok">✓</div><div class="sp-ob-body"><strong>Data Governance Documentation</strong>In place for all production-stage use cases</div></div>
+  <div class="sp-ob"><div class="sp-ob-icon warn">!</div><div class="sp-ob-body"><strong>Technical Documentation</strong>Incomplete for 6 of 14 applicable use cases</div></div>
+  <div class="sp-ob"><div class="sp-ob-icon ok">✓</div><div class="sp-ob-body"><strong>Human Oversight Mechanism</strong>Defined — requires consistency improvement</div></div>
+  <div class="sp-ob"><div class="sp-ob-icon err">✕</div><div class="sp-ob-body"><strong>DPIA (UC-19)</strong>Not completed — facial recognition triggers mandatory DPIA</div></div>
+  <div class="sp-ob"><div class="sp-ob-icon warn">!</div><div class="sp-ob-body"><strong>Logging &amp; Auditability</strong>Gaps in 4 use cases — not fully traceable</div></div>
+  <div style="height:16px"></div>`;
+  h+=`<div class="sp-sec-title">Recommendations</div>
+  <ul class="sp-bullets">
+    <li><span class="bi bi-blue"></span>Complete DPIA for UC-19 immediately — block deployment until approved</li>
+    <li><span class="bi bi-blue"></span>Assign compliance lead to finalise technical documentation across 6 open UCs</li>
+    <li><span class="bi bi-blue"></span>Enable centralised audit logging for all active and pilot-stage use cases</li>
+  </ul>`;
+  h+=`<div class="sp-sec-title">Obligations Overview</div>
+  <div class="sp-data-grid">
+    <div class="sp-dc"><div class="dc-label">Total Applicable</div><div class="dc-val">18</div></div>
+    <div class="sp-dc"><div class="dc-label">Completed</div><div class="dc-val" style="color:var(--success)">10</div></div>
+    <div class="sp-dc"><div class="dc-label">Pending</div><div class="dc-val" style="color:var(--yellow)">6</div></div>
+    <div class="sp-dc"><div class="dc-label">Critical Open</div><div class="dc-val" style="color:var(--error)">2</div></div>
+    <div class="sp-dc"><div class="dc-label">Jurisdiction</div><div class="dc-val">EU / CH</div></div>
+    <div class="sp-dc"><div class="dc-label">Next Audit</div><div class="dc-val">Q1 2026</div></div>
+  </div>`;
+  h+=`<div class="sp-sec-title">Compliance Profile</div>
+  <div class="sp-mini-grid">
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#dbeafe"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#147ff9" stroke-width="1.5"><path d="M2 12V8l3-1v5M7 12V6l2-.5v6.5M11 12V4l1-.5V12"/></svg></div><div class="sp-mc-title">Data Sources &amp; Handling</div></div>
+      <div class="sp-kv"><span class="k">Primary Source</span><span class="v"><span class="sp-tag blue">Internal ERP</span></span></div>
+      <div class="sp-kv"><span class="k">PII Involved</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+      <div class="sp-kv"><span class="k">Retention Policy</span><span class="v"><span class="sp-tag green">Defined</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#d0fae5"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#09c557" stroke-width="1.5"><path d="M9 2a3 3 0 010 5l-5 5-1-1 5-5a3 3 0 01-3-3 3 3 0 014 2l-1 1"/></svg></div><div class="sp-mc-title">Testing &amp; Validation</div></div>
+      <div class="sp-kv"><span class="k">Model Validation</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+      <div class="sp-kv"><span class="k">Accuracy Tests</span><span class="v"><span class="sp-tag green">Done</span></span></div>
+      <div class="sp-kv"><span class="k">Red-Teaming</span><span class="v"><span class="sp-tag red">Pending</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#fce7f3"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#e4200a" stroke-width="1.5"><rect x="2" y="3" width="10" height="7" rx="1"/><path d="M5 12h4M7 10v2"/></svg></div><div class="sp-mc-title">Interaction &amp; Deployment</div></div>
+      <div class="sp-kv"><span class="k">Mode</span><span class="v"><span class="sp-tag blue">API-Integrated</span></span></div>
+      <div class="sp-kv"><span class="k">User-Facing</span><span class="v"><span class="sp-tag orange">Yes</span></span></div>
+      <div class="sp-kv"><span class="k">Disclosure Label</span><span class="v"><span class="sp-tag orange">Draft</span></span></div>
+    </div>
+    <div class="sp-mc">
+      <div class="sp-mc-head"><div class="sp-mc-icon" style="background:#f3e8ff"><svg class="sp-mc-svg" viewBox="0 0 14 14" fill="none" stroke="#8200db" stroke-width="1.5"><path d="M9 2l3 3-6 6H3V8l6-6z"/><path d="M8 3l3 3"/></svg></div><div class="sp-mc-title">Logging &amp; Auditability</div></div>
+      <div class="sp-kv"><span class="k">Decision Logs</span><span class="v"><span class="sp-tag orange">Partial</span></span></div>
+      <div class="sp-kv"><span class="k">Access Logs</span><span class="v"><span class="sp-tag green">Enabled</span></span></div>
+      <div class="sp-kv"><span class="k">Audit-Ready</span><span class="v"><span class="sp-tag red">Not yet</span></span></div>
+    </div>
+  </div>`;
+  return h;
+}},
+opportunity:{t:'Opportunity Potential',h:function(){
+  let h=scoreHeader(83,'Opportunity Score','↑ +7 this quarter','up','#09C557');
+  h+=`<div class="ps"><h5>Portfolio</h5><div class="pr"><span class="k">Identified UCs</span><span class="v">36</span></div><div class="pr"><span class="k">High-Value Pipeline</span><span class="v">8</span></div><div class="pr"><span class="k">Untapped Departments</span><span class="v">Legal, HR</span></div></div>`;
+  return h;
+}},
+
+// ── S2: Trajectory Events — "Click → opens detail panel" with Timestamp, Change, Impact, Source ──
+ev1:{t:'UC-12 Moved to Active',h:function(){return`<div class="ps"><h5>Event Details</h5><div class="pr"><span class="k">Timestamp</span><span class="v">May 14, 2025</span></div><div class="pr"><span class="k">Change</span><span class="v">UC-12 moved from Pilot → Active</span></div><div class="pr"><span class="k">Impact</span><span class="v up">+3 Readiness</span></div><div class="pr"><span class="k">Source</span><span class="v">Department Head Update</span></div></div>`}},
+ev2:{t:'Governance Delay Increased',h:function(){return`<div class="ps"><h5>Event Details</h5><div class="pr"><span class="k">Timestamp</span><span class="v">Jul 22, 2025</span></div><div class="pr"><span class="k">Change</span><span class="v">Governance delay increased</span></div><div class="pr"><span class="k">Impact</span><span class="v down">-2 Governance</span></div><div class="pr"><span class="k">Source</span><span class="v">System Flag</span></div></div>`}},
+ev3:{t:'New Vendor Introduced',h:function(){return`<div class="ps"><h5>Event Details</h5><div class="pr"><span class="k">Timestamp</span><span class="v">Sep 8, 2025</span></div><div class="pr"><span class="k">Change</span><span class="v">New vendor introduced</span></div><div class="pr"><span class="k">Impact</span><span class="v up">+1 Compliance</span></div><div class="pr"><span class="k">Source</span><span class="v">Procurement</span></div></div>`}},
+
+// ── S3: Use Cases — "Click UC → right side panel" with 5 sections per spec ──
+uc01:{t:'UC-01 Demand Forecasting',h:function(){return ucPanel({status:'Active',bCls:'bg',owner:'L. Müller',dept:'R&D',expVal:'CHF 500k',capVal:'CHF 450k',capCls:'up',roi:'Payback achieved',roiCls:'up',readiness:90,governance:72,ethics:80,compliance:74,riskLevel:'Low',rlBadge:'bg',issues:'',timeline:[{date:'Oct 2024',text:'Planned → Discovery'},{date:'Dec 2024',text:'Discovery → Pilot'},{date:'Feb 2025',text:'Pilot → Active'}]})}},
+uc03:{t:'UC-03 Fraud Detection',h:function(){return ucPanel({status:'Active',bCls:'bg',owner:'K. Novak',dept:'Finance',expVal:'CHF 420k',capVal:'CHF 380k',capCls:'up',roi:'1.9x ROI',roiCls:'up',readiness:85,governance:70,ethics:82,compliance:78,riskLevel:'Low',rlBadge:'bg',issues:'',timeline:[{date:'Nov 2024',text:'Planned → Pilot'},{date:'Jan 2025',text:'Pilot → Active'}]})}},
+uc05:{t:'UC-05 Inventory Optimization',h:function(){return ucPanel({status:'Active',bCls:'bg',owner:'R. Tanaka',dept:'Operations',expVal:'CHF 180k',capVal:'CHF 90k',capCls:'neutral',roi:'On track',roiCls:'neutral',readiness:62,governance:58,ethics:70,compliance:60,riskLevel:'Low',rlBadge:'bg',issues:'',timeline:[{date:'Jan 2025',text:'Pilot → Active'}]})}},
+uc08:{t:'UC-08 Customer Analytics',h:function(){return ucPanel({status:'Active',bCls:'bg',owner:'M. Chen',dept:'Marketing',expVal:'CHF 400k',capVal:'CHF 320k',capCls:'up',roi:'Payback achieved',roiCls:'up',readiness:82,governance:68,ethics:75,compliance:70,riskLevel:'Low',rlBadge:'bg',issues:'',timeline:[{date:'Jan 2025',text:'Planned → Pilot'},{date:'Mar 2025',text:'Pilot → Active'}]})}},
+uc14:{t:'UC-14 Predictive Maintenance',h:function(){return ucPanel({status:'Active',bCls:'bg',owner:'J. Weber',dept:'Operations',expVal:'CHF 350k',capVal:'CHF 280k',capCls:'up',roi:'Near payback',roiCls:'neutral',readiness:74,governance:60,ethics:78,compliance:65,riskLevel:'Low',rlBadge:'bg',issues:'',timeline:[{date:'Dec 2024',text:'Planned → Pilot'},{date:'Mar 2025',text:'Pilot → Active'}]})}},
+uc22:{t:'UC-22 Content Generation',h:function(){return ucPanel({status:'Active',bCls:'bg',owner:'S. Park',dept:'Marketing',expVal:'CHF 200k',capVal:'CHF 150k',capCls:'up',roi:'On track',roiCls:'neutral',readiness:70,governance:62,ethics:68,compliance:60,riskLevel:'Medium',rlBadge:'by',issues:'Content quality monitoring needed',timeline:[{date:'Feb 2025',text:'Pilot → Active'}]})}},
+uc09:{t:'UC-09 NLP Triage',h:function(){return ucPanel({status:'Pilot',bCls:'by',owner:'A. Rossi',dept:'Customer Support',expVal:'CHF 120k',capVal:'CHF 0',capCls:'',roi:'Pre-revenue',roiCls:'neutral',readiness:55,governance:50,ethics:65,compliance:58,riskLevel:'Medium',rlBadge:'by',issues:'Integration with ticketing system pending',timeline:[{date:'Feb 2025',text:'Planned → Pilot'}]})}},
+uc11:{t:'UC-11 Chatbot v2',h:function(){return ucPanel({status:'Pilot',bCls:'by',owner:'P. Dubois',dept:'Customer Support',expVal:'CHF 200k',capVal:'CHF 0',capCls:'',roi:'Pre-revenue',roiCls:'neutral',readiness:60,governance:55,ethics:62,compliance:58,riskLevel:'Medium',rlBadge:'by',issues:'Response accuracy below threshold',timeline:[{date:'Jan 2025',text:'Planned → Pilot'}]})}},
+uc17:{t:'UC-17 Document Processing',h:function(){return ucPanel({status:'Pilot',bCls:'by',owner:'N. Silva',dept:'Operations',expVal:'CHF 160k',capVal:'CHF 0',capCls:'',roi:'Pre-revenue',roiCls:'neutral',readiness:58,governance:52,ethics:70,compliance:55,riskLevel:'Medium',rlBadge:'by',issues:'OCR accuracy needs improvement',timeline:[{date:'Mar 2025',text:'Planned → Pilot'}]})}},
+uc20:{t:'UC-20 Email Routing',h:function(){return ucPanel({status:'Pilot',bCls:'by',owner:'T. Kim',dept:'Operations',expVal:'CHF 80k',capVal:'CHF 0',capCls:'',roi:'Pre-revenue',roiCls:'neutral',readiness:52,governance:60,ethics:72,compliance:65,riskLevel:'Low',rlBadge:'bg',issues:'',timeline:[{date:'Mar 2025',text:'Planned → Pilot'}]})}},
+uc24:{t:'UC-24 Risk Scoring',h:function(){return ucPanel({status:'Pilot',bCls:'by',owner:'D. Sharma',dept:'Finance',expVal:'CHF 140k',capVal:'CHF 0',capCls:'',roi:'Pre-revenue',roiCls:'neutral',readiness:48,governance:45,ethics:55,compliance:50,riskLevel:'Medium',rlBadge:'by',issues:'Model validation pending',timeline:[{date:'Feb 2025',text:'Planned → Pilot'}]})}},
+uc15:{t:'UC-15 Autonomous Operations',h:function(){return ucPanel({status:'Blocked',bCls:'br',owner:'F. Braun',dept:'Operations',expVal:'CHF 500k',capVal:'CHF 0',capCls:'down',roi:'Blocked',roiCls:'down',readiness:40,governance:32,ethics:55,compliance:28,riskLevel:'High',rlBadge:'br',issues:'Pending compliance sign-off. No governance approval.',timeline:[{date:'Aug 2025',text:'Planned → Pilot'},{date:'Sep 2025',text:'Pilot → Blocked'}]})}},
+uc12:{t:'UC-12 Credit Decisioning',h:function(){return ucPanel({status:'High Risk',bCls:'br',owner:'G. Adams',dept:'Finance',expVal:'CHF 350k',capVal:'CHF 80k',capCls:'neutral',roi:'At risk',roiCls:'down',readiness:52,governance:38,ethics:42,compliance:35,riskLevel:'High',rlBadge:'br',issues:'Governance delay. Ethical exposure — algorithmic bias.',timeline:[{date:'May 2025',text:'Pilot → Active'},{date:'Jul 2025',text:'Bias flag raised'},{date:'Aug 2025',text:'Governance review pending'}]})}},
+uc19:{t:'UC-19 Facial Recognition',h:function(){return ucPanel({status:'Blocked',bCls:'br',owner:'H. Lee',dept:'Security',expVal:'CHF 180k',capVal:'CHF 0',capCls:'down',roi:'Blocked',roiCls:'down',readiness:35,governance:30,ethics:25,compliance:22,riskLevel:'High',rlBadge:'br',issues:'Privacy and consent concerns. GDPR DPIA incomplete.',timeline:[{date:'Jul 2025',text:'Planned → Blocked'}]})}},
+uc28:{t:'UC-28 Voice Analytics',h:function(){return ucPanel({status:'Planned',bCls:'bb',owner:'TBD',dept:'Customer Support',expVal:'TBD',capVal:'—',capCls:'',roi:'Not started',roiCls:'neutral',readiness:20,governance:0,ethics:0,compliance:0,riskLevel:'TBD',rlBadge:'bb',issues:'Owner not assigned',timeline:[]})}},
+uc30:{t:'UC-30 Sentiment Tracker',h:function(){return ucPanel({status:'Planned',bCls:'bb',owner:'TBD',dept:'Marketing',expVal:'TBD',capVal:'—',capCls:'',roi:'Not started',roiCls:'neutral',readiness:15,governance:0,ethics:0,compliance:0,riskLevel:'TBD',rlBadge:'bb',issues:'Scoping in progress',timeline:[]})}},
+uc32:{t:'UC-32 Process Mining',h:function(){return ucPanel({status:'Planned',bCls:'bb',owner:'TBD',dept:'Operations',expVal:'TBD',capVal:'—',capCls:'',roi:'Not started',roiCls:'neutral',readiness:18,governance:0,ethics:0,compliance:0,riskLevel:'TBD',rlBadge:'bb',issues:'Awaiting data infrastructure',timeline:[]})}},
+uc35:{t:'UC-35 Knowledge Graph',h:function(){return ucPanel({status:'Planned',bCls:'bb',owner:'TBD',dept:'R&D',expVal:'TBD',capVal:'—',capCls:'',roi:'Not started',roiCls:'neutral',readiness:12,governance:0,ethics:0,compliance:0,riskLevel:'TBD',rlBadge:'bb',issues:'Conceptual stage',timeline:[]})}},
+
+// ── S4: Departments — "Click → side panel" with 4 sections per spec ──
+dm:{t:'Marketing',h:function(){return deptPanel({name:'Marketing',score:82,trend:'Accelerating ↑',trendCls:'up',ucs:6,active:4,stalled:0,bottlenecks:[],adoption:'Rapid — 4 UCs advancing',adoptCls:'up',leadership:'High engagement',leadCls:'up',shadowAI:''})}},
+'do':{t:'Operations',h:function(){return deptPanel({name:'Operations',score:58,trend:'Slowing ↓',trendCls:'down',ucs:12,active:5,stalled:4,bottlenecks:[{sev:'critical',icon:'!',text:'No leadership sponsor — 4 pilots stalled'},{sev:'warning',icon:'⚠',text:'Governance friction high — avg review 18 days'}],adoption:'Stalling',adoptCls:'down',leadership:'Low engagement',leadCls:'down',shadowAI:'3 unsanctioned tools detected'})}},
+df:{t:'Finance',h:function(){return deptPanel({name:'Finance',score:64,trend:'Mixed →',trendCls:'neutral',ucs:5,active:2,stalled:1,bottlenecks:[{sev:'warning',icon:'⚠',text:'2 UCs diverging from approved roadmap'}],adoption:'Slow',adoptCls:'down',leadership:'Moderate',leadCls:'neutral',shadowAI:''})}},
+dh:{t:'Human Resources',h:function(){return deptPanel({name:'Human Resources',score:71,trend:'Improving ↑',trendCls:'up',ucs:3,active:2,stalled:0,bottlenecks:[],adoption:'Steady',adoptCls:'up',leadership:'Growing engagement',leadCls:'up',shadowAI:''})}},
+dr:{t:'R&D',h:function(){return deptPanel({name:'R&D',score:88,trend:'Leading ↑',trendCls:'up',ucs:8,active:6,stalled:0,bottlenecks:[],adoption:'Highest in org',adoptCls:'up',leadership:'Champion present',leadCls:'up',shadowAI:''})}},
+dl2:{t:'Legal',h:function(){return deptPanel({name:'Legal',score:42,trend:'Declining ↓',trendCls:'down',ucs:2,active:0,stalled:2,bottlenecks:[{sev:'critical',icon:'!',text:'No AI champion — department resists'},{sev:'critical',icon:'!',text:'Both UCs stalled — no progress in 6 weeks'}],adoption:'Minimal',adoptCls:'down',leadership:'Disengaged',leadCls:'down',shadowAI:''})}},
+};
+
+function op(k){const d=D[k]||{t:k,h:'<p style="font-size:12px;color:var(--t60)">Drill-down details will appear here.</p>'};document.getElementById('pT').textContent=d.t;document.getElementById('pC').innerHTML=typeof d.h==='function'?d.h():d.h;document.getElementById('sP').classList.add('open');document.getElementById('ov').classList.add('open');document.body.style.overflow='hidden';document.getElementById('sP').scrollTop=0}
+function cp(){document.getElementById('sP').classList.remove('open');document.getElementById('ov').classList.remove('open');document.body.style.overflow=''}
+
+let dOn=true; // Drivers shown by default
+function gel(id){return document.getElementById(id)}
+function tD(){
+  dOn=!dOn;
+  const btn=gel('dT'); if(btn){btn.classList.toggle('on',dOn);btn.textContent=dOn?'Hide Drivers':'Show Drivers';}
+  document.querySelectorAll('.dl').forEach(l=>l.classList.toggle('show',dOn));
+  const leg=gel('dlLeg'); if(leg) leg.classList.toggle('show',dOn);
+}
+// Initialize drivers visible on load
+document.querySelectorAll('.dl').forEach(l=>l.classList.add('show'));
+const _dlLeg=gel('dlLeg'); if(_dlLeg) _dlLeg.classList.add('show');
+
+function tC(){const c=gel('cL'),b=gel('ctBtn');if(c)c.classList.toggle('open');if(b)b.classList.toggle('open');}
+
+function sA(a){const r=gel('tR'),k=gel('tK');if(r)r.classList.toggle('on',a==='r');if(k)k.classList.toggle('on',a==='k');}
+
+// ── Legacy chart switcher (null-safe — elements may not exist) ──
+const chartMeta = {
+  readiness: {label:'Readiness Map',  note:'NOTE: Colour = Priority of the UC and Size = Complexity of the Use case.', legend:true},
+  risk:      {label:'Risk Exposure',  note:'NOTE: Colour = Priority of the UC and Size = Complexity of the Use case.', legend:true},
+  stage:     {label:'Governance vs Readiness', note:'NOTE: Colour = Status of the UC and Size = Complexity of the Use case.', legend:true},
+  value:     {label:'Value vs Investment',     note:'NOTE: Colour = Status of the UC and Size = Complexity of the Use case.', legend:true},
+};
+let currentChart = 'readiness';
+
+function toggleChartDD(){const el=gel('chartDD');if(el)el.classList.toggle('open');}
+document.addEventListener('click', e=>{
+  if(!e.target.closest('#chartDDBtn') && !e.target.closest('#chartDD')){
+    const el=gel('chartDD');if(el)el.classList.remove('open');
+  }
+});
+
+function switchChart(type){
+  ['readiness','risk','stage','value'].forEach(t=>{
+    const el=gel('chart'+t.charAt(0).toUpperCase()+t.slice(1));
+    if(el) el.style.display='none';
+  });
+  const show=gel('chart'+type.charAt(0).toUpperCase()+type.slice(1));
+  if(show) show.style.display='';
+  const lbl=gel('chartDDLabel'); if(lbl) lbl.textContent=chartMeta[type].label;
+  const note=gel('chartNote'); if(note) note.textContent=chartMeta[type].note;
+  const leg=gel('chartLegend'); if(leg) leg.style.display=chartMeta[type].legend?'':'none';
+  document.querySelectorAll('.chart-dd-item').forEach(el=>el.classList.remove('active'));
+  if(event&&event.currentTarget) event.currentTarget.classList.add('active');
+  const dd=gel('chartDD'); if(dd) dd.classList.remove('open');
+  currentChart=type;
+}
+
+function sT(el,e){
+  const t=gel('sTT'); if(!t) return;
+  const tN=gel('tN'),tS=gel('tS'),tO=gel('tO'),tV=gel('tV'),tRk=gel('tRk'),sC=gel('sC');
+  if(tN) tN.textContent=el.dataset.n;
+  if(tS) tS.textContent='Status: '+el.dataset.s;
+  if(tO) tO.textContent='Owner: '+el.dataset.o;
+  if(tV) tV.textContent='Value: '+el.dataset.v;
+  if(tRk) tRk.textContent='Risk: '+el.dataset.r;
+  if(sC){const r=sC.getBoundingClientRect();let x=e.clientX-r.left+14,y=e.clientY-r.top-10;if(x+180>r.width)x=e.clientX-r.left-180;t.style.left=x+'px';t.style.top=y+'px';}
+  t.classList.add('show');
+}
+function hT(){const t=gel('sTT');if(t)t.classList.remove('show');}
+
+document.addEventListener('keydown',e=>{if(e.key==='Escape')cp()});
+
+// Touch: close sidebar on outside tap (mobile)
+document.querySelector('.main').addEventListener('click',()=>{if(window.innerWidth<=900)document.getElementById('sb').blur()});
+
+// ═══ PORTFOLIO SCATTER CHART ═══
+const chartConfigs = {
+  ethics: {
+    title: 'Strategic Fit vs Ethical Exposure',
+    subtitle: '',
+    xArrow: 'Increasing Ethical Exposure →',
+    xLabel: 'Ethical Exposure Score (Low → High)',
+    ql_tl:'', ql_tr:'',
+    ql_bl:'', ql_br:'',
+    trBg:'#F0FAF4', brBg:'#FFF3F2',
+  },
+  compliance: {
+    title: 'Strategic Fit vs Compliance Burden',
+    subtitle: '',
+    xArrow: 'Increasing Compliance Burden →',
+    xLabel: 'Compliance Burden (obligations + operational load)',
+    ql_tl:'', ql_tr:'',
+    ql_bl:'', ql_br:'',
+    trBg:'#F0FAF4', brBg:'#FFF3F2',
+  },
+  readiness: {
+    title: 'Strategic Fit vs Feasibility',
+    subtitle: '',
+    xArrow: 'Increasing Feasibility →',
+    xLabel: 'Readiness Score',
+    ql_tl:'', ql_tr:'',
+    ql_bl:'', ql_br:'',
+    trBg:'#F0FAF4', brBg:'#FFF5F5',
+  },
+  governance: {
+    title: 'Strategic Fit vs Governance Requirement',
+    subtitle: 'Are your most critical AI systems governed to an adequate level?',
+    xArrow: 'Increasing Governance →',
+    xLabel: 'Governance Requirement Score',
+    ql_tl:'', ql_tr:'',
+    ql_bl:'', ql_br:'',
+    trBg:'#F0FAF4', brBg:'#FFF3F2',
+  }
+};
+
+// UC data: [name, stage, strategicFit(0-1), xScore(0-1), complexity, priority, ucKey]
+// stage: exploration=0, pilot=1, production=2
+// priority: high, medium, low   complexity: high, medium, low
+const ucData = [
+  // Production (Active)
+  {name:'UC-01 Demand Forecasting',stage:'production',sf:.88,eth:.72,comp:.68,read:.90,gov:.72,pri:'high',cx:'large',key:'uc01'},
+  {name:'UC-03 Fraud Detection',stage:'production',sf:.82,eth:.78,comp:.70,read:.85,gov:.70,pri:'high',cx:'medium',key:'uc03'},
+  {name:'UC-08 Customer Analytics',stage:'production',sf:.76,eth:.60,comp:.65,read:.82,gov:.68,pri:'high',cx:'medium',key:'uc08'},
+  {name:'UC-14 Predictive Maintenance',stage:'production',sf:.70,eth:.55,comp:.60,read:.74,gov:.60,pri:'medium',cx:'medium',key:'uc14'},
+  {name:'UC-22 Content Generation',stage:'production',sf:.65,eth:.68,comp:.55,read:.70,gov:.62,pri:'medium',cx:'small',key:'uc22'},
+  {name:'UC-05 Inventory Optimization',stage:'production',sf:.52,eth:.42,comp:.45,read:.62,gov:.58,pri:'low',cx:'small',key:'uc05'},
+  // Pilot
+  {name:'Chatbot Support Agent',stage:'pilot',sf:.78,eth:.82,comp:.75,read:.60,gov:.55,pri:'high',cx:'medium',key:'uc11'},
+  {name:'UC-09 NLP Triage',stage:'pilot',sf:.72,eth:.75,comp:.70,read:.55,gov:.50,pri:'medium',cx:'small',key:'uc09'},
+  {name:'UC-17 Document Processing',stage:'pilot',sf:.68,eth:.65,comp:.62,read:.58,gov:.52,pri:'medium',cx:'small',key:'uc17'},
+  {name:'UC-20 Email Routing',stage:'pilot',sf:.60,eth:.48,comp:.50,read:.52,gov:.60,pri:'low',cx:'small',key:'uc20'},
+  {name:'UC-24 Risk Scoring',stage:'pilot',sf:.64,eth:.60,comp:.58,read:.48,gov:.45,pri:'medium',cx:'medium',key:'uc24'},
+  // Exploration
+  {name:'UC-15 Autonomous Operations',stage:'exploration',sf:.82,eth:.90,comp:.88,read:.40,gov:.32,pri:'high',cx:'large',key:'uc15'},
+  {name:'UC-12 Credit Decisioning',stage:'exploration',sf:.75,eth:.85,comp:.82,read:.52,gov:.38,pri:'high',cx:'large',key:'uc12'},
+  {name:'UC-19 Facial Recognition',stage:'exploration',sf:.55,eth:.92,comp:.85,read:.35,gov:.30,pri:'medium',cx:'medium',key:'uc19'},
+  {name:'UC-28 Voice Analytics',stage:'exploration',sf:.35,eth:.40,comp:.38,read:.20,gov:.15,pri:'low',cx:'small',key:'uc28'},
+  {name:'UC-30 Sentiment Tracker',stage:'exploration',sf:.28,eth:.35,comp:.30,read:.18,gov:.12,pri:'low',cx:'small',key:'uc30'},
+];
+
+const stageFilters = {exploration:true, pilot:true, production:true};
+let currentPortfolioChart = 'ethics';
+
+const priorityColors = {high:'#E04040', medium:'#F28080', low:'#5CC8A0'};
+const priorityLabels = {high:'High', medium:'Medium', low:'Low'};
+const complexitySizes = {large:11, medium:8, small:6};
+
+function xValueForChart(uc, chartType) {
+  if(chartType==='ethics') return uc.eth;
+  if(chartType==='compliance') return uc.comp;
+  if(chartType==='readiness') return uc.read;
+  if(chartType==='governance') return uc.gov;
+  return uc.eth;
+}
+
+function renderScatter(chartType){
+  const cfg = chartConfigs[chartType];
+  document.getElementById('scatterTitle').textContent = cfg.title;
+  document.getElementById('ql-tl').textContent = 'Use Case Portfolio';
+  document.getElementById('scatterSubtitle').textContent = cfg.subtitle;
+  document.getElementById('scatterSubtitle').style.display = cfg.subtitle ? '' : 'none';
+  document.getElementById('xAxisArrow').textContent = cfg.xArrow;
+  document.getElementById('xAxisLabel').textContent = cfg.xLabel;
+  document.getElementById('ql-tl').textContent = cfg.ql_tl;
+  document.getElementById('ql-tr').textContent = cfg.ql_tr;
+  document.getElementById('ql-bl').textContent = cfg.ql_bl;
+  document.getElementById('ql-br').textContent = cfg.ql_br;
+  document.getElementById('q-tr').setAttribute('fill', cfg.trBg);
+  document.getElementById('q-br').setAttribute('fill', cfg.brBg);
+
+  const W=665, H=295, px=10, py=5;
+  const plotW=W-px, plotH=H-py-5;
+  const midX=px+plotW/2, midY=py+plotH/2;
+  const grp = document.getElementById('bubbleGroup');
+  grp.innerHTML='';
+
+  ucData.forEach(uc=>{
+    const stageOk = stageFilters[uc.stage];
+    if(!stageOk) return;
+    const xKey = chartType==='ethics'?'eth':chartType==='compliance'?'comp':chartType==='readiness'?'read':'gov';
+    const x = px + uc[xKey] * plotW;
+    const y = py + (1 - uc.sf) * (plotH-5);
+    const r = complexitySizes[uc.cx];
+    const fill = priorityColors[uc.pri];
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx',x.toFixed(1));
+    circle.setAttribute('cy',y.toFixed(1));
+    circle.setAttribute('r',r);
+    circle.setAttribute('fill',fill);
+    circle.setAttribute('opacity','0.85');
+    circle.style.cursor='pointer';
+    circle.style.transition='all .2s';
+    circle.addEventListener('mouseenter',function(e){
+      this.setAttribute('r',r+2);
+      this.setAttribute('opacity','1');
+      const tip=document.getElementById('scatterTip');
+      document.getElementById('stName').textContent=uc.name;
+      document.getElementById('stComp').textContent=uc.cx.charAt(0).toUpperCase()+uc.cx.slice(1);
+      document.getElementById('stPriority').textContent=priorityLabels[uc.pri];
+      const cont=document.getElementById('scatterContainer');
+      const rect=cont.getBoundingClientRect();
+      const svgEl=document.getElementById('mainScatter');
+      const svgRect=svgEl.getBoundingClientRect();
+      const scaleX=svgRect.width/680;
+      const scaleY=svgRect.height/320;
+      let tx=parseFloat(circle.getAttribute('cx'))*scaleX+14;
+      let ty=parseFloat(circle.getAttribute('cy'))*scaleY-10;
+      if(tx+210>svgRect.width) tx=parseFloat(circle.getAttribute('cx'))*scaleX-220;
+      tip.style.left=tx+'px';tip.style.top=ty+'px';
+      tip.classList.add('show');
+    });
+    circle.addEventListener('mouseleave',function(){
+      this.setAttribute('r',r);
+      this.setAttribute('opacity','0.85');
+      document.getElementById('scatterTip').classList.remove('show');
+    });
+    circle.addEventListener('click',function(){if(uc.key)op(uc.key)});
+    grp.appendChild(circle);
+  });
+}
+
+function switchPortfolioChart(type, btn){
+  currentPortfolioChart = type;
+  document.querySelectorAll('.pt-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+  renderScatter(type);
+}
+
+function switchPortfolioChartDD(type){
+  currentPortfolioChart = type;
+  renderScatter(type);
+}
+
+function applyStageFilter(value){
+  if(value === 'all'){
+    stageFilters.exploration = true;
+    stageFilters.pilot = true;
+    stageFilters.production = true;
+  } else {
+    stageFilters.exploration = value === 'exploration';
+    stageFilters.pilot = value === 'pilot';
+    stageFilters.production = value === 'production';
+  }
+  renderScatter(currentPortfolioChart);
+}
+
+function toggleStageFilter(stage, btn){
+  stageFilters[stage] = !stageFilters[stage];
+  btn.classList.toggle('active', stageFilters[stage]);
+  renderScatter(currentPortfolioChart);
+}
+
+// Initial render
+renderScatter('ethics');
+
+
+// ═══ DONUT CHART — USE CASE RISKS ═══
+(function(){
+  const svg = document.getElementById('ucrDonut');
+  const cx=110, cy=110, R=88, r=55;
+  const segments = [
+    {pct:.25, color:'#E54040', label:'High-Risk', count:'2 UCs (25%)', msg:'High-risk AI systems requiring additional review before deployment'},
+    {pct:.25, color:'#F5A623', label:'Minimal-Risk', count:'2 UCs (25%)', msg:'Minimal risk — standard governance process applies'},
+    {pct:.25, color:'#5CC8A0', label:'Limited-Risk', count:'2 UCs (25%)', msg:'Limited risk with transparency obligations required'},
+    {pct:.25, color:'#4A90D9', label:'GPAI / GPAI-Systemic', count:'2 UCs (25%)', msg:'Most UCs sit in Developing band, indicating inconsistent governance application'},
+  ];
+  const TAU=2*Math.PI, start=-Math.PI/2;
+  let angle=start;
+  segments.forEach(seg=>{
+    const a0=angle, a1=angle+seg.pct*TAU;
+    const x0=cx+R*Math.cos(a0), y0=cy+R*Math.sin(a0);
+    const x1=cx+R*Math.cos(a1), y1=cy+R*Math.sin(a1);
+    const ix0=cx+r*Math.cos(a0), iy0=cy+r*Math.sin(a0);
+    const ix1=cx+r*Math.cos(a1), iy1=cy+r*Math.sin(a1);
+    const large=seg.pct>.5?1:0;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${x0.toFixed(2)},${y0.toFixed(2)} A${R},${R} 0 ${large},1 ${x1.toFixed(2)},${y1.toFixed(2)} L${ix1.toFixed(2)},${iy1.toFixed(2)} A${r},${r} 0 ${large},0 ${ix0.toFixed(2)},${iy0.toFixed(2)} Z`);
+    path.setAttribute('fill',seg.color);
+    path.setAttribute('opacity','0.9');
+    path.style.cursor='pointer';
+    path.style.transition='opacity .2s';
+    const tipEl=document.getElementById('ucrTip');
+    path.addEventListener('mouseenter',function(){
+      this.setAttribute('opacity','1');
+      document.getElementById('ucrTipPct').textContent=seg.count;
+      document.getElementById('ucrTipMsg').textContent=seg.msg;
+      tipEl.classList.add('show');
+    });
+    path.addEventListener('mouseleave',function(){
+      this.setAttribute('opacity','0.9');
+      tipEl.classList.remove('show');
+    });
+    svg.appendChild(path);
+    angle=a1;
+  });
+  // center hole label
+  const lbl=document.createElementNS('http://www.w3.org/2000/svg','text');
+  lbl.setAttribute('x',cx);lbl.setAttribute('y',cy+4);
+  lbl.setAttribute('text-anchor','middle');lbl.setAttribute('font-size','13');
+  lbl.setAttribute('font-weight','700');lbl.setAttribute('fill','#0E1317');
+  lbl.setAttribute('font-family','var(--f)');lbl.textContent='8 UCs';
+  svg.appendChild(lbl);
+  const sub=document.createElementNS('http://www.w3.org/2000/svg','text');
+  sub.setAttribute('x',cx);sub.setAttribute('y',cy+18);
+  sub.setAttribute('text-anchor','middle');sub.setAttribute('font-size','10');
+  sub.setAttribute('fill','#9FA1A2');sub.setAttribute('font-family','var(--f)');sub.textContent='Total';
+  svg.appendChild(sub);
+})();
+// ═══ OBLIGATION TOGGLE ═══
+function toggleObligation(item){
+  const detail = item.nextElementSibling;
+  const chevron = item.querySelector('.ob-chevron');
+  const isOpen = detail && detail.style.display !== 'none';
+  if(detail){
+    detail.style.display = isOpen ? 'none' : 'block';
+    item.classList.toggle('open', !isOpen);
+    if(chevron) chevron.style.transform = isOpen ? '' : 'rotate(180deg)';
+  }
+}
+
+</script>
+</html>
