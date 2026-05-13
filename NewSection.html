@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AILAS — Governance by Design</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400;1,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #fff;
+      font-family: 'DM Sans', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: #0E1317;
+    }
+    #root-wrap {
+      width: 1920px;
+      transform-origin: top left;
+    }
+
+
+    /* ══════════════════════════════════════════
+       EXISTING PRODUCT CARDS — context only
+    ══════════════════════════════════════════ */
+    .sol-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      border-top: 1px solid #F0F0F0;
+      border-bottom: 1px solid #F0F0F0;
+    }
+    .sol-card {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 44px 56px;
+      border-right: 1px solid #F0F0F0;
+      position: relative;
+    }
+    .sol-card:last-child { border-right: none; }
+    .sol-card:first-child { background: #FDF4F2; }
+    .sol-card:first-child::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #E4200A 0%, rgba(228,32,10,0) 100%);
+      opacity: .7;
+    }
+    .sol-icon {
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      border: 1px solid #F0F0F0;
+      background: #FDF4F2;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .sol-icon svg { width: 24px; height: 24px; }
+    .sol-name {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 28px;
+      font-weight: 400;
+      letter-spacing: -.01em;
+      color: #0E1317;
+    }
+
+
+    /* ══════════════════════════════════════════
+       GOVERNANCE SECTION
+    ══════════════════════════════════════════ */
+    #gov-sec {
+      background: #fff;
+      border-top: 1px solid #F0F0F0;
+      overflow: hidden;
+    }
+
+    /* ── SVG Connector ── */
+    .gov-connector {
+      height: 200px;
+      display: flex;
+      justify-content: center;
+      overflow: visible;
+    }
+    .gov-connector svg {
+      width: 1200px;
+      height: 200px;
+      overflow: visible;
+    }
+
+    /* ── Header — exact oc-hdr spec ── */
+    .gov-hdr {
+      padding: 0 360px 72px;
+      text-align: center;
+    }
+    .gov-eyebrow {
+      display: block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 300;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #6E7174;
+      margin-bottom: 20px;
+    }
+    .gov-heading {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 72px;
+      font-weight: 400;
+      line-height: 1.08;
+      letter-spacing: -1.44px;
+      color: #0E1317;
+      margin-bottom: 24px;
+    }
+    .gov-heading em { font-style: italic; color: #E4200A; }
+    .gov-sub {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 300;
+      line-height: 1.6;
+      color: #6E7174;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+
+    /* ── Block stack ── */
+    .gov-stack {
+      padding: 0 360px 120px;
+    }
+    .gov-stack-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+    }
+
+
+    /* ══════════════════════════════════════════
+       BLOCK — Default & Hover states
+       Mirrors oc-card / oc-card-hover pattern exactly
+    ══════════════════════════════════════════ */
+    .gov-block {
+      position: relative;
+      padding: 44px 56px;
+      border: 1px solid #F0F0F0;
+      background: #fff;
+      overflow: hidden;
+      cursor: default;
+      /* Red left accent */
+    }
+    .gov-block::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: #E4200A;
+      opacity: 0.3;
+      transition: opacity .38s cubic-bezier(.4,0,.2,1);
+    }
+    /* Top gradient line — hidden by default, reveals on hover (mirrors oc-card-hover::before) */
+    .gov-block::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #E4200A 0%, rgba(228,32,10,0) 100%);
+      opacity: 0;
+      transition: opacity .38s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Default text elements */
+    .gov-block-title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -.01em;
+      color: #0E1317;
+      margin-bottom: 12px;
+      /* Slight downshift on hover — mirrors oc-card-default */
+      transition: transform .38s cubic-bezier(.4,0,.2,1);
+    }
+    .gov-block-pills {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #E4200A;
+      letter-spacing: .04em;
+      transition: transform .38s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* Description — hidden by default, visible on hover (mirrors oc-card-desc) */
+    .gov-block-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 20px;
+      font-weight: 300;
+      line-height: 1.6;
+      color: #6E7174;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      /* Exact transition from existing oc-card-hover */
+      transition:
+        opacity    .38s cubic-bezier(.4,0,.2,1),
+        transform  .38s cubic-bezier(.4,0,.2,1),
+        max-height .38s cubic-bezier(.4,0,.2,1),
+        margin-top .38s cubic-bezier(.4,0,.2,1);
+    }
+
+    /* ── Hover state ── */
+    .gov-block:hover {
+      background: #FDF4F2;
+      border-color: #FFB7B8;
+    }
+    .gov-block:hover::before { opacity: 1; }
+    .gov-block:hover::after  { opacity: .7; }
+    .gov-block:hover .gov-block-title {
+      font-weight: 600;
+      /* Slight scale-up like oc-card-title-hover */
+    }
+    .gov-block:hover .gov-block-desc {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 200px;
+      margin-top: 20px;
+    }
+
+
+    /* ── Flow connector: Fascia → CAO ── */
+    .gov-flow {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 64px;
+    }
+    .gov-flow-track {
+      width: 1px;
+      flex: 1;
+      background: linear-gradient(to bottom, #E4200A 0%, rgba(228,32,10,.2) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .gov-flow-dot {
+      position: absolute;
+      left: 50%; transform: translateX(-50%);
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: #E4200A;
+      animation: dotFall 1.6s ease-in-out infinite;
+    }
+    .gov-flow-dot:nth-child(2) {
+      animation-delay: .55s;
+      width: 4px; height: 4px;
+      opacity: .45;
+    }
+    @keyframes dotFall {
+      0%   { top: -6px; opacity: 1; }
+      85%  { opacity: .7; }
+      100% { top: 100%; opacity: 0; }
+    }
+    .gov-flow-arrow { flex-shrink: 0; opacity: .45; }
+
+
+    /* ══════════════════════════════════════════
+       FOUNDATION — dark base layer
+       Separate hover treatment for dark bg
+    ══════════════════════════════════════════ */
+    .gov-foundation-wrap { margin-top: 48px; }
+
+    .gov-foundation-label {
+      text-align: center;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 300;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: #6E7174;
+      opacity: .5;
+      margin-bottom: 16px;
+    }
+
+    .gov-foundation {
+      background: #fff;
+      border: 1px solid #F0F0F0;
+      padding: 44px 56px;
+      display: flex;
+      align-items: flex-start;
+      gap: 36px;
+      position: relative;
+      overflow: hidden;
+      cursor: default;
+      transition: background .38s cubic-bezier(.4,0,.2,1), border-color .38s cubic-bezier(.4,0,.2,1);
+    }
+    .gov-foundation::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: #E4200A;
+      opacity: 0.3;
+      transition: opacity .38s cubic-bezier(.4,0,.2,1);
+    }
+    .gov-foundation::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, #E4200A 0%, rgba(228,32,10,0) 100%);
+      opacity: 0;
+      transition: opacity .38s cubic-bezier(.4,0,.2,1);
+    }
+    .gov-foundation:hover { background: #FDF4F2; border-color: #FFB7B8; }
+    .gov-foundation:hover::before { opacity: 1; }
+    .gov-foundation:hover::after  { opacity: .7; }
+
+    .gov-foundation-icon {
+      width: 58px; height: 58px;
+      border-radius: 50%;
+      background: #FDF4F2;
+      border: 1px solid #F0F0F0;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+      margin-top: 4px;
+    }
+    .gov-foundation-icon svg { width: 24px; height: 24px; }
+
+    .gov-foundation-body { flex: 1; }
+
+    .gov-foundation-title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 36px;
+      font-weight: 400;
+      line-height: 1.2;
+      letter-spacing: -.01em;
+      color: #0E1317;
+      margin-bottom: 12px;
+      transition: font-weight .38s cubic-bezier(.4,0,.2,1);
+    }
+    .gov-foundation:hover .gov-foundation-title { font-weight: 600; }
+
+    .gov-foundation-pills {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 500;
+      color: #E4200A;
+      letter-spacing: .04em;
+    }
+
+    /* Foundation description — same hidden/hover pattern */
+    .gov-foundation-desc {
+      font-family: 'DM Sans', sans-serif;
+      font-size: 20px;
+      font-weight: 300;
+      line-height: 1.6;
+      color: #6E7174;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transform: translateY(10px);
+      transition:
+        opacity    .38s cubic-bezier(.4,0,.2,1),
+        transform  .38s cubic-bezier(.4,0,.2,1),
+        max-height .38s cubic-bezier(.4,0,.2,1),
+        margin-top .38s cubic-bezier(.4,0,.2,1);
+    }
+    .gov-foundation:hover .gov-foundation-desc {
+      opacity: 1;
+      transform: translateY(0);
+      max-height: 200px;
+      margin-top: 20px;
+    }
+
+    /* Structural base strip — removed */
+    .gov-base-strip { display: none; }
+  </style>
+</head>
+<body>
+
+<div id="root-wrap">
+
+  <!-- Existing product cards (context) -->
+  <div>
+    <div class="sol-grid">
+      <div class="sol-card">
+        <div class="sol-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E4200A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/>
+            <rect x="10" y="10" width="5" height="5" rx="1"/><path d="M5.5 8v3.5H10"/>
+          </svg>
+        </div>
+        <span class="sol-name">Decision Framework</span>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E4200A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <ellipse cx="12" cy="5" rx="7" ry="2.5"/>
+            <path d="M5 5v5c0 1.38 3.13 2.5 7 2.5s7-1.12 7-2.5V5"/>
+            <path d="M5 10v5c0 1.38 3.13 2.5 7 2.5s7-1.12 7-2.5v-5"/>
+          </svg>
+        </div>
+        <span class="sol-name">Knowledge Intelligence</span>
+      </div>
+      <div class="sol-card">
+        <div class="sol-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="#E4200A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3"/>
+            <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M19.07 4.93l-2.12 2.12M7.05 16.95l-2.12 2.12"/>
+          </svg>
+        </div>
+        <span class="sol-name">Agentic Systems</span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ══════════════ NEW GOVERNANCE SECTION ══════════════ -->
+  <section id="gov-sec">
+
+    <!-- Animated convergence: 3 streams → Fascia node -->
+    <div class="gov-connector">
+      <svg viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="gL" gradientUnits="userSpaceOnUse" x1="200" y1="0"  x2="600" y2="200">
+            <stop offset="0%"   stop-color="#E4200A" stop-opacity="0.05"/>
+            <stop offset="65%"  stop-color="#E4200A" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#E4200A" stop-opacity="1"/>
+          </linearGradient>
+          <linearGradient id="gC" gradientUnits="userSpaceOnUse" x1="600" y1="0"  x2="600" y2="200">
+            <stop offset="0%"   stop-color="#E4200A" stop-opacity="0.05"/>
+            <stop offset="65%"  stop-color="#E4200A" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#E4200A" stop-opacity="1"/>
+          </linearGradient>
+          <linearGradient id="gR" gradientUnits="userSpaceOnUse" x1="1000" y1="0" x2="600" y2="200">
+            <stop offset="0%"   stop-color="#E4200A" stop-opacity="0.05"/>
+            <stop offset="65%"  stop-color="#E4200A" stop-opacity="0.5"/>
+            <stop offset="100%" stop-color="#E4200A" stop-opacity="1"/>
+          </linearGradient>
+          <filter id="glow">
+            <feGaussianBlur stdDeviation="3" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="glowSoft">
+            <feGaussianBlur stdDeviation="7" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        </defs>
+
+        <!-- Soft glow tracks -->
+        <path d="M 200  0 C 200  100 600 100 600 200" fill="none" stroke="#E4200A" stroke-width="10" opacity="0.03" filter="url(#glowSoft)"/>
+        <path d="M 600  0 L 600 200"                   fill="none" stroke="#E4200A" stroke-width="10" opacity="0.03" filter="url(#glowSoft)"/>
+        <path d="M 1000 0 C 1000 100 600 100 600 200"  fill="none" stroke="#E4200A" stroke-width="10" opacity="0.03" filter="url(#glowSoft)"/>
+
+        <!-- Gradient paths -->
+        <path id="pL" d="M 200  0 C 200  100 600 100 600 200" fill="none" stroke="url(#gL)" stroke-width="1.5"/>
+        <path id="pC" d="M 600  0 L 600 200"                   fill="none" stroke="url(#gC)" stroke-width="1.5"/>
+        <path id="pR" d="M 1000 0 C 1000 100 600 100 600 200"  fill="none" stroke="url(#gR)" stroke-width="1.5"/>
+
+        <!-- Particles — Left -->
+        <circle r="4" fill="#E4200A" filter="url(#glow)"><animateMotion dur="2.2s" repeatCount="indefinite" begin="0s"><mpath href="#pL"/></animateMotion></circle>
+        <circle r="2.5" fill="#E4200A" opacity=".4"><animateMotion dur="2.2s" repeatCount="indefinite" begin=".75s"><mpath href="#pL"/></animateMotion></circle>
+
+        <!-- Particles — Center -->
+        <circle r="4" fill="#E4200A" filter="url(#glow)"><animateMotion dur="1.9s" repeatCount="indefinite" begin=".3s"><mpath href="#pC"/></animateMotion></circle>
+        <circle r="2.5" fill="#E4200A" opacity=".4"><animateMotion dur="1.9s" repeatCount="indefinite" begin=".9s"><mpath href="#pC"/></animateMotion></circle>
+
+        <!-- Particles — Right -->
+        <circle r="4" fill="#E4200A" filter="url(#glow)"><animateMotion dur="2.4s" repeatCount="indefinite" begin=".15s"><mpath href="#pR"/></animateMotion></circle>
+        <circle r="2.5" fill="#E4200A" opacity=".4"><animateMotion dur="2.4s" repeatCount="indefinite" begin=".8s"><mpath href="#pR"/></animateMotion></circle>
+
+        <!-- Convergence node + pulse rings -->
+        <circle cx="600" cy="200" r="7" fill="#E4200A" filter="url(#glow)"/>
+        <circle cx="600" cy="200" r="7" fill="none" stroke="#fff" stroke-width="3"/>
+        <circle cx="600" cy="200" r="7" fill="none" stroke="#E4200A" stroke-width="1.2" opacity="0">
+          <animate attributeName="r" values="7;24" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="opacity" values=".4;0" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="600" cy="200" r="7" fill="none" stroke="#E4200A" stroke-width=".7" opacity="0">
+          <animate attributeName="r" values="7;36" dur="2s" repeatCount="indefinite" begin=".65s"/>
+          <animate attributeName="opacity" values=".18;0" dur="2s" repeatCount="indefinite" begin=".65s"/>
+        </circle>
+      </svg>
+    </div>
+
+
+    <!-- Section header — guidelines content only -->
+    <div class="gov-hdr">
+      <span class="gov-eyebrow">Governance by Design</span>
+      <p class="gov-heading">
+        <em>Governance</em> is the fabric,<br>not the afterthought.
+      </p>
+      <p class="gov-sub">
+        Governance is built into the AILAS operating system as it evolves from foundational oversight to real-time operational control as the system evolves.
+      </p>
+    </div>
+
+
+    <!-- Block stack -->
+    <div class="gov-stack">
+      <div class="gov-stack-inner">
+
+        <!-- ① Fascia -->
+        <div class="gov-block">
+          <div class="gov-block-title">Fascia</div>
+          <div class="gov-block-pills">Connect &bull; Coordinate &bull; Govern</div>
+          <p class="gov-block-desc">
+            Fascia forms the connective governance layer of the AILAS OS — controlling how organisational knowledge, tools, permissions, workflows, and agentic systems interact across the enterprise.
+          </p>
+        </div>
+
+        <!-- Flow connector -->
+        <div class="gov-flow">
+          <div class="gov-flow-track">
+            <div class="gov-flow-dot"></div>
+            <div class="gov-flow-dot"></div>
+          </div>
+          <svg class="gov-flow-arrow" width="12" height="8" viewBox="0 0 12 8" fill="none">
+            <path d="M6 8L0 0H12L6 8Z" fill="#E4200A"/>
+          </svg>
+        </div>
+
+        <!-- ② Chief Agentic Officer -->
+        <div class="gov-block">
+          <div class="gov-block-title">Chief Agentic Officer</div>
+          <div class="gov-block-pills">Observe &bull; Evaluate &bull; Intervene</div>
+          <p class="gov-block-desc">
+            The Chief Agentic Officer is the AI-powered applied active governance system that monitors interactions in real time, evaluates requests against governance controls, and approves, rejects, or escalates actions across the operating environment.
+          </p>
+        </div>
+
+        <!-- ③ Governance & Compliance Foundation -->
+        <div class="gov-foundation-wrap">
+          <p class="gov-foundation-label">— Foundation Layer —</p>
+          <div class="gov-foundation">
+            <div class="gov-foundation-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="#E4200A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                <polyline points="9,12 11,14 15,10"/>
+              </svg>
+            </div>
+            <div class="gov-foundation-body">
+              <div class="gov-foundation-title">Governance &amp; Compliance Foundation</div>
+              <div class="gov-foundation-pills">Policies &bull; Controls &bull; Auditability</div>
+              <p class="gov-foundation-desc">
+                Establishes the passive governance layer required for accountable AI transformation through policies, responsibilities, documentation, certifications, controls, and audit-ready oversight.
+              </p>
+            </div>
+          </div>
+          <!-- Structural base strip — load-bearing foundation visual -->
+          <div class="gov-base-strip">
+            <span style="flex:4;  background:#E4200A; opacity:.85;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:4;  background:#C41A06; opacity:.72;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:4;  background:#E4200A; opacity:.85;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:4;  background:#C41A06; opacity:.72;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:4;  background:#E4200A; opacity:.6;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:4;  background:#C41A06; opacity:.44;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:4;  background:#E4200A; opacity:.28;"></span>
+            <span style="flex:.1; background:#0E1317;"></span>
+            <span style="flex:8;  background:#0E1317;"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </section>
+
+</div><!-- /root-wrap -->
+
+<script>
+  (function() {
+    function applyScale() {
+      var root = document.getElementById('root-wrap');
+      if (!root) return;
+      var s = window.innerWidth / 1920;
+      root.style.transform = 'scale(' + s + ')';
+      document.body.style.height = Math.ceil(root.offsetHeight * s) + 'px';
+    }
+    applyScale();
+    window.addEventListener('resize', applyScale);
+    window.addEventListener('load', applyScale);
+  })();
+</script>
+</body>
+</html>
