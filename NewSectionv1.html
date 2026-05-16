@@ -1,0 +1,713 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AILAS — Governance by Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fff; font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; color: #0E1317; overflow-x: hidden; }
+    #root-wrap { width: 1920px; transform-origin: top left; }
+
+    :root {
+      --ease:   cubic-bezier(.4, 0, .2, 1);
+      --red:    #E4200A;
+      --red-lt: #FDF4F2;
+      --red-bd: #FFB7B8;
+      --border: #F0F0F0;
+      --dark:   #0E1317;
+      --muted:  #6E7174;
+    }
+
+    /* Shared typography */
+    .eyebrow { display: block; font-size: 18px; font-weight: 300; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    .serif-h  { font-family: 'Crimson Text', Georgia, serif; font-size: 72px; font-weight: 400; line-height: 1.08; letter-spacing: -1.44px; color: var(--dark); margin-bottom: 24px; }
+    .serif-h em { font-style: italic; color: var(--red); }
+    .body-sub { font-size: 22px; font-weight: 300; line-height: 1.6; color: var(--muted); max-width: 900px; margin: 0 auto; }
+
+    /* Entrance */
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+
+    /* ═══════════════════════════════════════════════════
+       STAGES + FASCIA — one container with canvas fabric
+       Canvas covers everything inside .sol-wrap.
+       Density = (y/H)^2.2 → peaks at Fascia (bottom).
+    ═══════════════════════════════════════════════════ */
+    .sol-wrap {
+      position: relative;
+      background: #fff;
+      overflow: visible; /* let convergence SVG extend below */
+    }
+    #weaveCanvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      display: block; pointer-events: none;
+      opacity: 0; transition: opacity 1.8s ease;
+    }
+    #weaveCanvas.ready { opacity: 1; }
+
+    /* Section header */
+    .sol-hdr {
+      position: relative; z-index: 1;
+      padding: 80px 360px 60px; text-align: center;
+    }
+
+    /* Stage rows */
+    .stage-row {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 200px 1fr;
+      border-top: 1px solid var(--border);
+      padding: 60px 360px; align-items: start;
+    }
+    .stage-num {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 160px; font-weight: 600; line-height: .85; letter-spacing: -6px;
+      color: var(--dark); opacity: .06; user-select: none;
+    }
+    .stage-content { padding-left: 64px; border-left: 1px solid var(--border); }
+    .stage-name {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 52px; font-weight: 400; line-height: 1.08; letter-spacing: -.02em;
+      color: var(--dark); margin-bottom: 14px;
+    }
+    .stage-pills { font-size: 14px; font-weight: 500; color: var(--red); letter-spacing: .05em; margin-bottom: 18px; }
+    .stage-desc  { font-size: 20px; font-weight: 300; line-height: 1.7; color: var(--muted); max-width: 820px; }
+
+
+    /* ═══════════════════════════════════════════════════
+       FASCIA — canvas peaks here, this is the darkest point
+    ═══════════════════════════════════════════════════ */
+    .fascia-wrap {
+      position: relative; z-index: 1;
+      padding: 0 360px 0;
+    }
+    .fascia-block {
+      display: grid; grid-template-columns: 1fr 180px;
+      border: 1px solid var(--red-bd);
+      overflow: hidden; position: relative;
+    }
+    .fascia-block::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--red) 0%, rgba(228,32,10,0) 55%);
+      opacity: .65; z-index: 2;
+    }
+    .fascia-block::after {
+      content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px;
+      background: var(--red); z-index: 2;
+    }
+    .fascia-content { padding: 44px 52px; background: var(--red-lt); }
+    .fascia-title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 52px; font-weight: 600; line-height: 1.05; letter-spacing: -.02em;
+      color: var(--dark); margin-bottom: 14px;
+    }
+    .fascia-pills { font-size: 14px; font-weight: 500; color: var(--red); letter-spacing: .05em; margin-bottom: 18px; }
+    .fascia-desc  { font-size: 19px; font-weight: 300; line-height: 1.7; color: var(--muted); }
+
+    /* CSS dot-grid animation — right panel */
+    .fascia-dots {
+      background: var(--red-lt); border-left: 1px solid var(--red-bd);
+      display: grid; grid-template-columns: repeat(5, 1fr);
+      gap: 14px; padding: 28px; align-content: center;
+    }
+    .fascia-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--red); opacity: .18;
+      animation: dotPulse 2.4s ease-in-out infinite;
+      justify-self: center;
+    }
+    @keyframes dotPulse {
+      0%, 100% { opacity: .12; transform: scale(1); }
+      50%       { opacity: .65; transform: scale(1.5); }
+    }
+
+
+    /* ═══════════════════════════════════════════════════
+       CONVERGENCE ZONE
+       8 bezier paths fan from Fascia's full width
+       and converge to a single centre point — the top
+       of the CAO circle directly below.
+       Sits at the very bottom of sol-wrap so the
+       connection is seamless with no gap.
+    ═══════════════════════════════════════════════════ */
+    .conv-wrap {
+      position: relative; z-index: 1;
+      width: 100%; height: 200px;
+      padding: 0 360px;
+    }
+    .conv-wrap svg {
+      display: block; width: 100%; height: 100%; overflow: visible;
+    }
+    .conv-base {
+      fill: none; stroke: var(--red); stroke-width: .6;
+    }
+    .conv-pulse {
+      fill: none; stroke: var(--red); stroke-width: 1.5;
+      stroke-dasharray: 40 640; stroke-dashoffset: 680;
+      animation: convFlow 4s linear infinite;
+    }
+    .conv-pulse.p2 { animation-duration: 5.2s; animation-delay: -1.3s; }
+    .conv-pulse.p3 { animation-duration: 4.6s; animation-delay: -2.5s; }
+    .conv-pulse.p4 { animation-duration: 3.8s; animation-delay: -3.7s; }
+    .conv-pulse.p5 { animation-duration: 5.0s; animation-delay:  -.8s; }
+    .conv-pulse.p6 { animation-duration: 4.2s; animation-delay: -1.9s; }
+    .conv-pulse.p7 { animation-duration: 3.6s; animation-delay: -3.1s; }
+    .conv-pulse.p8 { animation-duration: 4.8s; animation-delay: -2.1s; }
+    @keyframes convFlow { to { stroke-dashoffset: -680; } }
+
+    .conv-node-pulse {
+      fill: none; stroke: var(--red); stroke-width: 1; opacity: 0;
+      animation: nodeRing 2.6s ease-out infinite;
+    }
+    @keyframes nodeRing {
+      0%   { r: 5;  opacity: .6; }
+      100% { r: 22; opacity: 0;  }
+    }
+
+
+    /* ═══════════════════════════════════════════════════
+       GOVERNANCE SECTION — CAO + Foundation
+    ═══════════════════════════════════════════════════ */
+    #gov-sec { background: #fff; overflow: visible; }
+
+    /* Governance header — appears after CAO as narrative */
+    .gov-hdr { padding: 72px 360px 60px; text-align: center; }
+
+
+    /* ═══════════════════════════════════════════════════
+       CAO — circular, centred, Three.js 3D inside
+    ═══════════════════════════════════════════════════ */
+    .cao-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 360px 0;
+    }
+    .cao-circle {
+      width: 360px; height: 360px; border-radius: 50%;
+      border: 1px solid rgba(228,32,10,.2);
+      position: relative; overflow: hidden; flex-shrink: 0;
+    }
+    #caoCanvas {
+      position: absolute; inset: 0;
+      width: 100% !important; height: 100% !important;
+      border-radius: 50%; display: block;
+    }
+    /* Text below circle */
+    .cao-text { text-align: center; padding: 48px 0 0; max-width: 720px; }
+    .cao-title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 52px; font-weight: 400; line-height: 1.08; letter-spacing: -.02em;
+      color: var(--dark); margin-bottom: 14px;
+    }
+    .cao-pills { font-size: 14px; font-weight: 500; color: var(--red); letter-spacing: .05em; margin-bottom: 20px; }
+    .cao-desc  { font-size: 19px; font-weight: 300; line-height: 1.7; color: var(--muted); }
+
+
+    /* ═══════════════════════════════════════════════════
+       FLOW CONNECTOR — CAO → Foundation
+    ═══════════════════════════════════════════════════ */
+    .gov-flow {
+      display: flex; flex-direction: column; align-items: center; height: 60px;
+    }
+    .gov-flow-track {
+      width: 1px; flex: 1;
+      background: linear-gradient(to bottom, var(--red), rgba(228,32,10,.06));
+      position: relative; overflow: hidden;
+    }
+    .gov-flow-dot {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      border-radius: 50%; background: var(--red); width: 4px; height: 4px;
+      animation: dotFall 1.8s var(--ease) infinite;
+    }
+    .gov-flow-dot:nth-child(2) { animation-delay: .65s; width: 3px; height: 3px; opacity: .3; }
+    @keyframes dotFall { 0%{top:-4px;opacity:1} 80%{opacity:.3} 100%{top:100%;opacity:0} }
+    .gov-flow-arrow { flex-shrink: 0; opacity: .25; }
+
+
+    /* ═══════════════════════════════════════════════════
+       FOUNDATION
+    ═══════════════════════════════════════════════════ */
+    .fnd-wrap { padding: 0 360px 80px; overflow: visible; position: relative; }
+    .fnd-label { text-align: center; font-size: 13px; font-weight: 300; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); opacity: .4; margin-bottom: 16px; }
+    .fnd-block {
+      border: 1px solid var(--border); padding: 40px 56px;
+      position: relative; overflow: visible; cursor: default;
+      transition: background .32s var(--ease), border-color .32s var(--ease);
+    }
+    .fnd-block::before { content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 3px; background: var(--red); opacity: .18; transition: opacity .32s var(--ease); }
+    .fnd-block::after  { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; background: linear-gradient(90deg, var(--red) 0%, rgba(228,32,10,0) 60%); opacity: 0; transition: opacity .32s var(--ease); }
+    .fnd-block:hover { background: var(--red-lt); border-color: var(--red-bd); }
+    .fnd-block:hover::before { opacity: 1; }
+    .fnd-block:hover::after  { opacity: .55; }
+    .fnd-title { font-family: 'Crimson Text', Georgia, serif; font-size: 34px; font-weight: 400; color: var(--dark); margin-bottom: 10px; }
+    .fnd-pills { font-size: 14px; font-weight: 500; color: var(--red); letter-spacing: .05em; }
+    .fnd-desc {
+      position: absolute; top: calc(100% - 1px); left: -1px; right: -1px; z-index: 20;
+      background: var(--red-lt); border: 1px solid var(--red-bd);
+      border-radius: 0 0 4px 4px; padding: 20px 56px 28px;
+      font-size: 18px; font-weight: 300; line-height: 1.72; color: var(--muted);
+      box-shadow: 0 14px 40px rgba(228,32,10,.09), 0 2px 6px rgba(228,32,10,.04);
+      opacity: 0; transform: translateY(-3px); pointer-events: none;
+      transition: opacity .3s var(--ease), transform .3s var(--ease);
+    }
+    .fnd-desc::before { content: ''; display: block; height: 1px; background: rgba(228,32,10,.2); margin-bottom: 16px; }
+    .fnd-block:hover .fnd-desc { opacity: 1; transform: translateY(0); pointer-events: auto; }
+  </style>
+</head>
+<body>
+<div id="root-wrap">
+
+
+  <!-- ═══════════════════════════════════════
+       STAGES + FASCIA
+       Canvas fabric covers this entire section.
+       Density increases from 0 → max at Fascia.
+  ═══════════════════════════════════════ -->
+  <div class="sol-wrap">
+    <canvas id="weaveCanvas"></canvas>
+
+    <!-- Section header -->
+    <div class="sol-hdr reveal" id="solHdr">
+      <span class="eyebrow">The AILAS Operating System</span>
+      <p class="serif-h">One System. <em>Three Stages.</em></p>
+      <p class="body-sub">A coordinated operating environment that evolves with every stage of transformation.</p>
+    </div>
+
+    <!-- Stage 01 -->
+    <div class="stage-row reveal" id="stage1">
+      <div class="stage-num">01</div>
+      <div class="stage-content">
+        <div class="stage-name">Decision Intelligence Engine</div>
+        <div class="stage-pills">Discover &bull; Analyse &bull; Monitor</div>
+        <p class="stage-desc">Identify where AI can create value, understand organisational risks before committing resources, and maintain visibility and control over the enterprise transformation journey.</p>
+      </div>
+    </div>
+
+    <!-- Stage 02 -->
+    <div class="stage-row reveal" id="stage2" style="transition-delay:.1s">
+      <div class="stage-num">02</div>
+      <div class="stage-content">
+        <div class="stage-name">Company Brain</div>
+        <div class="stage-pills">Map &bull; Capture &bull; Activate</div>
+        <p class="stage-desc">Map where organisational knowledge lives, capture tacit knowledge, and build a multilayered Company Brain — a living intelligence foundation that continuously grows, evolves, and activates AI systems across the enterprise.</p>
+      </div>
+    </div>
+
+    <!-- Stage 03 -->
+    <div class="stage-row reveal" id="stage3" style="transition-delay:.2s">
+      <div class="stage-num">03</div>
+      <div class="stage-content">
+        <div class="stage-name">Federated Cognitive System</div>
+        <div class="stage-pills">Personalise &bull; Augment &bull; Automate</div>
+        <p class="stage-desc">Enable private-by-design personal AI systems for every employee that adapt to individual workflows, tools, and working styles — introducing human-centred agentic execution through adaptive tools, enterprise intelligence, and controlled autonomy.</p>
+      </div>
+    </div>
+
+    <!-- FASCIA — fabric reaches maximum density here -->
+    <div class="fascia-wrap reveal" id="blkFascia">
+      <div class="fascia-block">
+        <div class="fascia-content">
+          <div class="fascia-title">Fascia</div>
+          <div class="fascia-pills">Connect &bull; Coordinate &bull; Govern</div>
+          <p class="fascia-desc">Fascia forms the connective governance layer of the AILAS OS — controlling how organisational knowledge, tools, permissions, workflows, and agentic systems interact across the enterprise.</p>
+        </div>
+        <div class="fascia-dots" id="fasciaDots">
+          <div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div>
+          <div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div>
+          <div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div>
+          <div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div>
+          <div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div><div class="fascia-dot"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONVERGENCE — 8 threads fan from Fascia, converge to CAO centre.
+         Zero gap between this and CAO below — lines feed directly in. -->
+    <div class="conv-wrap reveal" id="convZone" style="transition-delay:.05s">
+      <svg viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="cg1" gradientUnits="userSpaceOnUse" x1="60"   y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg2" gradientUnits="userSpaceOnUse" x1="220"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg3" gradientUnits="userSpaceOnUse" x1="380"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg4" gradientUnits="userSpaceOnUse" x1="500"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg5" gradientUnits="userSpaceOnUse" x1="700"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg6" gradientUnits="userSpaceOnUse" x1="820"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg7" gradientUnits="userSpaceOnUse" x1="980"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg8" gradientUnits="userSpaceOnUse" x1="1140" y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+
+        <!-- Static base strands -->
+        <path class="conv-base" opacity=".22" stroke="url(#cg1)" d="M   60 0 C   60 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg2)" d="M  220 0 C  220 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg3)" d="M  380 0 C  380 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg4)" d="M  500 0 C  500 120 600 165 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg5)" d="M  700 0 C  700 120 600 165 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg6)" d="M  820 0 C  820 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg7)" d="M  980 0 C  980 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".22" stroke="url(#cg8)" d="M 1140 0 C 1140 100 600 160 600 200"/>
+
+        <!-- Animated pulse strands -->
+        <path class="conv-pulse"    stroke="url(#cg1)" filter="url(#glow)" d="M   60 0 C   60 100 600 160 600 200"/>
+        <path class="conv-pulse p2" stroke="url(#cg2)" filter="url(#glow)" d="M  220 0 C  220 100 600 160 600 200"/>
+        <path class="conv-pulse p3" stroke="url(#cg3)" filter="url(#glow)" d="M  380 0 C  380 100 600 160 600 200"/>
+        <path class="conv-pulse p4" stroke="url(#cg4)" filter="url(#glow)" d="M  500 0 C  500 120 600 165 600 200"/>
+        <path class="conv-pulse p5" stroke="url(#cg5)" filter="url(#glow)" d="M  700 0 C  700 120 600 165 600 200"/>
+        <path class="conv-pulse p6" stroke="url(#cg6)" filter="url(#glow)" d="M  820 0 C  820 100 600 160 600 200"/>
+        <path class="conv-pulse p7" stroke="url(#cg7)" filter="url(#glow)" d="M  980 0 C  980 100 600 160 600 200"/>
+        <path class="conv-pulse p8" stroke="url(#cg8)" filter="url(#glow)" d="M 1140 0 C 1140 100 600 160 600 200"/>
+
+        <!-- Node where all strands meet -->
+        <circle cx="600" cy="200" r="5" fill="#E4200A" id="convNodeCore" filter="url(#glow)" opacity="0" style="transition:opacity .5s ease"/>
+        <circle cx="600" cy="200" r="5" class="conv-node-pulse" style="animation-delay:.3s"/>
+        <circle cx="600" cy="200" r="5" class="conv-node-pulse" style="animation-delay:1.6s"/>
+      </svg>
+    </div>
+
+  </div><!-- /sol-wrap -->
+
+
+  <!-- ═══════════════════════════════════════
+       GOVERNANCE — CAO sits immediately below
+       the convergence lines. Zero gap.
+  ═══════════════════════════════════════ -->
+  <section id="gov-sec">
+
+    <!-- CAO — directly below convergence, no padding-top -->
+    <div class="cao-wrap reveal" id="blkCAO">
+      <div class="cao-circle">
+        <canvas id="caoCanvas"></canvas>
+      </div>
+      <div class="cao-text">
+        <div class="cao-title">Chief Agentic Officer</div>
+        <div class="cao-pills">Observe &bull; Evaluate &bull; Intervene</div>
+        <p class="cao-desc">The Chief Agentic Officer is the AI-powered applied active governance system that monitors interactions in real time, evaluates requests against governance controls, and approves, rejects, or escalates actions across the operating environment.</p>
+      </div>
+    </div>
+
+    <!-- Flow: CAO → Foundation -->
+    <div class="gov-flow" id="govFlow">
+      <div class="gov-flow-track">
+        <div class="gov-flow-dot"></div>
+        <div class="gov-flow-dot"></div>
+      </div>
+      <svg class="gov-flow-arrow" width="10" height="7" viewBox="0 0 10 7" fill="none">
+        <path d="M5 7L0 0H10L5 7Z" fill="#E4200A"/>
+      </svg>
+    </div>
+
+    <!-- Governance section intro — appears before Foundation -->
+    <div class="gov-hdr reveal" id="govHdr">
+      <span class="eyebrow">Governance by Design</span>
+      <p class="serif-h"><em>Governance</em> is the fabric,<br>not the afterthought.</p>
+      <p class="body-sub">Governance is built into the AILAS operating system as it evolves from foundational oversight to real-time operational control.</p>
+    </div>
+
+    <!-- Foundation -->
+    <div class="fnd-wrap reveal" id="blkFnd" style="transition-delay:.1s">
+      <p class="fnd-label">Foundation Layer</p>
+      <div class="fnd-block">
+        <div class="fnd-title">Governance &amp; Compliance Foundation</div>
+        <div class="fnd-pills">Policies &bull; Controls &bull; Auditability</div>
+        <p class="fnd-desc">Establishes the passive governance layer required for accountable AI transformation through policies, responsibilities, documentation, certifications, controls, and audit-ready oversight.</p>
+      </div>
+    </div>
+
+  </section>
+
+</div><!-- /root-wrap -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Scale to viewport ── */
+  function applyScale() {
+    var rw = document.getElementById('root-wrap');
+    if (!rw) return;
+    var s = window.innerWidth / 1920;
+    rw.style.transform = 'scale(' + s + ')';
+    document.body.style.height = Math.ceil(rw.offsetHeight * s) + 'px';
+  }
+
+
+  /* ── Woven thread canvas ────────────────────────────────
+     Horizontal + vertical threads. Density = (y/H)^2.2.
+     Near-zero at stage 01, maximum at the Fascia block.
+     Threads also animate (gentle undulation).             */
+  function buildWeave() {
+    var canvas = document.getElementById('weaveCanvas');
+    var wrap   = document.querySelector('.sol-wrap');
+    if (!canvas || !wrap) return;
+
+    var W = wrap.offsetWidth, H = wrap.offsetHeight;
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    var H_SP = 34, V_SP = 50, t = 0;
+
+    /* Fabric fades in from Decision Intelligence Engine (stage1). */
+    var s2el  = document.getElementById('stage1');
+    var fadeY = s2el ? s2el.offsetTop : H * 0.12;
+
+    function density(y) {
+      if (y <= fadeY) return 0;
+      return Math.pow((y - fadeY) / (H - fadeY), 1.8);
+    }
+
+    (function frame() {
+      ctx.clearRect(0, 0, W, H);
+      t += .006;
+
+      /* Horizontal threads */
+      for (var y = H_SP; y < H; y += H_SP) {
+        var d = density(y);
+        if (d < .04) continue;
+        ctx.beginPath(); ctx.moveTo(0, y);
+        for (var x = 0; x <= W; x += 3)
+          ctx.lineTo(x, y + Math.sin(x * .008 + t * .55 + y * .004) * d * 6);
+        ctx.strokeStyle = 'rgba(228,32,10,' + (d * .3).toFixed(3) + ')';
+        ctx.lineWidth = d < .3 ? .5 : .8;
+        ctx.stroke();
+      }
+
+      /* Vertical threads — start from fadeY */
+      for (var vx = V_SP; vx < W; vx += V_SP) {
+        var gv = ctx.createLinearGradient(vx, fadeY, vx, H);
+        gv.addColorStop(0,   'rgba(228,32,10,0)');
+        gv.addColorStop(.4,  'rgba(228,32,10,.03)');
+        gv.addColorStop(1,   'rgba(228,32,10,.20)');
+        ctx.beginPath(); ctx.moveTo(vx, fadeY);
+        for (var vy = fadeY; vy <= H; vy += 3) {
+          var vd = density(vy);
+          ctx.lineTo(vx + Math.sin(vy * .01 + t * .4 + vx * .003) * vd * 5, vy);
+        }
+        ctx.strokeStyle = gv; ctx.lineWidth = .6; ctx.stroke();
+      }
+
+      /* Intersection nodes at bottom 42% */
+      for (var hy = Math.ceil(H * .58 / H_SP) * H_SP; hy < H; hy += H_SP) {
+        var nd = density(hy);
+        for (var nx = V_SP; nx < W; nx += V_SP) {
+          var na = nd * (.5 + .5 * Math.sin(t * 1.4 + nx * .02 + hy * .03)) * .5;
+          if (na < .06) continue;
+          ctx.beginPath(); ctx.arc(nx, hy, 1.8, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(228,32,10,' + na.toFixed(3) + ')';
+          ctx.fill();
+        }
+      }
+      requestAnimationFrame(frame);
+    }());
+
+    setTimeout(function () { canvas.classList.add('ready'); }, 80);
+  }
+
+
+  /* ── Fascia dot stagger — diagonal ripple ── */
+  function initFasciaDots() {
+    document.querySelectorAll('.fascia-dot').forEach(function (d, i) {
+      d.style.animationDelay = (Math.floor(i / 5) + i % 5) * .18 + 's';
+    });
+  }
+
+
+  /* ── CAO — Three.js 3D network (same engine as FCS page) ─────
+     Light style: warm white bg, MeshLambertMaterial nodes.
+     CAO = large red center sphere.
+     Inner ring = 6 governance channel nodes (warm gray).
+     Outer ring = 8 observed agent nodes (dark gray, 2 flagged red).
+     Slow auto-rotation. Same rendering approach as FCS visualization. */
+  function buildCAO() {
+    if (typeof THREE === 'undefined') return;
+    var canvas = document.getElementById('caoCanvas');
+    var container = document.querySelector('.cao-circle');
+    if (!canvas || !container) return;
+
+    var W = container.offsetWidth  || 360;
+    var H = container.offsetHeight || 360;
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: false });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0xFDF4F2, 1);   /* light red-tint bg — matches AILAS red-lt */
+    renderer.setSize(W, H);
+
+    var scene  = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(52, W / H, 0.1, 100);
+    camera.position.set(0, 1.8, 11);
+    camera.lookAt(0, 0, 0);
+
+    /* Lights — same setup as FCS file */
+    scene.add(new THREE.AmbientLight(0xffffff, 0.88));
+    var kl = new THREE.DirectionalLight(0xffffff, 0.65);
+    kl.position.set(7, 12, 9); scene.add(kl);
+    var fl = new THREE.DirectionalLight(0xfff4f0, 0.30);
+    fl.position.set(-6, -4, -5); scene.add(fl);
+
+    function lerp(a, b, t) { return a + (b - a) * t; }
+
+    /* Sphere helper */
+    function makeSphere(radius, color, opacity) {
+      var geo = new THREE.SphereGeometry(radius, 36, 36);
+      var mat = new THREE.MeshLambertMaterial({ color: color, transparent: opacity < 1, opacity: opacity });
+      return new THREE.Mesh(geo, mat);
+    }
+
+    /* Tube helper — same as FCS file */
+    function makeTube(pA, pB, r, color, opacity) {
+      var dir = new THREE.Vector3().subVectors(pB, pA);
+      var len = dir.length();
+      if (len < 0.001) return null;
+      var geo = new THREE.CylinderGeometry(r, r, len, 6, 1);
+      var mat = new THREE.MeshLambertMaterial({ color: color, transparent: true, opacity: opacity });
+      var m   = new THREE.Mesh(geo, mat);
+      m.position.copy(new THREE.Vector3().addVectors(pA, pB).multiplyScalar(0.5));
+      m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+      return m;
+    }
+
+    var group = new THREE.Group();
+    scene.add(group);
+
+    /* ── CAO centre node — large red sphere ── */
+    var caoSphere = makeSphere(0.44, 0xE4200A, 1.0);
+    group.add(caoSphere);
+
+    /* Subtle aura ring around CAO */
+    var auraRing = new THREE.Mesh(
+      new THREE.TorusGeometry(0.95, 0.008, 8, 72),
+      new THREE.MeshLambertMaterial({ color: 0xE4200A, transparent: true, opacity: 0.22 })
+    );
+    auraRing.rotation.x = Math.PI * 0.35;
+    group.add(auraRing);
+
+    /* ── Inner ring — 6 governance channel nodes (Facia-style) ── */
+    var innerPos = [];
+    for (var i = 0; i < 6; i++) {
+      var ang = (i / 6) * Math.PI * 2;
+      var tilt = (Math.random() - 0.5) * 1.4;
+      var pos = new THREE.Vector3(
+        Math.cos(ang) * 2.3,
+        tilt,
+        Math.sin(ang) * 2.3
+      );
+      innerPos.push(pos);
+      var n = makeSphere(0.13, 0xB4ACA6, 0.82);
+      n.position.copy(pos); group.add(n);
+
+      /* Line: CAO → inner node */
+      var ln = makeTube(new THREE.Vector3(0, 0, 0), pos, 0.005, 0xE4200A, 0.16);
+      if (ln) group.add(ln);
+    }
+
+    /* ── Outer ring — 8 observed agent nodes ── */
+    for (var j = 0; j < 8; j++) {
+      var a2 = (j / 8) * Math.PI * 2;
+      var t2 = (Math.random() - 0.5) * 2.2;
+      var pos2 = new THREE.Vector3(
+        Math.cos(a2) * 4.3,
+        t2,
+        Math.sin(a2) * 4.3
+      );
+
+      /* 2 nodes flagged red (intervention markers) */
+      var flagged = (j === 2 || j === 6);
+      var col2 = flagged ? 0xD3412C : 0x726E6B;
+      var op2  = flagged ? 0.90 : 0.65;
+      var n2   = makeSphere(flagged ? 0.115 : 0.09, col2, op2);
+      n2.position.copy(pos2); group.add(n2);
+
+      /* Connect outer node → nearest inner node */
+      var nearest = 0, nearDist = 999;
+      for (var k = 0; k < innerPos.length; k++) {
+        var d = pos2.distanceTo(innerPos[k]);
+        if (d < nearDist) { nearDist = d; nearest = k; }
+      }
+      var ln2 = makeTube(innerPos[nearest], pos2, 0.004, 0x4A4645, 0.16);
+      if (ln2) group.add(ln2);
+    }
+
+    /* ── Sparse particle field — same as FCS ── */
+    var pg  = new THREE.BufferGeometry();
+    var pp  = new Float32Array(240 * 3);
+    for (var pi = 0; pi < 240 * 3; pi++) pp[pi] = (Math.random() - 0.5) * 32;
+    pg.setAttribute('position', new THREE.BufferAttribute(pp, 3));
+    scene.add(new THREE.Points(pg, new THREE.PointsMaterial({
+      color: 0xCCC8C4, size: 0.04, transparent: true, opacity: 0.18, sizeAttenuation: true
+    })));
+
+    /* ── Render loop — slow auto-rotate ── */
+    var angle = 0;
+    (function loop() {
+      requestAnimationFrame(loop);
+      angle += 0.004;
+      group.rotation.y = angle;
+
+      /* CAO sphere breathing */
+      var breathe = 1 + Math.sin(Date.now() * 0.0018) * 0.04;
+      caoSphere.scale.setScalar(breathe);
+
+      /* Aura ring counter-rotate for depth */
+      auraRing.rotation.z += 0.003;
+
+      renderer.render(scene, camera);
+    }());
+
+    /* Resize if container changes */
+    new ResizeObserver(function () {
+      var nw = container.offsetWidth, nh = container.offsetHeight;
+      if (nw > 0 && nh > 0) {
+        renderer.setSize(nw, nh);
+        camera.aspect = nw / nh;
+        camera.updateProjectionMatrix();
+      }
+    }).observe(container);
+  }
+
+
+  /* ── Entrance animations ── */
+  function revealAll() {
+    ['solHdr','stage1','stage2','stage3','blkFascia','convZone',
+     'blkCAO','govHdr','blkFnd'
+    ].forEach(function (id, i) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      setTimeout(function () { el.classList.add('in'); }, i * 80);
+    });
+
+    /* Convergence node appears after lines are visible */
+    setTimeout(function () {
+      var n = document.getElementById('convNodeCore');
+      if (n) n.style.opacity = '1';
+    }, 800);
+
+    /* govFlow appears with CAO */
+    setTimeout(function () {
+      var f = document.getElementById('govFlow');
+      if (f) f.style.opacity = '1';
+    }, 560);
+  }
+
+
+  /* ── Init ── */
+  applyScale();
+  window.addEventListener('resize', applyScale);
+  window.addEventListener('load', function () {
+    applyScale();
+    setTimeout(function () {
+      buildWeave();
+      initFasciaDots();
+      buildCAO();
+      revealAll();
+    }, 150);
+  });
+
+}());
+</script>
+</body>
+</html>
