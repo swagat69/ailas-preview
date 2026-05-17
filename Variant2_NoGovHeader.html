@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AILAS – Governance by Design</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <style>
+    /* ─── Reset ─── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: #fff; font-family: 'DM Sans', sans-serif; -webkit-font-smoothing: antialiased; color: #0E1317; overflow-x: hidden; }
+    #root-wrap { width: 1920px; transform-origin: top left; }
+
+    /* ─── Design tokens ─── */
+    :root {
+      --ease:   cubic-bezier(.4, 0, .2, 1);
+      --red:    #E4200A;
+      --red-lt: #FDF4F2;
+      --red-bd: #FFB7B8;
+      --border: #F0F0F0;
+      --dark:   #0E1317;
+      --muted:  #6E7174;
+    }
+
+    /* ─── Shared typography ─── */
+    .eyebrow  { display: block; font-size: 18px; font-weight: 300; letter-spacing: 1.8px; text-transform: uppercase; color: var(--muted); margin-bottom: 20px; }
+    .serif-h  { font-family: 'Crimson Text', Georgia, serif; font-size: 72px; font-weight: 400; line-height: 1.08; letter-spacing: -1.44px; color: var(--dark); margin-bottom: 24px; }
+    .serif-h em { font-style: italic; color: var(--red); }
+    .body-sub { font-size: 22px; font-weight: 300; line-height: 1.6; color: var(--muted); max-width: 900px; margin: 0 auto; }
+
+    /* ─── Entrance animation ─── */
+    .reveal { opacity: 0; transform: translateY(16px); transition: opacity .6s ease, transform .6s ease; }
+    .reveal.in { opacity: 1; transform: translateY(0); }
+
+
+    /* ════════════════════════════════════════════════════
+       STAGES + FASCIA
+       Single container. Canvas fabric covers everything.
+       Threads fade in from Stage 01 (DIE) and peak at
+       Fascia – the darkest convergence point.
+    ════════════════════════════════════════════════════ */
+    .sol-wrap {
+      position: relative;
+      background: #fff;
+      overflow: visible;
+    }
+    #weaveCanvas {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      display: block; pointer-events: none;
+      opacity: 0; transition: opacity 1.8s ease;
+    }
+    #weaveCanvas.ready { opacity: 1; }
+
+    /* Section header */
+    .sol-hdr {
+      position: relative; z-index: 1;
+      padding: 80px 360px 60px; text-align: center;
+    }
+
+    /* Stage rows */
+    .stage-row {
+      position: relative; z-index: 1;
+      display: grid; grid-template-columns: 160px 1fr;
+      padding: 72px 360px; align-items: start;
+    }
+    .stage-row::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--red);
+      opacity: 0;
+    }
+    .stage-row:nth-child(2)::before { opacity: .18; }
+    .stage-row:nth-child(3)::before { opacity: .34; }
+    .stage-row:nth-child(4)::before { opacity: .52; }
+    .stage-num {
+      position: relative; z-index: 3;
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 148px; font-weight: 600; line-height: .85; letter-spacing: -6px;
+      color: var(--dark); opacity: .12; user-select: none;
+      padding-top: 4px;
+    }
+    .stage-content { padding-left: 64px; position: relative; z-index: 3; }
+
+    /* Row 1 — icon + title, vertically centred */
+    .stage-header {
+      display: flex; align-items: center; gap: 20px;
+      margin-bottom: 10px;
+    }
+    .stage-icon-tile {
+      width: 60px; height: 60px; border-radius: 16px;
+      background: var(--red-lt);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0;
+    }
+    .stage-icon-tile svg { width: 28px; height: 28px; }
+    .stage-name {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 48px; font-weight: 400; line-height: 1.05; letter-spacing: -.02em;
+      color: var(--dark); margin: 0;
+    }
+
+    /* Row 2 — pills */
+    .stage-pills {
+      display: inline-block;
+      font-size: 11px; font-weight: 500; color: var(--red);
+      letter-spacing: .10em; text-transform: uppercase;
+      margin: 0 0 26px 76px;
+    }
+
+    /* Row 3 — description */
+    .stage-desc {
+      font-size: 19px; font-weight: 300; line-height: 1.72;
+      color: var(--muted); max-width: 780px;
+      margin: 0;
+    }
+
+
+    /* ════════════════════════════════════════════════════
+       FASCIA — fabric is at maximum density here
+    ════════════════════════════════════════════════════ */
+    .fascia-wrap {
+      position: relative; z-index: 2;
+      padding: 32px 360px 80px;
+      background: transparent;
+    }
+    .fascia-block {
+      border: 1px solid var(--red-bd);
+      overflow: hidden; position: relative;
+      text-align: center;
+      background: #fff;
+    }
+    .fascia-block::before {
+      content: '';
+      display: block;
+      height: 4px;
+      background: linear-gradient(90deg, rgba(228,32,10,0.3) 0%, var(--red) 30%, #FF7A6B 50%, var(--red) 70%, rgba(228,32,10,0.3) 100%);
+    }
+    .fascia-block::after { display: none; }
+    .fascia-content { padding: 52px 80px 60px; background: radial-gradient(ellipse 70% 60% at 50% 0%, rgba(253,244,242,0.9) 0%, #fff 65%); }
+    .fascia-title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 56px; font-weight: 600; line-height: 1.05; letter-spacing: -.02em;
+      color: var(--dark); margin-bottom: 16px;
+    }
+    .fascia-pills { font-size: 12px; font-weight: 500; color: var(--red); letter-spacing: .07em; margin-bottom: 22px; }
+    .fascia-desc  { font-size: 19px; font-weight: 300; line-height: 1.75; color: var(--muted); max-width: none; margin: 0 auto; }
+
+
+    /* ════════════════════════════════════════════════════
+       CONVERGENCE — threads fan from Fascia → CAO
+       8 bezier paths, transparent at top → red at centre.
+       Animated particles travel along each strand.
+    ════════════════════════════════════════════════════ */
+    .conv-wrap {
+      position: relative; z-index: 1;
+      width: 100%; height: 240px; padding: 0 360px;
+    }
+    .conv-wrap svg { display: block; width: 100%; height: 100%; overflow: visible; }
+
+    .conv-base {
+      fill: none; stroke: var(--red); stroke-width: .7;
+    }
+    .conv-pulse {
+      fill: none; stroke: var(--red); stroke-width: 1.6;
+      stroke-dasharray: 44 700; stroke-dashoffset: 744;
+      animation: convFlow 4s linear infinite;
+    }
+    .conv-pulse.p2  { animation-duration: 5.2s; animation-delay: -1.3s; }
+    .conv-pulse.p3  { animation-duration: 4.6s; animation-delay: -2.5s; }
+    .conv-pulse.p4  { animation-duration: 3.8s; animation-delay: -3.7s; }
+    .conv-pulse.p5  { animation-duration: 5.0s; animation-delay:  -.8s; }
+    .conv-pulse.p6  { animation-duration: 4.2s; animation-delay: -1.9s; }
+    .conv-pulse.p7  { animation-duration: 3.6s; animation-delay: -3.1s; }
+    .conv-pulse.p8  { animation-duration: 4.8s; animation-delay: -2.1s; }
+    .conv-pulse.p9  { animation-duration: 4.4s; animation-delay: -0.5s; }
+    .conv-pulse.p10 { animation-duration: 3.9s; animation-delay: -4.2s; }
+    .conv-pulse.p11 { animation-duration: 5.4s; animation-delay: -1.0s; }
+    .conv-pulse.p12 { animation-duration: 4.1s; animation-delay: -2.8s; }
+    @keyframes convFlow { to { stroke-dashoffset: -744; } }
+
+    .conv-node-pulse {
+      fill: none; stroke: var(--red); stroke-width: 1; opacity: 0;
+      animation: nodeRing 2.6s ease-out infinite;
+    }
+    @keyframes nodeRing {
+      0%   { r: 5;  opacity: .6; }
+      100% { r: 22; opacity: 0;  }
+    }
+
+
+    /* ════════════════════════════════════════════════════
+       GOVERNANCE SECTION
+    ════════════════════════════════════════════════════ */
+    #gov-sec { background: #fff; overflow: visible; }
+
+    .gov-hdr {
+      position: relative; z-index: 1;
+      padding: 64px 360px 52px; text-align: center;
+    }
+
+
+    /* ════════════════════════════════════════════════════
+       CAO — circular, Three.js 3D inside
+    ════════════════════════════════════════════════════ */
+    .cao-wrap {
+      display: flex; flex-direction: column; align-items: center;
+      padding: 0 360px;
+    }
+    .cao-circle {
+      width: 420px; height: 420px; border-radius: 50%;
+      border: 1.5px solid rgba(228,32,10,.28);
+      position: relative; overflow: hidden; flex-shrink: 0;
+      clip-path: circle(50% at 50% 50%);
+      -webkit-clip-path: circle(50% at 50% 50%);
+    }
+    #caoCanvas {
+      position: absolute; inset: 0;
+      width: 100% !important; height: 100% !important;
+      border-radius: 50%;
+      clip-path: circle(50% at 50% 50%);
+      display: block;
+    }
+    .cao-text { text-align: center; padding: 56px 0 0; max-width: 720px; }
+    .cao-title {
+      font-family: 'Crimson Text', Georgia, serif;
+      font-size: 52px; font-weight: 400; line-height: 1.08; letter-spacing: -.02em;
+      color: var(--dark); margin-bottom: 16px;
+    }
+    .cao-pills { font-size: 12px; font-weight: 500; color: var(--red); letter-spacing: .07em; margin-bottom: 22px; }
+    .cao-desc  { font-size: 19px; font-weight: 300; line-height: 1.75; color: var(--muted); }
+
+
+    /* ════════════════════════════════════════════════════
+       FLOW CONNECTOR — CAO → Foundation
+    ════════════════════════════════════════════════════ */
+    .gov-flow {
+      display: flex; flex-direction: column; align-items: center;
+      height: 120px;
+      opacity: 0; transition: opacity .5s ease;
+    }
+    .gov-flow.in { opacity: 1; }
+    .gov-flow-track {
+      width: 1.5px; flex: 1;
+      background: linear-gradient(to bottom, var(--red), rgba(228,32,10,.04));
+      position: relative; overflow: hidden;
+    }
+    .gov-flow-dot {
+      position: absolute; left: 50%; transform: translateX(-50%);
+      border-radius: 50%; background: var(--red); width: 5px; height: 5px;
+      animation: dotFall 1.8s var(--ease) infinite;
+    }
+    .gov-flow-dot:nth-child(2) { animation-delay: .65s; width: 3px; height: 3px; opacity: .3; }
+    @keyframes dotFall { 0%{top:-5px;opacity:1} 80%{opacity:.3} 100%{top:100%;opacity:0} }
+    .gov-flow-arrow { flex-shrink: 0; opacity: .3; }
+
+
+    /* ════════════════════════════════════════════════════
+       FOUNDATION — simple card, hover reveals description
+    ════════════════════════════════════════════════════ */
+    .fnd-wrap  { padding: 0 360px 120px; overflow: visible; position: relative; }
+    .fnd-label { text-align: center; font-size: 12px; font-weight: 300; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); opacity: .4; margin-bottom: 16px; }
+    .fnd-block {
+      border: 1px solid var(--red-bd);
+      background: #fff;
+      overflow: hidden;
+      position: relative; cursor: default;
+      text-align: center;
+    }
+    .fnd-block::before { display: none; }
+    .fnd-block::after {
+      content: '';
+      display: block;
+      position: absolute; bottom: 0; left: 0; right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, rgba(228,32,10,0.3) 0%, var(--red) 30%, #FF7A6B 50%, var(--red) 70%, rgba(228,32,10,0.3) 100%);
+    }
+    .fnd-inner { padding: 52px 80px 60px; background: radial-gradient(ellipse 70% 60% at 50% 100%, rgba(253,244,242,0.8) 0%, #fff 65%); }
+    .fnd-title { font-family: 'Crimson Text', Georgia, serif; font-size: 36px; font-weight: 400; color: var(--dark); margin-bottom: 12px; letter-spacing: -.01em; }
+    .fnd-pills { font-size: 12px; font-weight: 500; color: var(--red); letter-spacing: .07em; margin-bottom: 20px; }
+    .fnd-desc  { font-size: 19px; font-weight: 300; line-height: 1.75; color: var(--muted); max-width: none; margin: 0 auto;
+                 position: static; opacity: 1; transform: none; pointer-events: auto;
+                 background: none; border: none; border-radius: 0; padding: 0; box-shadow: none; }
+  </style>
+</head>
+<body>
+<div id="root-wrap">
+
+  <!-- ════════════════════════════════════════
+       STAGES + FASCIA
+  ════════════════════════════════════════ -->
+  <div class="sol-wrap">
+    <canvas id="weaveCanvas"></canvas>
+
+    <div class="sol-hdr reveal" id="solHdr">
+      <span class="eyebrow">The AILAS Operating System</span>
+      <p class="serif-h">One System. <em>Three Stages.</em></p>
+      <p class="body-sub">A coordinated operating environment that evolves with every stage of transformation.</p>
+    </div>
+
+    <div class="stage-row reveal" id="stage1">
+      <div class="stage-num">01</div>
+      <div class="stage-content">
+        <div class="stage-header">
+          <div class="stage-icon-tile">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M42.1802 7.37166C40.2093 7.37166 38.5559 8.8125 38.1374 10.6875H28.3124V7.21875H19.5937V10.6875H9.86242C9.44392 8.8125 7.79055 7.37166 5.81964 7.37166C3.53364 7.37166 1.67383 9.26991 1.67383 11.6092C1.67383 13.9484 3.53364 15.86 5.81964 15.86C7.79055 15.8603 9.44392 14.4375 9.86242 12.5625H18.8785C14.7601 14.4375 12.0937 18.6368 12.0937 23.2708V32.0625H8.90617V40.7812H17.6249V32.0625H13.9687V23.2708C13.9722 21.3949 14.501 19.5574 15.4952 17.9665C16.4893 16.3756 17.9091 15.0949 19.5937 14.2694V15.9375H28.3124V14.2159C29.9999 15.0389 31.4221 16.3196 32.4167 17.912C33.4113 19.5045 33.9383 21.3444 33.9374 23.2219V32.0625H30.2812V40.7812H38.9999V32.0625H35.8124V23.2219C35.8187 20.9964 35.1953 18.8145 34.0141 16.9283C32.833 15.0421 31.1423 13.5286 29.1374 12.5625H38.1374C38.5556 14.4375 40.2087 15.8576 42.1799 15.8576C44.4659 15.8576 46.3257 13.9545 46.3257 11.6147C46.3257 9.27487 44.4662 7.37166 42.1802 7.37166ZM5.81964 13.9723C4.56752 13.9723 3.54883 12.91 3.54883 11.6043C3.54883 10.2985 4.56752 9.23634 5.81964 9.23634C7.07177 9.23634 8.09055 10.2986 8.09055 11.6043C8.09055 12.9099 7.07177 13.9723 5.81964 13.9723ZM15.7499 33.9375V38.9062H10.7812V33.9375H15.7499ZM26.4374 14.0625H21.4687V9.09375H26.4374V14.0625ZM37.1249 33.9375V38.9062H32.1562V33.9375H37.1249ZM42.1802 13.9723C40.9281 13.9723 39.9095 12.91 39.9095 11.6043C39.9095 10.2985 40.9281 9.23634 42.1802 9.23634C43.4323 9.23634 44.451 10.2986 44.451 11.6043C44.451 12.9099 43.4323 13.9723 42.1802 13.9723Z" fill="#E4200A"/></svg>
+          </div>
+          <div class="stage-name">Decision Intelligence Engine</div>
+        </div>
+        <div class="stage-pills">Discover &bull; Analyse &bull; Monitor</div>
+        <p class="stage-desc">Identify where AI can create value, understand organisational risks before committing resources, and maintain visibility and control over the enterprise transformation journey.</p>
+      </div>
+    </div>
+
+    <div class="stage-row reveal" id="stage2" style="transition-delay:.1s">
+      <div class="stage-num">02</div>
+      <div class="stage-content">
+        <div class="stage-header">
+          <div class="stage-icon-tile">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M22 9C13.5 9 7.5 14.5 7.5 21.5C7.5 28 11.5 33 16 35C17.5 35.8 18.5 36.4 19 38H22ZM13 18.5C14.5 16.5 18.5 18 17 22C16 24 13.5 23.5 13 18.5ZM12.5 27C14.5 25 18.5 26.5 17 30.5C16 32 13 31.5 12.5 27Z" fill="#E4200A"/><path fill-rule="evenodd" d="M26 9C34.5 9 40.5 14.5 40.5 21.5C40.5 28 36.5 33 32 35C30.5 35.8 29.5 36.4 29 38H26ZM35 18.5C33.5 16.5 29.5 18 31 22C32 24 34.5 23.5 35 18.5ZM35.5 27C33.5 25 29.5 26.5 31 30.5C32 32 35 31.5 35.5 27Z" fill="#E4200A"/><path d="M19 38C19 41.5 21.2 43 24 43C26.8 43 29 41.5 29 38Z" fill="#E4200A"/></svg>
+          </div>
+          <div class="stage-name">Company Brain</div>
+        </div>
+        <div class="stage-pills">Map &bull; Capture &bull; Activate</div>
+        <p class="stage-desc">Map where organisational knowledge lives, capture tacit knowledge, and build a multilayered Company Brain – a living intelligence foundation that continuously grows, evolves, and activates AI systems across the enterprise.</p>
+      </div>
+    </div>
+
+    <div class="stage-row reveal" id="stage3" style="transition-delay:.2s">
+      <div class="stage-num">03</div>
+      <div class="stage-content">
+        <div class="stage-header">
+          <div class="stage-icon-tile">
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.5 23.25C22.9142 23.25 23.25 22.9142 23.25 22.5C23.25 22.0858 22.9142 21.75 22.5 21.75C22.0858 21.75 21.75 22.0858 21.75 22.5C21.75 22.9142 22.0858 23.25 22.5 23.25Z" fill="#E4200A"/><path d="M43.5 21.75C43.6989 21.75 43.8897 21.671 44.0303 21.5303C44.171 21.3897 44.25 21.1989 44.25 21V16.395C44.957 16.2125 45.5731 15.7783 45.983 15.174C46.3928 14.5697 46.5681 13.8366 46.4761 13.1123C46.3841 12.3879 46.0311 11.722 45.4832 11.2393C44.9353 10.7566 44.2302 10.4903 43.5 10.4903C42.7698 10.4903 42.0647 10.7566 41.5168 11.2393C40.969 11.722 40.6159 12.3879 40.5239 13.1123C40.4319 13.8366 40.6072 14.5697 41.0171 15.174C41.4269 15.7783 42.043 16.2125 42.75 16.395V20.25H30V18H27.75V5.25001H31.605C31.7875 5.957 32.2217 6.57315 32.826 6.98296C33.4303 7.39277 34.1634 7.5681 34.8878 7.4761C35.6121 7.38409 36.2781 7.03106 36.7607 6.48318C37.2434 5.9353 37.5097 5.23019 37.5097 4.50001C37.5097 3.76983 37.2434 3.06471 36.7607 2.51683C36.2781 1.96895 35.6121 1.61592 34.8878 1.52392C34.1634 1.43191 33.4303 1.60725 32.826 2.01706C32.2217 2.42687 31.7875 3.04301 31.605 3.75001H27C26.8011 3.75001 26.6103 3.82902 26.4697 3.96968C26.329 4.11033 26.25 4.30109 26.25 4.50001V18H24.75V10.5H23.25V18H21.75V4.50001C21.75 4.30109 21.671 4.11033 21.5303 3.96968C21.3897 3.82902 21.1989 3.75001 21 3.75001H16.395C16.2125 3.04301 15.7783 2.42687 15.174 2.01706C14.5697 1.60725 13.8366 1.43191 13.1123 1.52392C12.3879 1.61592 11.722 1.96895 11.2393 2.51683C10.7566 3.06471 10.4903 3.76983 10.4903 4.50001C10.4903 5.23019 10.7566 5.9353 11.2393 6.48318C11.722 7.03106 12.3879 7.38409 13.1123 7.4761C13.8366 7.5681 14.5697 7.39277 15.174 6.98296C15.7783 6.57315 16.2125 5.957 16.395 5.25001H20.25V18H18V20.25H5.25001V16.395C5.957 16.2125 6.57315 15.7783 6.98296 15.174C7.39277 14.5697 7.5681 13.8366 7.4761 13.1123C7.38409 12.3879 7.03106 11.722 6.48318 11.2393C5.9353 10.7566 5.23019 10.4903 4.50001 10.4903C3.76983 10.4903 3.06471 10.7566 2.51683 11.2393C1.96895 11.722 1.61592 12.3879 1.52392 13.1123C1.43191 13.8366 1.60725 14.5697 2.01706 15.174C2.42687 15.7783 3.04301 16.2125 3.75001 16.395V21C3.75001 21.1989 3.82902 21.3897 3.96968 21.5303C4.11033 21.671 4.30109 21.75 4.50001 21.75H18V23.25H10.5V24.75H18V26.25H4.50001C4.30109 26.25 4.11033 26.329 3.96968 26.4697C3.82902 26.6103 3.75001 26.8011 3.75001 27V31.605C3.04301 31.7875 2.42687 32.2217 2.01706 32.826C1.60725 33.4303 1.43191 34.1634 1.52392 34.8878C1.61592 35.6121 1.96895 36.2781 2.51683 36.7607C3.06471 37.2434 3.76983 37.5097 4.50001 37.5097C5.23019 37.5097 5.9353 37.2434 6.48318 36.7607C7.03106 36.2781 7.38409 35.6121 7.4761 34.8878C7.5681 34.1634 7.39277 33.4303 6.98296 32.826C6.57315 32.2217 5.957 31.7875 5.25001 31.605V27.75H18V30H20.25V42.75H16.395C16.2125 42.043 15.7783 41.4269 15.174 41.0171C14.5697 40.6072 13.8366 40.4319 13.1123 40.5239C12.3879 40.6159 11.722 40.969 11.2393 41.5168C10.7566 42.0647 10.4903 42.7698 10.4903 43.5C10.4903 44.2302 10.7566 44.9353 11.2393 45.4832C11.722 46.0311 12.3879 46.3841 13.1123 46.4761C13.8366 46.5681 14.5697 46.3928 15.174 45.983C15.7783 45.5731 16.2125 44.957 16.395 44.25H21C21.1989 44.25 21.3897 44.171 21.5303 44.0303C21.671 43.8897 21.75 43.6989 21.75 43.5V30H23.25V37.5H24.75V30H26.25V43.5C26.25 43.6989 26.329 43.8897 26.4697 44.0303C26.6103 44.171 26.8011 44.25 27 44.25H31.605C31.7875 44.957 32.2217 45.5731 32.826 45.983C33.4303 46.3928 34.1634 46.5681 34.8878 46.4761C35.6121 46.3841 36.2781 46.0311 36.7607 45.4832C37.2434 44.9353 37.5097 44.2302 37.5097 43.5C37.5097 42.7698 37.2434 42.0647 36.7607 41.5168C36.2781 40.969 35.6121 40.6159 34.8878 40.5239C34.1634 40.4319 33.4303 40.6072 32.826 41.0171C32.2217 41.4269 31.7875 42.043 31.605 42.75H27.75V30H30V27.75H42.75V31.605C42.043 31.7875 41.4269 32.2217 41.0171 32.826C40.6072 33.4303 40.4319 34.1634 40.5239 34.8878C40.6159 35.6121 40.969 36.2781 41.5168 36.7607C42.0647 37.2434 42.7698 37.5097 43.5 37.5097C44.2302 37.5097 44.9353 37.2434 45.4832 36.7607C46.0311 36.2781 46.3841 35.6121 46.4761 34.8878C46.5681 34.1634 46.3928 33.4303 45.983 32.826C45.5731 32.2217 44.957 31.7875 44.25 31.605V27C44.25 26.8011 44.171 26.6103 44.0303 26.4697C43.8897 26.329 43.6989 26.25 43.5 26.25H30V24.75H37.5V23.25H30V21.75H43.5ZM24.75 27.75H20.25V26.25H24.75V27.75ZM22.5 24.75C22.055 24.75 21.62 24.618 21.25 24.3708C20.88 24.1236 20.5916 23.7722 20.4213 23.361C20.251 22.9499 20.2064 22.4975 20.2932 22.0611C20.3801 21.6246 20.5943 21.2237 20.909 20.909C21.2237 20.5943 21.6246 20.3801 22.0611 20.2932C22.4975 20.2064 22.9499 20.251 23.361 20.4213C23.7722 20.5916 24.1236 20.88 24.3708 21.25C24.618 21.62 24.75 22.055 24.75 22.5C24.75 23.0967 24.513 23.669 24.091 24.091C23.669 24.513 23.0967 24.75 22.5 24.75ZM27.75 24.75H26.25V20.25H27.75V24.75Z" fill="#E4200A"/></svg>
+          </div>
+          <div class="stage-name">Federated Cognitive System</div>
+        </div>
+        <div class="stage-pills">Personalise &bull; Augment &bull; Automate</div>
+        <p class="stage-desc">Enable private-by-design personal AI systems for every employee that adapt to individual workflows, tools, and working styles – introducing human-centred agentic execution through adaptive tools, enterprise intelligence, and controlled autonomy.</p>
+      </div>
+    </div>
+
+    <!-- Fascia — fabric at maximum density -->
+    <div class="fascia-wrap reveal" id="blkFascia" style="transition-delay:.3s">
+      <div class="fascia-block">
+        <div class="fascia-content">
+          <div class="fascia-title">Fascia</div>
+          <div class="fascia-pills">Connect &bull; Coordinate &bull; Govern</div>
+          <p class="fascia-desc">Fascia forms the connective governance layer of the AILAS OS – controlling how organisational knowledge, tools, permissions, workflows, and agentic systems interact across the enterprise.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Convergence — threads flow from Fascia into CAO -->
+    <div class="conv-wrap reveal" id="convZone" style="transition-delay:.4s">
+      <svg viewBox="0 0 1200 200" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="cg1"  gradientUnits="userSpaceOnUse" x1="60"   y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg2"  gradientUnits="userSpaceOnUse" x1="220"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg3"  gradientUnits="userSpaceOnUse" x1="380"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg4"  gradientUnits="userSpaceOnUse" x1="500"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg5"  gradientUnits="userSpaceOnUse" x1="700"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg6"  gradientUnits="userSpaceOnUse" x1="820"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg7"  gradientUnits="userSpaceOnUse" x1="980"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg8"  gradientUnits="userSpaceOnUse" x1="1140" y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".5"/></linearGradient>
+          <linearGradient id="cg9"  gradientUnits="userSpaceOnUse" x1="140"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".3"/></linearGradient>
+          <linearGradient id="cg10" gradientUnits="userSpaceOnUse" x1="440"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".3"/></linearGradient>
+          <linearGradient id="cg11" gradientUnits="userSpaceOnUse" x1="760"  y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".3"/></linearGradient>
+          <linearGradient id="cg12" gradientUnits="userSpaceOnUse" x1="1060" y1="0" x2="600" y2="200"><stop offset="0%" stop-color="#E4200A" stop-opacity="0"/><stop offset="100%" stop-color="#E4200A" stop-opacity=".3"/></linearGradient>
+          <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        </defs>
+        <!-- Primary strands -->
+        <path class="conv-base" opacity=".28" stroke="url(#cg1)"  d="M   60 0 C   60 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg2)"  d="M  220 0 C  220 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg3)"  d="M  380 0 C  380 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg4)"  d="M  500 0 C  500 120 600 165 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg5)"  d="M  700 0 C  700 120 600 165 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg6)"  d="M  820 0 C  820 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg7)"  d="M  980 0 C  980 100 600 160 600 200"/>
+        <path class="conv-base" opacity=".28" stroke="url(#cg8)"  d="M 1140 0 C 1140 100 600 160 600 200"/>
+        <!-- Secondary strands (thinner, dimmer) -->
+        <path class="conv-base" opacity=".14" stroke="url(#cg9)"  d="M  140 0 C  140 110 600 162 600 200" stroke-width=".45"/>
+        <path class="conv-base" opacity=".14" stroke="url(#cg10)" d="M  440 0 C  440 115 600 164 600 200" stroke-width=".45"/>
+        <path class="conv-base" opacity=".14" stroke="url(#cg11)" d="M  760 0 C  760 115 600 164 600 200" stroke-width=".45"/>
+        <path class="conv-base" opacity=".14" stroke="url(#cg12)" d="M 1060 0 C 1060 110 600 162 600 200" stroke-width=".45"/>
+        <!-- Pulse animations -->
+        <path class="conv-pulse"     stroke="url(#cg1)"  filter="url(#glow)" d="M   60 0 C   60 100 600 160 600 200"/>
+        <path class="conv-pulse p2"  stroke="url(#cg2)"  filter="url(#glow)" d="M  220 0 C  220 100 600 160 600 200"/>
+        <path class="conv-pulse p3"  stroke="url(#cg3)"  filter="url(#glow)" d="M  380 0 C  380 100 600 160 600 200"/>
+        <path class="conv-pulse p4"  stroke="url(#cg4)"  filter="url(#glow)" d="M  500 0 C  500 120 600 165 600 200"/>
+        <path class="conv-pulse p5"  stroke="url(#cg5)"  filter="url(#glow)" d="M  700 0 C  700 120 600 165 600 200"/>
+        <path class="conv-pulse p6"  stroke="url(#cg6)"  filter="url(#glow)" d="M  820 0 C  820 100 600 160 600 200"/>
+        <path class="conv-pulse p7"  stroke="url(#cg7)"  filter="url(#glow)" d="M  980 0 C  980 100 600 160 600 200"/>
+        <path class="conv-pulse p8"  stroke="url(#cg8)"  filter="url(#glow)" d="M 1140 0 C 1140 100 600 160 600 200"/>
+        <path class="conv-pulse p9"  stroke="url(#cg9)"  filter="url(#glow)" d="M  140 0 C  140 110 600 162 600 200"/>
+        <path class="conv-pulse p10" stroke="url(#cg10)" filter="url(#glow)" d="M  440 0 C  440 115 600 164 600 200"/>
+        <path class="conv-pulse p11" stroke="url(#cg11)" filter="url(#glow)" d="M  760 0 C  760 115 600 164 600 200"/>
+        <path class="conv-pulse p12" stroke="url(#cg12)" filter="url(#glow)" d="M 1060 0 C 1060 110 600 162 600 200"/>
+        <circle id="convNodeCore" cx="600" cy="200" r="6" fill="#E4200A" filter="url(#glow)" opacity="0" style="transition:opacity .6s ease"/>
+        <circle cx="600" cy="200" r="6" class="conv-node-pulse" style="animation-delay:.4s"/>
+        <circle cx="600" cy="200" r="6" class="conv-node-pulse" style="animation-delay:1.7s"/>
+        <circle cx="600" cy="200" r="6" class="conv-node-pulse" style="animation-delay:3.0s"/>
+      </svg>
+    </div>
+
+  </div><!-- /sol-wrap -->
+
+
+  <!-- ════════════════════════════════════════
+       GOVERNANCE
+  ════════════════════════════════════════ -->
+  <section id="gov-sec">
+
+    <!-- CAO — sits directly below convergence lines -->
+    <div class="cao-wrap reveal" id="blkCAO" style="transition-delay:.5s">
+      <div class="cao-circle">
+        <canvas id="caoCanvas"></canvas>
+      </div>
+      <div class="cao-text">
+        <div class="cao-title">Chief Agentic Officer</div>
+        <div class="cao-pills">Observe &bull; Evaluate &bull; Intervene</div>
+        <p class="cao-desc">The Chief Agentic Officer is the AI-powered applied active governance system that monitors interactions in real time, evaluates requests against governance controls, and approves, rejects, or escalates actions across the operating environment.</p>
+      </div>
+    </div>
+
+    <!-- Flow: CAO → Foundation -->
+    <div class="gov-flow" id="govFlow">
+      <div class="gov-flow-track">
+        <div class="gov-flow-dot"></div>
+        <div class="gov-flow-dot"></div>
+      </div>
+      <svg class="gov-flow-arrow" width="10" height="7" viewBox="0 0 10 7" fill="none">
+        <path d="M5 7L0 0H10L5 7Z" fill="#E4200A"/>
+      </svg>
+    </div>
+
+    <!-- Foundation -->
+    <div class="fnd-wrap reveal" id="blkFnd" style="transition-delay:.7s">
+      <p class="fnd-label">Foundation Layer</p>
+      <div class="fnd-block">
+        <div class="fnd-inner">
+          <div class="fnd-title">Governance &amp; Compliance Foundation</div>
+          <div class="fnd-pills">Policies &bull; Controls &bull; Auditability</div>
+          <p class="fnd-desc">Establishes the passive governance layer required for accountable AI transformation through policies, responsibilities, documentation, certifications, controls, and audit-ready oversight.</p>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+</div><!-- /root-wrap -->
+
+<script>
+(function () {
+  'use strict';
+
+  /* ── Viewport scale ── */
+  function applyScale() {
+    var rw = document.getElementById('root-wrap');
+    if (!rw) return;
+    var s = window.innerWidth / 1920;
+    rw.style.transform = 'scale(' + s + ')';
+    document.body.style.height = Math.ceil(rw.offsetHeight * s) + 'px';
+  }
+
+
+  function buildWeave() {
+    var canvas = document.getElementById('weaveCanvas');
+    var wrap   = document.querySelector('.sol-wrap');
+    if (!canvas || !wrap) return;
+
+    var W = wrap.offsetWidth, H = wrap.offsetHeight;
+    canvas.width = W; canvas.height = H;
+    var ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    var s1el          = document.getElementById('stage1');
+    var fasciaEl      = document.getElementById('blkFascia');
+    var fasciaBlockEl = fasciaEl ? fasciaEl.querySelector('.fascia-block') : null;
+    var fadeY = s1el ? s1el.offsetTop : H * 0.12;
+    /* stopY = top of the actual fascia-block card (fascia-wrap top + block's offsetTop inside it) */
+    var stopY = fasciaBlockEl
+      ? fasciaEl.offsetTop + fasciaBlockEl.offsetTop
+      : (fasciaEl ? fasciaEl.offsetTop + 48 : H);
+    var CX = W / 2;
+
+    function yp(y) { return Math.max(0, Math.min(1, (y - fadeY) / (stopY - fadeY))); }
+    function cf(y) { var p = yp(y); if (p < 0.62) return 0; var t = (p - 0.62) / 0.38; return t * t; }
+    /* Fade out only in the last 8% so threads stay visible right up to the fascia border */
+    function fo(y) { var p = yp(y); if (p < 0.92) return 1; return 1 - (p - 0.92) / 0.08; }
+
+    var H_SP = 30, V_SP = 46, t = 0;
+
+    var parts = [];
+    for (var i = 0; i < 60; i++) {
+      parts.push({ x: Math.random() * W, y: fadeY + Math.random() * (stopY - fadeY),
+                   spd: 0.20 + Math.random() * 0.42, r: 0.5 + Math.random() * 0.9,
+                   op: 0.12 + Math.random() * 0.20 });
+    }
+    function resetP(p) {
+      p.x = Math.random() * W;
+      p.y = fadeY + Math.random() * (stopY - fadeY) * 0.3;
+      p.spd = 0.22 + Math.random() * 0.45;
+    }
+
+    (function frame() {
+      ctx.clearRect(0, 0, W, H);
+      t += .005;
+
+      /* ── Horizontal threads ── */
+      for (var y = H_SP; y < stopY; y += H_SP) {
+        var prog = yp(y), c = cf(y), f = fo(y);
+        if (prog < 0.015 || f < 0.02) continue;
+        var vis  = Math.min(prog * 2.4, 1) * 0.20 * f;
+        var span = (W / 2) * (1 - c * 0.90);
+        var x0 = CX - span, x1 = CX + span;
+        var eb = Math.min(0.25, 38 / Math.max(span, 1));
+        var hg = ctx.createLinearGradient(x0, y, x1, y);
+        hg.addColorStop(0,      'rgba(228,32,10,0)');
+        hg.addColorStop(eb,     'rgba(228,32,10,' + vis.toFixed(3) + ')');
+        hg.addColorStop(1 - eb, 'rgba(228,32,10,' + vis.toFixed(3) + ')');
+        hg.addColorStop(1,      'rgba(228,32,10,0)');
+        ctx.beginPath(); ctx.moveTo(x0, y);
+        for (var x = x0; x <= x1; x += 3)
+          ctx.lineTo(x, y + Math.sin(x * .008 + t * .5 + y * .004) * Math.min(prog * 2, 1) * 5 * (1 - c));
+        ctx.strokeStyle = hg; ctx.lineWidth = prog < .25 ? .45 : .75; ctx.stroke();
+      }
+
+      /* ── Vertical threads ── */
+      for (var vx = V_SP; vx < W; vx += V_SP) {
+        var ef = Math.abs(vx - CX) / (W / 2);
+        ctx.beginPath(); ctx.moveTo(vx, fadeY);
+        for (var vy = fadeY; vy <= stopY; vy += 3) {
+          var vp = yp(vy), vc = cf(vy);
+          ctx.lineTo(vx + (CX - vx) * vc + Math.sin(vy * .01 + t * .38 + vx * .003) * vp * 4.5 * (1 - vc), vy);
+        }
+        var gv = ctx.createLinearGradient(vx, fadeY, CX, stopY);
+        gv.addColorStop(0,    'rgba(228,32,10,0)');
+        gv.addColorStop(0.14, 'rgba(228,32,10,' + (0.10 * (1 - ef * 0.5)).toFixed(3) + ')');
+        gv.addColorStop(0.76, 'rgba(228,32,10,' + (0.17 * (1 - ef * 0.65)).toFixed(3) + ')');
+        gv.addColorStop(1,    'rgba(228,32,10,0)');
+        ctx.strokeStyle = gv; ctx.lineWidth = .55; ctx.stroke();
+      }
+
+      /* ── Intersection nodes — slow random blink ── */
+      for (var hy = fadeY + H_SP; hy < stopY; hy += H_SP) {
+        var hp = yp(hy), hc = cf(hy), hf = fo(hy);
+        if (hf < 0.04) continue;
+        for (var nx = V_SP; nx < W; nx += V_SP) {
+          var nodeX = nx + (CX - nx) * hc;
+          var seed  = (nx * 7 + Math.floor(hy) * 13) % 97;
+          /* Very slow unique speed per dot (0.06 – 0.22) so each blinks independently */
+          var spd   = 0.06 + (seed % 19) * 0.008;
+          /* Diverse phases so no two dots blink in sync */
+          var phase = seed * 0.972 + (seed % 11) * 1.57;
+          /* Cubic-shaped pulse: dot is off most of the time, briefly lights up */
+          var raw   = Math.sin(t * spd + phase);
+          var blink = raw > 0 ? raw * raw * raw : 0;  /* narrow bright spike */
+          var na    = Math.pow(hp, 0.7) * blink * (0.28 + (seed % 7) * 0.06) * hf;
+          if (na < .025) continue;
+          ctx.beginPath(); ctx.arc(nodeX, hy, 1.6, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(228,32,10,' + na.toFixed(3) + ')'; ctx.fill();
+        }
+      }
+
+      /* ── Particles ── */
+      for (var pi = 0; pi < parts.length; pi++) {
+        var p = parts[pi], pp = yp(p.y), pc = cf(p.y), pf = fo(p.y);
+        p.x += (CX - p.x) * (0.003 + pc * 0.018);
+        p.y += p.spd;
+        if (p.y >= stopY - 2) { resetP(p); continue; }
+        var alpha = pp * p.op * pf * (1 - Math.abs(p.x - CX) / (W / 2) * 0.5);
+        if (alpha < .025) continue;
+        ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(228,32,10,' + alpha.toFixed(3) + ')'; ctx.fill();
+      }
+
+      /* ── Convergence glow at Fascia — connects to card border ── */
+      var gP = 0.5 + 0.5 * Math.sin(t * 1.9);
+      /* Large outer halo bleeds over the fascia card top border */
+      var glowR = 120 + gP * 40;
+      var rg = ctx.createRadialGradient(CX, stopY, 0, CX, stopY, glowR);
+      rg.addColorStop(0,    'rgba(228,32,10,' + (0.32 + gP * 0.12).toFixed(3) + ')');
+      rg.addColorStop(0.18, 'rgba(228,32,10,' + (0.14 + gP * 0.06).toFixed(3) + ')');
+      rg.addColorStop(0.55, 'rgba(228,32,10,' + (0.04 * gP).toFixed(3) + ')');
+      rg.addColorStop(1,    'rgba(228,32,10,0)');
+      ctx.beginPath(); ctx.arc(CX, stopY, glowR, 0, Math.PI * 2);
+      ctx.fillStyle = rg; ctx.fill();
+
+      /* Tight pulsing ring right at the border */
+      var rR = 5 + (1 - Math.sin(t * 2.2)) * 20;
+      var rA = Math.max(0, Math.sin(t * 2.2) * 0.30);
+      ctx.beginPath(); ctx.arc(CX, stopY, rR, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(228,32,10,' + rA.toFixed(3) + ')';
+      ctx.lineWidth = 0.75; ctx.stroke();
+
+      requestAnimationFrame(frame);
+    }());
+
+    setTimeout(function () { canvas.classList.add('ready'); }, 80);
+  }
+
+
+
+
+  /* ── Fascia dot stagger — diagonal ripple ── */
+  function initFasciaDots() {
+    document.querySelectorAll('.fascia-dot').forEach(function (d, i) {
+      d.style.animationDelay = (Math.floor(i / 5) + i % 5) * .18 + 's';
+    });
+  }
+
+
+  /* ════════════════════════════════════════════════════
+     CAO VARIANT A — "Pulse Network"
+     CAO sits at centre. Agent nodes scatter in 3D.
+     Small red spheres travel along connection lines,
+     representing real-time evaluation flowing outward.
+     Destination nodes briefly glow as pulses arrive.
+  ════════════════════════════════════════════════════ */
+  function buildCAO() {
+    if (typeof THREE === 'undefined') return;
+    var canvas    = document.getElementById('caoCanvas');
+    var container = document.querySelector('.cao-circle');
+    if (!canvas || !container) return;
+
+    var CW = container.offsetWidth  || 360;
+    var CH = container.offsetHeight || 360;
+
+    var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setClearColor(0xFDF4F2, 1);
+    renderer.setSize(CW, CH);
+
+    var scene  = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(52, CW / CH, 0.1, 100);
+    camera.position.set(0, 2.5, 11);
+    camera.lookAt(0, 0, 0);
+
+    scene.add(new THREE.AmbientLight(0xffffff, 0.9));
+    var kl = new THREE.DirectionalLight(0xffffff, 0.6);
+    kl.position.set(6, 12, 8); scene.add(kl);
+    var fl = new THREE.DirectionalLight(0xfff4f0, 0.28);
+    fl.position.set(-5, -4, -5); scene.add(fl);
+
+    var group = new THREE.Group();
+    scene.add(group);
+
+    function makeSphere(r, col, op) {
+      return new THREE.Mesh(
+        new THREE.SphereGeometry(r, 32, 32),
+        new THREE.MeshLambertMaterial({ color: col, transparent: op < 1, opacity: op })
+      );
+    }
+
+    /* CAO centre — prominent red sphere */
+    var caoSphere = makeSphere(0.46, 0xE4200A, 1.0);
+    group.add(caoSphere);
+
+    /* Soft aura ring — double ring */
+    var aura = new THREE.Mesh(
+      new THREE.TorusGeometry(0.95, 0.009, 8, 64),
+      new THREE.MeshLambertMaterial({ color: 0xE4200A, transparent: true, opacity: 0.22 })
+    );
+    aura.rotation.x = Math.PI * 0.3;
+    group.add(aura);
+
+    var aura2 = new THREE.Mesh(
+      new THREE.TorusGeometry(1.4, 0.005, 8, 64),
+      new THREE.MeshLambertMaterial({ color: 0xE4200A, transparent: true, opacity: 0.10 })
+    );
+    aura2.rotation.x = Math.PI * 0.15;
+    aura2.rotation.z = Math.PI * 0.2;
+    group.add(aura2);
+
+    /* Agent nodes — scattered spherically */
+    var ORIGIN = new THREE.Vector3(0, 0, 0);
+    var agents = [];
+    var agentData = [
+      { r: 3.2, t: 0.6,  p: 1.1 }, { r: 3.8, t: 1.9,  p: 0.8 },
+      { r: 3.5, t: 3.1,  p: 1.4 }, { r: 4.0, t: 4.4,  p: 0.6 },
+      { r: 3.3, t: 5.2,  p: 1.8 }, { r: 3.9, t: 0.2,  p: 2.4 },
+      { r: 3.6, t: 2.7,  p: 0.4 }, { r: 4.2, t: 3.9,  p: 1.6 },
+      { r: 3.1, t: 1.1,  p: 2.8 }, { r: 3.7, t: 5.8,  p: 1.0 },
+      { r: 4.1, t: 0.9,  p: 3.0 }, { r: 3.4, t: 4.8,  p: 0.2 },
+      { r: 2.9, t: 2.2,  p: 2.1 }, { r: 4.3, t: 1.5,  p: 1.9 },
+      { r: 3.0, t: 3.7,  p: 0.9 }, { r: 4.4, t: 5.5,  p: 2.6 }
+    ];
+
+    agentData.forEach(function (d) {
+      var pos = new THREE.Vector3(
+        d.r * Math.sin(d.p) * Math.cos(d.t),
+        d.r * Math.cos(d.p),
+        d.r * Math.sin(d.p) * Math.sin(d.t)
+      );
+      var flagged = Math.random() < 0.18;
+      var n = makeSphere(flagged ? 0.11 : 0.085, flagged ? 0xD3412C : 0x6E6A67, flagged ? 0.88 : 0.65);
+      n.position.copy(pos);
+      group.add(n);
+
+      /* Static connection line (CAO → agent) */
+      var pts = [ORIGIN.clone(), pos.clone()];
+      var lineGeo = new THREE.BufferGeometry().setFromPoints(pts);
+      var line = new THREE.Line(lineGeo,
+        new THREE.LineBasicMaterial({ color: 0xC8C0B8, transparent: true, opacity: 0.24 })
+      );
+      group.add(line);
+
+      agents.push({ mesh: n, pos: pos.clone(), flagged: flagged, glowT: 0 });
+    });
+
+    /* Sparse particle field */
+    var pg = new THREE.BufferGeometry();
+    var pp = new Float32Array(320 * 3);
+    for (var pi = 0; pi < 320 * 3; pi++) pp[pi] = (Math.random() - 0.5) * 28;
+    pg.setAttribute('position', new THREE.BufferAttribute(pp, 3));
+    scene.add(new THREE.Points(pg,
+      new THREE.PointsMaterial({ color: 0xC4C0BC, size: 0.045, transparent: true, opacity: 0.22, sizeAttenuation: true })
+    ));
+
+    /* ── Pulse system ──
+       Small red spheres travel from CAO to a random agent.
+       On arrival: agent briefly brightens (glowT → 1 → 0).  */
+    var activePulses = [];
+    var pulsePool = [];
+
+    function getPulseSphere() {
+      if (pulsePool.length > 0) return pulsePool.pop();
+      var s = makeSphere(0.055, 0xE4200A, 0.95);
+      group.add(s);
+      return s;
+    }
+
+    function launchPulse() {
+      var idx  = Math.floor(Math.random() * agents.length);
+      var dest = agents[idx];
+      var sphere = getPulseSphere();
+      sphere.position.copy(ORIGIN);
+      sphere.visible = true;
+      activePulses.push({ sphere: sphere, dest: dest, t: 0, speed: 0.018 + Math.random() * 0.012 });
+    }
+
+    var autoAngle = 0;
+    var frameCount = 0;
+
+    (function loop() {
+      requestAnimationFrame(loop);
+      frameCount++;
+
+      /* Launch a new pulse roughly every 80 frames */
+      if (frameCount % 80 === 0) launchPulse();
+      /* Occasionally launch a second concurrent pulse */
+      if (frameCount % 140 === 0) launchPulse();
+
+      /* Advance pulses */
+      for (var i = activePulses.length - 1; i >= 0; i--) {
+        var p = activePulses[i];
+        p.t += p.speed;
+        p.sphere.position.lerpVectors(ORIGIN, p.dest.pos, Math.min(p.t, 1));
+        if (p.t >= 1) {
+          p.sphere.visible = false;
+          pulsePool.push(p.sphere);
+          p.dest.glowT = 1.0;   /* trigger destination glow */
+          activePulses.splice(i, 1);
+        }
+      }
+
+      /* Update agent glow states */
+      agents.forEach(function (a) {
+        if (a.glowT > 0) {
+          a.glowT = Math.max(0, a.glowT - 0.025);
+          var baseCol = a.flagged ? 0xD3412C : 0x6E6A67;
+          a.mesh.material.emissive.setHex(baseCol);
+          a.mesh.material.emissive.multiplyScalar(a.glowT * 0.4);
+          a.mesh.scale.setScalar(1 + a.glowT * 0.35);
+        } else {
+          a.mesh.material.emissive.setScalar(0);
+          a.mesh.scale.setScalar(1);
+        }
+      });
+
+      /* Rotate scene + breathe CAO */
+      autoAngle += 0.003;
+      group.rotation.y = autoAngle;
+      caoSphere.scale.setScalar(1 + Math.sin(Date.now() * 0.0016) * 0.045);
+      aura.rotation.z  += 0.004;
+      aura2.rotation.z -= 0.0025;
+
+      renderer.render(scene, camera);
+    }());
+
+    new ResizeObserver(function () {
+      var nw = container.offsetWidth, nh = container.offsetHeight;
+      if (nw > 0 && nh > 0) { renderer.setSize(nw, nh); camera.aspect = nw / nh; camera.updateProjectionMatrix(); }
+    }).observe(container);
+  }
+
+
+  /* ── Entrance animations ── */
+  function revealAll() {
+    var ids = [
+      'solHdr', 'stage1', 'stage2', 'stage3',
+      'blkFascia', 'convZone',
+      'blkCAO', 'blkFnd'
+    ];
+    ids.forEach(function (id, i) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      setTimeout(function () { el.classList.add('in'); }, 80 + i * 80);
+    });
+
+    /* Convergence node */
+    setTimeout(function () {
+      var n = document.getElementById('convNodeCore');
+      if (n) n.style.opacity = '1';
+    }, 900);
+
+    /* Flow connector */
+    setTimeout(function () {
+      var f = document.getElementById('govFlow');
+      if (f) f.classList.add('in');
+    }, 800);
+  }
+
+
+  /* ── Init ── */
+  applyScale();
+  window.addEventListener('resize', applyScale);
+  window.addEventListener('load', function () {
+    applyScale();
+    setTimeout(function () {
+      buildWeave();
+      initFasciaDots();
+      buildCAO();
+      revealAll();
+    }, 160);
+  });
+
+}());
+</script>
+</body>
+</html>
